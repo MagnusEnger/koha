@@ -344,6 +344,7 @@ sub get_template_and_user {
 
     if ( $in->{'type'} eq "intranet" ) {
         $template->param(
+            useHouseboundModule         => C4::Context->preference("useHouseboundModule"),
             AmazonContent               => C4::Context->preference("AmazonContent"),
             AmazonCoverImages           => C4::Context->preference("AmazonCoverImages"),
             AmazonEnabled               => C4::Context->preference("AmazonEnabled"),
