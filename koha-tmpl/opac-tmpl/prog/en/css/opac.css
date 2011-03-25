@@ -762,9 +762,9 @@ body#advsearch #listsmenulink {
 #opac-main-search {
 	background-image : url( ../../images/menu-background.gif);
 	background-repeat : repeat-x;
-	background-color : #739ACF;
+	background-color : #FFFFFF;
 	background-position : -10px top;
-	border-top : 1px solid #335599;
+	border-top : 1px solid #512D09;
 	border-bottom : 1px solid #335599;
 	margin-left : -10px;
 	margin-right : -10px;
@@ -1670,8 +1670,8 @@ span.starMT {
 }
 
 #cartmenulink {
-	background : #98CB58;
-	color : #336600;
+	background : #E3E4DF;
+	color : #E36534;
 	font-size : 105%;
 }
 
@@ -1685,7 +1685,7 @@ span.starMT {
 }
 
 #cartmenulink:hover {
-	background-color : #BFDE96;
+	background-color : #CCCEC1;
 }
 
 #cartmenulink img {
