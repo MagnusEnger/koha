@@ -62,6 +62,8 @@
     [% END %]
 
 [% END %]
-
+<div id="ft-ptfs">
+   <p id="ptfs-credit"><a href="http://koha-community.org/"><img id=kohaftr src="/opac-tmpl/prog/images/koha-logo.png"/></a> implemented by <a href="http://www.ptfs-europe.com"><img id=ptfsftr src="/opac-tmpl/prog/images/ptfs-logo.png"/></a></p>
+</div>
 </body>
 </html>
