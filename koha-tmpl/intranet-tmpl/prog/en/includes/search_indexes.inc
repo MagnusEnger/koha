@@ -18,6 +18,7 @@
     <option value="sn">Standard Number</option>
     <option value="nb">&nbsp;&nbsp;&nbsp;&nbsp; ISBN</option>
     <option value="ns">&nbsp;&nbsp;&nbsp;&nbsp; ISSN</option>
+    <option value="Control-number,wrdl">&nbsp;&nbsp;&nbsp;&nbsp; Control Number</option>
     <option value="callnum">&nbsp;&nbsp;&nbsp;&nbsp; Call Number</option>
     <option value="ln,rtrn">Language</option>
     <option value="nt">Notes/Comments</option>
