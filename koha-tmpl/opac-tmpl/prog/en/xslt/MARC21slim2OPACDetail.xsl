@@ -401,6 +401,17 @@
         </span>
         </xsl:if>
 
+  <xsl:if test="marc:datafield[@tag=084]">
+   <span class="results_summary"><span class="label">Classmark: </span>
+       <xsl:for-each select="marc:datafield[@tag=084]">
+         <xsl:call-template name="subfieldSelect">
+           <xsl:with-param name="codes">a</xsl:with-param>
+         </xsl:call-template>
+       </xsl:for-each>
+   </span>
+  </xsl:if>
+
+
         <!-- Other Title  Statement: Alternate Graphic Representation (MARC 880) -->
         <xsl:if test="$display880">
             <xsl:call-template name="m880Select">
