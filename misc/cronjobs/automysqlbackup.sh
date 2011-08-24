@@ -23,12 +23,12 @@
 # Set the following variables to your system needs
 # (Detailed instructions below variables)
 #=====================================================================
-CUST_ID="****"
+CUST_ID="PM"
 BU_SERV_ID="koha@backup.koha-ptfs.eu"
 # Username to access the MySQL server e.g. dbuser
 USERNAME=root
 # Username to access the MySQL server e.g. password
-PASSWORD=******
+PASSWORD=melB1n
 # Host name (or IP address) of MySQL server e.g localhost
 DBHOST=localhost
 # List of DBNAMES for Daily/Weekly Backup e.g. "DB1 DB2 DB3"
