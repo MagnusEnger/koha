@@ -51,6 +51,7 @@ function search_member(subscriptionid){
 <li><span class="label">Recipients:</span><table style="clear:none;margin:0;">
         <tr><th>Name</th>
             <th>Rank</th>
+            <th>Printing</th>
             <th>Delete</th>
         </tr>
         [% USE m_loop = iterator(memberloop) %]
@@ -67,6 +68,13 @@ function search_member(subscriptionid){
                     [% END %]
                 [% END %]
                 </select>
+            </td>
+            <td>
+            [% IF member.vacation_flag %]
+            No
+            [% ELSE %]
+            Yes
+            [% END %]
             </td>
             <td><a href="/cgi-bin/koha/serials/routing.pl?routingid=[% member.routingid %]&amp;subscriptionid=[% subscriptionid %]&amp;op=delete">Delete</a></td>
         </tr>

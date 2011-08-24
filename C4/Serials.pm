@@ -2111,9 +2111,10 @@ sub getroutinglist {
     my ($subscriptionid) = @_;
     my $dbh              = C4::Context->dbh;
     my $sth              = $dbh->prepare(
-        'SELECT routingid, borrowernumber, ranking, biblionumber
+        'SELECT routingid, subscriptionroutinglist.borrowernumber, ranking, biblionumber, vacation_flag
             FROM subscription 
             JOIN subscriptionroutinglist ON subscription.subscriptionid = subscriptionroutinglist.subscriptionid
+            JOIN borrowers ON subscriptionroutinglist.borrowernumber = borrowers.borrowernumber
             WHERE subscription.subscriptionid = ? ORDER BY ranking ASC'
     );
     $sth->execute($subscriptionid);

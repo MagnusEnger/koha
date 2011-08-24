@@ -199,7 +199,7 @@
 <input type="hidden" name="op" value="insert" />
 [% ELSE %]
 <input type="hidden" name="op" value="save" />
-[% IF step == 4 || step == 5 || step == 6 || step == 2 || step == 1 %]
+[% IF step == 4 || step == 5 || step == 6 || step == 2 || step == 1 || step == 7 %]
 [%# Only put the cardnumber if we arent showing it in the form later %]
 [% IF cardnumber %]
 <input type="hidden" name="cardnumber" value="[% cardnumber %]" />
@@ -1439,6 +1439,19 @@
     [% END %]
   </fieldset>
 [% END %] [% END %]
+[% IF step_7 %]
+    <legend>Patron routing list preference</legend>
+    <ul>
+    <li>
+    <label for="vacation0">Print on routing list:</label>
+    <input type="radio" id="vacation0" [% IF vacation_flag == 0 %] checked="1" [% END %] name="vacation_flag" value="0" />
+    </li>
+    <li>
+    <label for="vacation1">Suppress from routing list:</label>
+    <input type="radio" id="vacation1" [% IF vacation_flag == 1 %] checked="1"[% END %] name="vacation_flag" value="1" />
+    </li>
+    </ul>
+[% END %]
 
 [% UNLESS ( check_member ) %]
     <fieldset class="action">

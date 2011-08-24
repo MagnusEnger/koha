@@ -109,6 +109,7 @@ for my $routing ( @routinglist ) {
     }
     $member->{routingid}=$routing->{routingid} || q{};
     $member->{ranking} = $routing->{ranking} || q{};
+    $member->{vacation_flag}=$routing->{vacation_flag} || q{};
 
     push(@{$member_loop}, $member);
 }

@@ -115,6 +115,7 @@ $template->param( "duplicate" => 1 ) if ( $op eq 'duplicate' );
 $template->param( "checked" => 1 ) if ( defined($nodouble) && $nodouble eq 1 );
 ( $borrower_data = GetMember( 'borrowernumber' => $borrowernumber ) ) if ( $op eq 'modify' or $op eq 'save' or $op eq 'duplicate' );
 my $categorycode  = $input->param('categorycode') || $borrower_data->{'categorycode'};
+my $vacation_flag = $input->param('vacation_flag') || $borrower_data->{vacation_flag};
 my $category_type = $input->param('category_type') || '';
 if ($category_type){
     $template->{VARS}->{'type_only'} = 1;
@@ -408,7 +409,7 @@ if ($nok or !$nodouble){
     %data=%newdata; 
     $template->param( updtype => ($op eq 'add' ?'I':'M'));	# used to check for $op eq "insert"... but we just changed $op!
     unless ($step){  
-        $template->param( step_1 => 1,step_2 => 1,step_3 => 1, step_4 => 1, step_5 => 1, step_6 => 1);
+        $template->param( step_1 => 1,step_2 => 1,step_3 => 1, step_4 => 1, step_5 => 1, step_6 => 1, step_7 => 1);
     }  
 } 
 if (C4::Context->preference("IndependantBranches")) {
@@ -425,14 +426,14 @@ if ($op eq 'add'){
 }
 if ($op eq "modify")  {
     $template->param( updtype => 'M',modify => 1 );
-    $template->param( step_1=>1, step_2=>1, step_3=>1, step_4=>1, step_5 => 1, step_6 => 1) unless $step;
+    $template->param( step_1 => 1, step_2 => 1, step_3 => 1, step_4 => 1, step_5 => 1, step_6 => 1, step_7 => 1) unless $step;
     if ( $step == 4 ) {
         $template->param( categorycode => $borrower_data->{'categorycode'} );
     }
 }
 if ( $op eq "duplicate" ) {
     $template->param( updtype => 'I' );
-    $template->param( step_1 => 1, step_2 => 1, step_3 => 1, step_4 => 1, step_5 => 1, step_6 => 1 ) unless $step;
+    $template->param( step_1 => 1, step_2 => 1, step_3 => 1, step_4 => 1, step_5 => 1, step_6 => 1, step_7 => 1) unless $step;
     $data{'cardnumber'} = "";
 }
 
@@ -739,6 +740,7 @@ if(defined($data{'flags'})){
 if(defined($data{'contacttitle'})){
   $template->param("contacttitle_" . $data{'contacttitle'} => "SELECTED");
 }
+$template->param(vacation_flag => $vacation_flag);
 
   
 output_html_with_http_headers $input, $cookie, $template->output;

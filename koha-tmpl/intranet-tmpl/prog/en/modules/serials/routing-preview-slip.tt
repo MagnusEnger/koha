@@ -26,10 +26,12 @@
         <td><b>Date due</b></td>
     </tr>
     [% FOREACH memberloo IN memberloop %]
-    <tr>
-        <td>[% memberloo.name %]</td>
-        <td>&nbsp;</td>
-    </tr>
+        [% UNLESS memberloo.vacation_flag %]
+        <tr>
+            <td>[% memberloo.name %]</td>
+            <td>&nbsp;</td>
+        </tr>
+        [% END %]
     [% END %]
 </table>
 

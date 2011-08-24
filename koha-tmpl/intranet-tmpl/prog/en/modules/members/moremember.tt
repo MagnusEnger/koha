@@ -331,7 +331,21 @@ function validate1(date) {
 <div class="action"><a href="memberentry.pl?op=modify&amp;borrowernumber=[% borrowernumber %]&amp;step=5">Edit</a></div>
 [% END %]
 
+<div class="yui-u first">
+    <div id="patron-routinglist-pref">
+    <h3>Patron routing list preference</h3>
+    <input type="hidden" name="modify" value="yes" />
+    <input type="hidden" name="borrowernumber" value="[% borrowernumber %]" />
+        <div class="rows">
+        <ol>
+            <li><span class="label">Print on routing lists:</span>[% IF vacation_flag %]No[% ELSE %]Yes[% END %]</li>
+        </ol>
+        </div>
+    </div>
+<div class="action"><a href="memberentry.pl?op=modify&amp;borrowernumber=[% borrowernumber %]&amp;step=7&amp;vacation_flag=[% vacation_flag %]">Edit</a></div>
 </div>
+</div>
+
  <div class="yui-u"> 
  <div id="patron-library-details">
  <h3>Library use</h3>

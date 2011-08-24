@@ -82,6 +82,9 @@ if($ok){
 		my $notes;
 		my $title = $subs->{'bibliotitle'};
         for my $routing ( @routinglist ) {
+            if ($routing->{vacation_flag}) {
+                next;
+            }
             my $sth = $dbh->prepare('SELECT * FROM reserves WHERE biblionumber = ? AND borrowernumber = ? LIMIT 1');
             $sth->execute($biblio,$routing->{borrowernumber});
             my $reserve = $sth->fetchrow_hashref;
@@ -118,6 +121,7 @@ my $memberloop = [];
 for my $routing (@routinglist) {
     my $member = GetMember( borrowernumber => $routing->{borrowernumber} );
     $member->{name}           = "$member->{firstname} $member->{surname}";
+    $member->{vacation_flag}  = "$routing->{vacation_flag}";
     push @{$memberloop}, $member;
 }
 

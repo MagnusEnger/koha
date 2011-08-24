@@ -34,7 +34,9 @@ function print_slip(subscriptionid,issue){
 		<li><span class="label">List member:</span><table style="clear:none;margin:0;">
         <tr><th>Name</th></tr>
 [% FOREACH memberloo IN memberloop %]
+        [% UNLESS memberloo.vacation_flag %]
         <tr><td>[% memberloo.surname %], [% memberloo.firstname %]</td></tr>
+        [% END %]
 [% END %]
         </table></li>
 		<li><span class="label">Notes:</span>[% routingnotes %]</li>
