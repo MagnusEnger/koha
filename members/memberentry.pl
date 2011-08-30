@@ -115,7 +115,6 @@ $template->param( "duplicate" => 1 ) if ( $op eq 'duplicate' );
 $template->param( "checked" => 1 ) if ( defined($nodouble) && $nodouble eq 1 );
 ( $borrower_data = GetMember( 'borrowernumber' => $borrowernumber ) ) if ( $op eq 'modify' or $op eq 'save' or $op eq 'duplicate' );
 my $categorycode  = $input->param('categorycode') || $borrower_data->{'categorycode'};
-my $vacation_flag = $input->param('vacation_flag') || $borrower_data->{vacation_flag};
 my $category_type = $input->param('category_type') || '';
 if ($category_type){
     $template->{VARS}->{'type_only'} = 1;
@@ -740,7 +739,12 @@ if(defined($data{'flags'})){
 if(defined($data{'contacttitle'})){
   $template->param("contacttitle_" . $data{'contacttitle'} => "SELECTED");
 }
-$template->param(vacation_flag => $vacation_flag);
+if ( defined $data{vacation_flag} ) {
+    $template->param(vacation_flag => $data{vacation_flagi});
+}
+else {
+    $template->param(vacation_flag => 0);
+}
 
   
 output_html_with_http_headers $input, $cookie, $template->output;
