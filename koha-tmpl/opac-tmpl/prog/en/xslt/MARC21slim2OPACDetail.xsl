@@ -200,6 +200,22 @@
                     <xsl:call-template name="part"/>
         <xsl:choose><xsl:when test="position()=last()"><xsl:text>.</xsl:text></xsl:when><xsl:otherwise><xsl:text>; </xsl:text></xsl:otherwise></xsl:choose>
         </xsl:for-each>
+
+          <!-- 490 Series blank indicator -->
+                <xsl:for-each select="marc:datafield[@tag=490]">
+             <a href="/cgi-bin/koha/opac-search.pl?q=se:{marc:subfield[@code='a']}">
+                        <xsl:call-template name="chopPunctuation">
+                            <xsl:with-param name="chopString">
+                                <xsl:call-template name="subfieldSelect">
+                                    <xsl:with-param name="codes">av</xsl:with-param>
+                                </xsl:call-template>
+                            </xsl:with-param>
+                        </xsl:call-template>
+            </a>
+                    <xsl:call-template name="part"/>
+        <xsl:choose><xsl:when test="position()=last()"><xsl:text>.</xsl:text></xsl:when><xsl:otherwise><xsl:text>; </xsl:text></xsl:otherwise></xsl:choose>
+        </xsl:for-each>
+
         <!-- 490 Series traced, Ind1 = 1 -->
         <xsl:if test="marc:datafield[@tag=490][@ind1=1]">
             <xsl:for-each select="marc:datafield[@tag=800 or @tag=810 or @tag=811 or @tag=830]">
