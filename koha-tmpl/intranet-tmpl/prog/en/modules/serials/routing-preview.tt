@@ -32,10 +32,11 @@ function print_slip(subscriptionid,issue){
 	<ol>
 		<li><span class="label">Issue:</span>[% issue %]</li>
 		<li><span class="label">List member:</span><table style="clear:none;margin:0;">
-        <tr><th>Name</th></tr>
+        <tr><th>Name</th><th>Branch</th></tr>
 [% FOREACH memberloo IN memberloop %]
         [% UNLESS memberloo.vacation_flag %]
-        <tr><td>[% memberloo.surname %], [% memberloo.firstname %]</td></tr>
+        <tr><td>[% memberloo.surname %], [% memberloo.firstname %]</td>
+            <td>[% memberloo.branchcode %]</td></tr>
         [% END %]
 [% END %]
         </table></li>

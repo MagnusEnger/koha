@@ -50,6 +50,7 @@ function search_member(subscriptionid){
 [% IF memberloop %]
 <li><span class="label">Recipients:</span><table style="clear:none;margin:0;">
         <tr><th>Name</th>
+            <th>Branch</th>
             <th>Rank</th>
             <th>Printing</th>
             <th>Delete</th>
@@ -57,6 +58,7 @@ function search_member(subscriptionid){
         [% USE m_loop = iterator(memberloop) %]
         [% FOREACH member IN m_loop %]
         <tr><td>[% member.name %]</td>
+            <td>[% memberloo.branchcode %]</td>
             <td>
                 <select name="itemrank" onchange="reorder_item([%- subscriptionid -%], [%- member.routingid -%], this.value)">
                 [% rankings = [1 .. m_loop.size] %]

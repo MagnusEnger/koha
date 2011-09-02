@@ -16,19 +16,21 @@
 
 <table>
     <tr>
-        <td colspan="2"><h3>[% libraryname %]</h3></td>
+        <td colspan="3"><h3>[% libraryname %]</h3></td>
     </tr>
     <tr>
-        <td colspan="2"><b>Title:</b> [% title |html %]<br />[% issue %]</td>
+        <td colspan="3"><b>Title:</b> [% title |html %]<br />[% issue %]</td>
     </tr>
     <tr>
         <td><b>Name</b></td>
+        <td><b>Branch</b></td>
         <td><b>Date due</b></td>
     </tr>
     [% FOREACH memberloo IN memberloop %]
         [% UNLESS memberloo.vacation_flag %]
         <tr>
             <td>[% memberloo.name %]</td>
+            <td>[% memberloo.branchcode %]</td>
             <td>&nbsp;</td>
         </tr>
         [% END %]
