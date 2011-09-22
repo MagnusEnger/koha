@@ -142,6 +142,50 @@
     <a href="/cgi-bin/koha/opac-search.pl?do=Clear">[New search]</a>
 
 <!-- /SEARCH BUTTONS --></div></div>
+
+<div class="yui-g">
+
+<div class="yui-u first">
+<!-- AVAILABILITY LIMITS -->
+    [% UNLESS ( singleBranchMode ) %]
+    <div id="location" class="container"><fieldset><legend>Location and availability: </legend>
+
+        <select name="limit" id="branchloop">
+        <option value="">All libraries</option>
+        [% FOREACH BranchesLoo IN BranchesLoop %]
+        [% IF ( BranchesLoo.selected ) %]
+        <option value="branch:[% BranchesLoo.value %]" selected="selected">[% BranchesLoo.branchname %]</option>
+        [% ELSE %]
+        <option value="branch:[% BranchesLoo.value %]">[% BranchesLoo.branchname %]</option>
+        [% END %]
+        [% END %]
+        </select>
+        [% IF ( searchdomainloop ) %]
+            <p>OR</p> <!-- should addjs to grey out group pulldown if a library is selected. -->
+                <label for="categoryloop">Groups of Libraries</label><select name="multibranchlimit" id="categoryloop">
+                <option value=""> -- none -- </option>
+                [% FOREACH searchdomainloo IN searchdomainloop %]
+                <option value="[% searchdomainloo.categorycode %]">[% searchdomainloo.categoryname %]</option>
+                [% END %]
+                </select>
+        [% END %]
+        <div style="margin-top:.4em"><label for="available-items"><input type="checkbox" id="available-items" name="limit" value="available" /> Only items currently available for loan or reference</label></div>
+    </fieldset></div>
+    [% END %]
+<!-- /AVAILABILITY LIMITS -->
+</div>
+<div class="yui-u">
+<!-- RANK LIMITS -->
+    <div id="sortby" class="container"><fieldset><legend>Sort by: </legend>
+        <select id="sort_by" name="sort_by">
+[% INCLUDE 'resort_form.inc' %]
+</select></fieldset></div>
+<!-- RANK LIMITS -->
+</div>
+</div>
+
+
+
 <div class="yui-g">
 <div id="pubrange" class="container">
 <fieldset>
