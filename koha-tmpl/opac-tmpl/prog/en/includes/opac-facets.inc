@@ -11,7 +11,7 @@
 <li id="[% facets_loo.type_id %]">
 [% IF ( facets_loo.type_label_Authors ) %]Authors[% END %]
 [% IF ( facets_loo.type_label_Titles ) %]Titles[% END %]
-[% IF ( facets_loo.type_label_Topics ) %]Topics[% END %]
+[% IF ( facets_loo.type_label_Topics ) %]Subjects[% END %]
 [% IF ( facets_loo.type_label_Places ) %]Places[% END %]
 [% IF ( facets_loo.type_label_Series ) %]Series[% END %]
 [% IF ( facets_loo.type_label_ItemTypes ) %]Item types[% END %]
