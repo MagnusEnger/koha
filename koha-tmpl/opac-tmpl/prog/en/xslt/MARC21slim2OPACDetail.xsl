@@ -635,6 +635,18 @@
         </div>
         </xsl:if>
 
+        <!-- 510 -->
+        <xsl:if test="marc:datafield[@tag=510]">
+        <xsl:for-each select="marc:datafield[@tag=510]">
+            <span class="results_summary">
+                <xsl:if test="@ind1=' '">
+                <span class="label">Citation notes: </span>
+                </xsl:if>
+                <xsl:value-of select="marc:subfield[@code='a']"/>
+            </span>
+        </xsl:for-each>
+        </xsl:if>
+
         <!-- 583 -->
         <xsl:if test="marc:datafield[@tag=583]">
         <xsl:for-each select="marc:datafield[@tag=583]">
@@ -724,7 +736,7 @@
           <xsl:when test="@ind1=1"><xsl:text>Review: </xsl:text></xsl:when>
           <xsl:when test="@ind1=2"><xsl:text>Scope and content: </xsl:text></xsl:when>
           <xsl:when test="@ind1=3"><xsl:text>Abstract: </xsl:text></xsl:when>
-          <xsl:when test="@ind1=4"><xsl:text>Content advice: </xsl:text></xsl:when>
+          <xsl:when test="@ind1=4"><xsl:text>Comments: </xsl:text></xsl:when>
           <xsl:otherwise><xsl:text>Summary: </xsl:text></xsl:otherwise>
         </xsl:choose>
         </span>
