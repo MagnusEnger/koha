@@ -630,7 +630,7 @@ function irregularity_check(){
             errortext +=expected+_(" issues expected, ")+rollover+_(" were entered.")+"<br \/>"+_("Please indicate which date(s) an issue is not expected")+"<br \/>";
             irregular_issues.numskipped = expected - rollover;
 		}
-        errortext +="<select multiple id=\"irregularity_select\" name=\"irregularity_select\" onchange=\"irregular_issues.update();\">\n";
+        errortext +="<select multiple=\"multiple\" id=\"irregularity_select\" name=\"irregularity_select\" onchange=\"irregular_issues.update();\">\n";
 		errortext +=irregular_options(periodicity);
 		errortext += "<\/select>\n <textarea rows=\"6\" width=\"18\" id=\"irregularity_summary\" name=\"irregularity_summary\" value=\"foo\"><\/textarea>";
         error=errortext;
