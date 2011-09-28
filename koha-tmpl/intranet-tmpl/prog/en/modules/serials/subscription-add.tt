@@ -110,7 +110,8 @@ IrregularPattern.prototype.update = function() {
         if(document.f.irregularity_select) {
             //$("#irregularity_select option:selected").each(...); //jquery can combine both conditionals and the for loop
             for( var i in document.f.irregularity_select.options ) {
-                if( document.f.irregularity_select.options[i].selected ) {
+                if( document.f.irregularity_select.options[i] &&
+                document.f.irregularity_select.options[i].selected ) {
                     this.skipped[cnt] = document.f.irregularity_select.options[i].value ;
                     summary_str += document.f.irregularity_select.options[i].text + "\n" ;
 				    cnt++;
