@@ -100,30 +100,23 @@ function IrregularPattern() {
 }
 
 IrregularPattern.prototype.update = function() {
-		this.skipped= new Array;
-		var cnt = 0;
-		// daily periodicity, we interpret irregular array as which days of week to skip.
-		// else if weekly periodicity, week numbers (starting from 01 Jan) to skip.
-        // else  irregular array is list of issues to skip
-		var summary_str = '';
-		this.numskipped = 0;
-        if(document.f.irregularity_select) {
-            //$("#irregularity_select option:selected").each(...); //jquery can combine both conditionals and the for loop
-            for( var i in document.f.irregularity_select.options ) {
-                if( document.f.irregularity_select.options[i] &&
-                document.f.irregularity_select.options[i].selected ) {
-                    this.skipped[cnt] = document.f.irregularity_select.options[i].value ;
-                    summary_str += document.f.irregularity_select.options[i].text + "\n" ;
-				    cnt++;
-				    this.numskipped++;
-			    }
-		    }
-		    var summary = document.getElementById("irregularity_summary");
-		    if(summary) {
-			    summary.value = summary_str;
-			    summary.rows= ( cnt > 6 ) ? cnt : 6 ; // textarea will bre resized, but not more than 6 lines will show.
-		    }
-        }
+    this.skipped= new Array;
+    var cnt = 0;
+    // daily periodicity, we interpret irregular array as which days of week to skip.
+    // else if weekly periodicity, week numbers (starting from 01 Jan) to skip.
+    // else  irregular array is list of issues to skip
+    var summary_str = '';
+    this.numskipped = 0;
+    $("#irregularity_select option:selected").each(function(index) {
+        summary_str += $(this).text() + "\n" ;
+        this.numskipped++;
+        cnt++;
+    });
+    var summary = $("#irregularity_summary");
+    if(summary) {
+        summary.val(summary_str);
+        summary.attr("rows", ( cnt <= 6 ) ? cnt : 6) ; // textarea will be resized, but not more than 6 lines will show.
+    }
 }
 
 IrregularPattern.prototype.irregular = function(index) { 
