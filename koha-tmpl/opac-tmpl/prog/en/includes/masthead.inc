@@ -37,9 +37,9 @@
 
 	<select name="idx" id="masthead_search" class="left">
 	[% IF ( ms_kw ) %]
-        <option selected="selected" value="">Library catalog</option>
+        <option selected="selected" value="">Library catalogue</option>
 		[% ELSE %]
-        <option value="">Library catalog</option>
+        <option value="">Library catalogue</option>
 		[% END %]
 		[% IF ( ms_ti ) %]
         <option selected="selected" value="ti">Title</option>
