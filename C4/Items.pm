@@ -2005,7 +2005,7 @@ sub _calc_items_cn_sort {
 
     # PM Customisations
     my $cn_source = $source_values->{'items.cn_source'};
-    my $itemcallnumber = $source_values->'itemcallnumber'};
+    my $itemcallnumber = $source_values->{'itemcallnumber'};
     $cn_source =~ s/BUILDING CONTRACT/BC/g;
     $itemcallnumber =~ s/BUILDING CONTRACT/BC/g;
 
