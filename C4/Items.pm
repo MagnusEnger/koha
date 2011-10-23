@@ -2003,7 +2003,13 @@ sub _calc_items_cn_sort {
     my $item = shift;
     my $source_values = shift;
 
-    $item->{'items.cn_sort'} = GetClassSort($source_values->{'items.cn_source'}, $source_values->{'itemcallnumber'}, "");
+    # PM Customisations
+    my $cn_source = $source_values->{'items.cn_source'};
+    my $itemcallnumber = $source_values->'itemcallnumber'};
+    $cn_source =~ s/BUILDING CONTRACT/BC/g;
+    $itemcallnumber =~ s/BUILDING CONTRACT/BC/g;
+
+    $item->{'items.cn_sort'} = GetClassSort($cn_source, $itemcallnumber,"");
 }
 
 =head2 _set_defaults_for_add 
