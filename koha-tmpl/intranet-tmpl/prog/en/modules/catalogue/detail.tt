@@ -276,6 +276,7 @@ function verify_images() {
                 <th>Status</th>
                 <th>Last seen</th>
                 <th>Barcode</th>
+                <th>Private Notes</th>
                 [% IF ( volinfo ) %]<th>Publication details</th>[% END %]
                 [% IF ( itemdata_uri ) %]<th>url</th>[% END %]
                 [% IF ( itemdata_copynumber ) %]<th>Copy no.</th>[% END %]
@@ -387,6 +388,7 @@ function verify_images() {
                     </td>
                     <td class="datelastseen">[% itemloo.datelastseen %]</td>
                     <td class="hbarcode"><a href="/cgi-bin/koha/catalogue/moredetail.pl?type=[% itemloo.type %]&amp;itemnumber=[% itemloo.itemnumber %]&amp;biblionumber=[% itemloo.biblionumber %]&amp;bi=[% itemloo.biblioitemnumber %]#item[% itemloo.itemnumber %]">[% itemloo.barcode %]</a></td>
+		    <td class="hpnote">[% itemloo.more_subfields_xml %]</td>
 				[% IF ( volinfo ) %]	<td class="enumchron">
 					[% IF ( itemdata_enumchron ) %]
 						[% IF ( itemloo.enumchron ) %]
