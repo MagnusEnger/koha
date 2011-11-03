@@ -1,0 +1,64 @@
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Koha &rsaquo; Administration &rsaquo; Routing List Text
+$rsaquo; [% IF entry %]Edit entry
+         [% ELSE %] New entry
+         [% END %]
+</title>
+[% INCLUDE 'doc-head-close.inc' %]
+<script type="text/javascript">
+//<![CDATA[
+function editRlTxt(code, r_text) {
+    return true;
+}
+//]]>
+</script>
+</head>
+<body>
+[% INCLUDE 'header.inc' %]
+[% INCLUDE 'cat-search.inc' %]
+
+<div id="breadcrumbs">
+    <a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo;
+    <a href="/cgi-bin/koha/admin/admin-home.pl">Administration</a> &rsquo;
+    <a href="/cgi-bin/koha/admin/routinglisttext.pl">Routing List Text</a>
+</div>
+
+<div id="doc3" class="yui-t2">
+    <div id="bd">
+        <div id="yui-main">
+            <div id="toolbar">
+            </div>
+            <div class="yui-b">
+               <h3>Routing List Text</h3>
+           <table id="rl_text">
+           <tbody>
+           [% FOREACH message IN message_list %]
+           [% IF loop.odd %]
+             <tr>
+           [% ELSE %]
+              <tr class="highlight">
+           [% END %]
+               <td>[% message.id %]</td>
+               <td>[% message.code %]</td>
+               <td>[% message.txt %]</td>
+               <!-- <td><a href="rledit.pl?code=[% message.code %]&text=[% message.txt %]"></a></td> -->
+               <td><button type="button" class="termlink" onclick="editRlTxt([% message.id %], [% message.txt %]); return false;">Edit</button></td>
+              </tr>
+           [% END %]
+           </tbody>
+           <thead>
+              <th>Id</th>
+              <th>Code</th>
+              <th>Text</th>
+              <th>&nbsp;</th>
+           </thead>
+           </table>
+           </div>
+
+</div>
+</div>
+<div class="yui-b">
+[% INCLUDE 'admin-menu.inc' %]
+</div>
+</div>
+[% INCLUDE 'intranet-bottom.inc' %]

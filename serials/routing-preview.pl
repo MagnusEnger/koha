@@ -35,6 +35,7 @@ use C4::Items;
 use C4::Serials;
 use URI::Escape;
 use C4::Branch;
+use C4::RoutingSlip::Copyright;
 
 my $query = new CGI;
 my $subscriptionid = $query->param('subscriptionid');
@@ -128,6 +129,10 @@ for my $routing (@routinglist) {
 my $routingnotes = $serials[0]->{'routingnotes'};
 $routingnotes =~ s/\n/\<br \/\>/g;
 
+if ( $subs->{copyright} ) {
+    my $copyright = C4::RoutingSlip::Copyright->new( id => $subs->{copyright} );
+    $template->param->( copyright => $copyright );
+}
 $template->param(
     title => $subs->{'bibliotitle'},
     issue => $issue,

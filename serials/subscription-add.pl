@@ -31,6 +31,7 @@ use C4::Branch; # GetBranches
 use C4::Serials;
 use C4::Letters;
 use Carp;
+use C4::RoutingSlip::Copyright;
 
 #use Smart::Comments;
 
@@ -135,6 +136,9 @@ for my $thisbranch (sort { $branches->{$a}->{branchname} cmp $branches->{$b}->{b
         branchname => $branches->{$thisbranch}->{'branchname'},
     };
 }
+
+my $copyrightroutinglist = C4::RoutingSlip::Copyright->get_all();
+$template->param(copyrightroutinglist => $copyrightroutinglist);
 
 my $locations_loop = GetAuthorisedValues("LOC",$subs->{'location'});
 
@@ -258,6 +262,7 @@ sub redirect_add_subscription {
     my $missinglist = $query->param('missinglist');
     my $opacnote = $query->param('opacnote');
     my $librariannote = $query->param('librariannote');
+    my $copyright = $query->param('copyright');
 	my $subscriptionid = NewSubscription($auser,$branchcode,$aqbooksellerid,$cost,$aqbudgetid,$biblionumber,
 					$startdate,$periodicity,$dow,$numberlength,$weeklength,$monthlength,
 					$add1,$every1,$whenmorethan1,$setto1,$lastvalue1,$innerloop1,
@@ -265,7 +270,8 @@ sub redirect_add_subscription {
 					$add3,$every3,$whenmorethan3,$setto3,$lastvalue3,$innerloop3,
 					$numberingmethod, $status, $notes,$letter,$firstacquidate,join(",",@irregularity),
                     $numberpattern, $callnumber, $hemisphere,($manualhistory?$manualhistory:0),$internalnotes,
-                    $serialsadditems,$staffdisplaycount,$opacdisplaycount,$graceperiod,$location,$enddate
+                    $serialsadditems,$staffdisplaycount,$opacdisplaycount,$graceperiod,$location,$enddate,
+                    $copyright
 				);
     ModSubscriptionHistory ($subscriptionid,$histstartdate,$histenddate,$recievedlist,$missinglist,$opacnote,$librariannote);
 
@@ -333,6 +339,7 @@ sub redirect_mod_subscription {
     my $graceperiod     = $query->param('graceperiod') || 0;
     my $location = $query->param('location');
     my $nextexpected = GetNextExpected($subscriptionid);
+    my $copyright = $query->param('copyright');
 	#  If it's  a mod, we need to check the current 'expected' issue, and mod it in the serials table if necessary.
     if ( $nextacquidate ne $nextexpected->{planneddate}->output('iso') ) {
         ModNextExpected($subscriptionid,C4::Dates->new($nextacquidate,'iso'));
@@ -351,7 +358,8 @@ sub redirect_mod_subscription {
             $whenmorethan3,   $setto3,       $lastvalue3,     $innerloop3,
             $numberingmethod, $status,       $biblionumber,   $callnumber,
             $notes,           $letter,       $hemisphere,     $manualhistory,$internalnotes,
-            $serialsadditems, $staffdisplaycount,$opacdisplaycount,$graceperiod,$location,$enddate,$subscriptionid
+            $serialsadditems, $staffdisplaycount,$opacdisplaycount,$graceperiod,$location,$enddate,$subscriptionid,
+            $copyright
         );
         ModSubscriptionHistory ($subscriptionid,$histstartdate,$histenddate,$recievedlist,$missinglist,$opacnote,$librariannote);
     print $query->redirect("/cgi-bin/koha/serials/subscription-detail.pl?subscriptionid=$subscriptionid");

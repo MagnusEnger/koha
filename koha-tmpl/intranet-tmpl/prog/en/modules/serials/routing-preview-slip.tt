@@ -37,6 +37,10 @@
     [% END %]
 </table>
 
+[% IF copyright %]
+    <p>[% copyright.txt %]</p>
+[% END %]
+
 <div id="routingnotes">
     <p id="generalroutingnote">[% generalroutingnote %]</p>
     <p id="routingnote">[% routingnotes %]</p>
