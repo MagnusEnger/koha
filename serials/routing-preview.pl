@@ -131,7 +131,7 @@ $routingnotes =~ s/\n/\<br \/\>/g;
 
 if ( $subs->{copyright} ) {
     my $copyright = C4::RoutingSlip::Copyright->new( id => $subs->{copyright} );
-    $template->param->( copyright => $copyright );
+    $template->param( copyright => $copyright );
 }
 $template->param(
     title => $subs->{'bibliotitle'},
