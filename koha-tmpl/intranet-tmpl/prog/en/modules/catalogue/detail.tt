@@ -276,10 +276,10 @@ function verify_images() {
                 <th>Status</th>
                 <th>Last seen</th>
                 <th>Barcode</th>
-                <th>Private Notes</th>
                 [% IF ( volinfo ) %]<th>Publication details</th>[% END %]
                 [% IF ( itemdata_uri ) %]<th>url</th>[% END %]
                 [% IF ( itemdata_copynumber ) %]<th>Copy no.</th>[% END %]
+                [% IF ( itemdata_more_subfields_xml ) %]<th>Private Notes</th>[% END %]
                 [% IF materials %]<th>Materials specified</th>[% END %]
                 [% IF ( itemdata_itemnotes ) %]<th>Public notes</th>[% END %]
         [% IF ( SpineLabelShowPrintOnBibDetails ) %]<th>Spine label</th>[% END %]
@@ -388,7 +388,6 @@ function verify_images() {
                     </td>
                     <td class="datelastseen">[% itemloo.datelastseen %]</td>
                     <td class="hbarcode"><a href="/cgi-bin/koha/catalogue/moredetail.pl?type=[% itemloo.type %]&amp;itemnumber=[% itemloo.itemnumber %]&amp;biblionumber=[% itemloo.biblionumber %]&amp;bi=[% itemloo.biblioitemnumber %]#item[% itemloo.itemnumber %]">[% itemloo.barcode %]</a></td>
-		    <td class="hpnote">[% itemloo.more_subfields_xml %]</td>
 				[% IF ( volinfo ) %]	<td class="enumchron">
 					[% IF ( itemdata_enumchron ) %]
 						[% IF ( itemloo.enumchron ) %]
@@ -403,6 +402,7 @@ function verify_images() {
 				[% IF ( itemdata_copynumber ) %]
 					<td class="copynumber">[% itemloo.copynumber %]</td>
 				[% END %]
+                [% IF ( itemdata_more_subfields_xml ) %]<td class="hpnote">[% itemloo.more_subfields_xml %]</td>[% END %]
 	        [% IF materials %]
 		    <td class="materials"> [% itemloo.materials %] </td>
 		[% END %]
