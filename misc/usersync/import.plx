@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use 5.010;
 # CPAN Imports
-use Text::CSV;
+use Text::CSV::Encoded;
 use Digest::MD5 qw(md5_base64);
 # Koha Imports
 use C4::Context;
@@ -32,7 +32,7 @@ my $today  = "$mday-$mon-$year";
 my $path = "/home/syncuser/imports/";
 my $file = "people.csv";
 my $backup = "past/people-$today.csv";
-my $csv = Text::CSV->new();
+my $csv = Text::CSV::Encoded->new({encoding => "utf8", });
 # DB
 my $dbh = C4::Context->dbh;
 my $bor_insert = $dbh->prepare_cached(
@@ -77,17 +77,17 @@ $count++;
 	    $columns[3]
         );	    
 	
-	print "Record: " . $count . "\n";
-	print "Cardnumber: $columns[2]\n";
-        print "Surname: $columns[0]\n";
-	print "Firstname: $firstname\n";
-        print "Othernames: $othernames\n";
-	print "Address: $columns[6]\n";
-	print "Email: $columns[4]\n";
-	print "Branch: $branch\n";
-	print "Category: $category\n";
-	print "Password: $password\n";
-	print "Username: $columns[3]\n";
+#	print "Record: " . $count . "\n";
+#	print "Cardnumber: $columns[2]\n";
+#       print "Surname: $columns[0]\n";
+#	print "Firstname: $firstname\n";
+#       print "Othernames: $othernames\n";
+#	print "Address: $columns[6]\n";
+#	print "Email: $columns[4]\n";
+#	print "Branch: $branch\n";
+#	print "Category: $category\n";
+#	print "Password: $password\n";
+#	print "Username: $columns[3]\n";
         
 	#print "Forenames: $columns[1]\n";
         #print "EmployeeID: $columns[2]\n";
@@ -95,7 +95,7 @@ $count++;
         #print "Email: $columns[4]\n";
         #print "Location: $columns[5]\n";
         #print "Room Number: $columns[6]\n";
-        print "\n\n";
+#        print "\n\n";
     }
     else {
         my $err = $csv->error_input;
