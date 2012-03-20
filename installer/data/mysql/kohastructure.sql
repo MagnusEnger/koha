@@ -2831,6 +2831,64 @@ CREATE TABLE ratings (
     CONSTRAINT ratings_ibfk_2 FOREIGN KEY (biblionumber) REFERENCES biblio (biblionumber) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+--
+-- Table structure for table `quotes`
+--
+
+DROP TABLE IF EXISTS quotes;
+CREATE TABLE `quotes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `source` text DEFAULT NULL,
+  `text` mediumtext NOT NULL,
+  `timestamp` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- vendor_edi_accounts
+--
+
+DROP TABLE IF EXISTS vendor_edi_accounts;
+CREATE TABLE vendor_edi_accounts (
+    id int(11) NOT NULL auto_increment,
+    description text NOT NULL,
+    host text,username text,
+    password text,
+    last_activity date default NULL,
+    provider int(11) default NULL,
+    in_dir text,
+    san varchar(20) default NULL,
+    PRIMARY KEY  (id)
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- edifact_messages
+--
+
+DROP TABLE IF EXISTS edifact_messages;
+CREATE TABLE edifact_messages (
+    key int(11) NOT NULL auto_increment,
+    message_type text NOT NULL,
+    date_sent date default NULL,
+    provider int(11) default NULL,
+    status text,
+    basketno int(11) NOT NULL default '0',
+    edi LONGTEXT,
+    remote_file TEXT,
+    PRIMARY KEY  (key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+--
+-- edifact_ean
+--
+
+DROP TABLE IF EXISTS edifact_ean;
+CREATE TABLE edifact_ean (
+    branchcode varchar(10) NOT NULL default '',
+    ean varchar(15) NOT NULL default '',
+    UNIQUE KEY `edifact_ean_branchcode` (branchcode)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

@@ -5246,6 +5246,146 @@ if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
     SetVersion($DBversion);
 }
 
+$DBversion = "3.09.00.005";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+    unless (TableExists('quotes')) {
+        $dbh->do( qq{
+            CREATE TABLE `quotes` (
+              `id` int(11) NOT NULL AUTO_INCREMENT,
+              `source` text DEFAULT NULL,
+              `text` mediumtext NOT NULL,
+              `timestamp` datetime NOT NULL,
+              PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8
+        });
+    }
+    $dbh->do( qq{
+        INSERT IGNORE INTO permissions VALUES (13, "edit_quotes","Edit quotes for quote-of-the-day feature");
+    });
+    $dbh->do( qq{
+        INSERT IGNORE INTO `systempreferences` (variable,value,explanation,options,type) VALUES('QuoteOfTheDay',0,'Enable or disable display of Quote of the Day on the OPAC home page',NULL,'YesNo');
+    });
+    print "Upgrade to $DBversion done (Adding Quote of the Day Option.)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.09.00.006";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+    $dbh->do("UPDATE systempreferences SET
+                variable = 'OPACShowHoldQueueDetails',
+                value = CASE value WHEN '1' THEN 'priority' ELSE 'none' END,
+                options = 'none|priority|holds|holds_priority',
+                explanation = 'Show holds details in OPAC',
+                type = 'Choice'
+              WHERE variable = 'OPACDisplayRequestPriority'");
+    print "Upgrade to $DBversion done (Changed system preference OPACDisplayRequestPriority -> OPACShowHoldQueueDetails)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.09.00.007";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+    unless(C4::Context->preference('ReservesControlBranch')){
+        $dbh->do("INSERT INTO `systempreferences` (variable,value,options,explanation,type) VALUES ('ReservesControlBranch','PatronLibrary','ItemHomeLibrary|PatronLibrary','Branch checked for members reservations rights.','Choice')");
+    }
+    print "Upgrade to $DBversion done (Insert ReservesControlBranch systempreference into systempreferences table )\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.09.00.008";
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("ALTER TABLE sessions ADD PRIMARY KEY (id);");
+    $dbh->do("ALTER TABLE sessions DROP INDEX `id`;");
+    print "Upgrade to $DBversion done (redefine the field id as PRIMARY KEY of sessions)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.09.00.009";
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("ALTER TABLE branches ADD PRIMARY KEY (branchcode);");
+    $dbh->do("ALTER TABLE branches DROP INDEX branchcode;");
+    print "Upgrade to $DBversion done (redefine the field branchcode as PRIMARY KEY of branches)\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = "3.09.00.010";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+    $dbh->do("INSERT INTO systempreferences (variable,value,explanation,options,type) VALUES('IssueLostItem', 'alert', 'alert|confirm|nothing', 'Defines what should be done when an attempt is made to issue an item that has been marked as lost.', 'Choice')");
+    print "Upgrade to $DBversion done (Add system preference issuelostitem ))\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.09.00.011";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+    $dbh->do("ALTER TABLE `biblioitems` ADD `ean` VARCHAR( 13 ) NULL AFTER issn");
+    $dbh->do("CREATE INDEX `ean` ON biblioitems (`ean`) ");
+    $dbh->do("ALTER TABLE `deletedbiblioitems` ADD `ean` VARCHAR( 13 ) NULL AFTER issn");
+    if (C4::Context->preference("marcflavour") eq 'UNIMARC') {
+         $dbh->do("UPDATE marc_subfield_structure SET kohafield='biblioitems.ean' WHERE tagfield='073' and tagsubfield='a'");
+    }
+    print "Upgrade to $DBversion done (Adding ean in biblioitems and deletedbiblioitems)\n";
+    print "If you have records with ean, please run misc/batchRebuildBiblioTables.pl to populate bibliotems.ean\n" if (C4::Context->preference("marcflavour") eq 'UNIMARC');
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.09.00.012";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+    $dbh->do("INSERT INTO systempreferences (variable,value,explanation,options,type) VALUES('SuspendHoldsIntranet', '1', NULL , 'Allow holds to be suspended from the intranet.', 'YesNo')");
+    $dbh->do("INSERT INTO systempreferences (variable,value,explanation,options,type) VALUES('SuspendHoldsOpac', '1', NULL , 'Allow holds to be suspended from the OPAC.', 'YesNo')");
+    print "Upgrade to $DBversion done (Add system preference OpacBrowseResults ))\n";
+    SetVersion($DBversion);
+}
+
+$DBversion ="3.09.00.013";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+    $dbh->do("INSERT INTO systempreferences (variable,value,explanation,options,type) VALUES('DefaultLanguageField008','','Fill in the default language for field 008 Range 35-37 (e.g. eng, nor, ger, see www.loc.gov/marc/languages/language_code.html)','','Free');");
+    print "Upgrade to $DBversion done (Add system preference DefaultLanguageField008))\n";
+    SetVersion($DBversion);
+}
+
+$DBversion ="3.09.00.014";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+    # add phone message transport type
+    $dbh->do("INSERT INTO message_transport_types (message_transport_type) VALUES ('phone')");
+    
+    # adds HOLD_PHONE and PREDUE_PHONE letters (as placeholders)
+    $dbh->do("INSERT INTO letter (module, code, name, title, content) VALUES
+              ('reserves', 'HOLD_PHONE', 'Item Available for Pick-up (phone notice)', 'Item Available for Pick-up (phone notice)', 'Your item is available for pickup'),
+              ('circulation', 'PREDUE_PHONE', 'Advance Notice of Item Due (phone notice)', 'Advance Notice of Item Due (phone notice)', 'Your item is due soon'),
+              ('circulation', 'OVERDUE_PHONE', 'Overdue Notice (phone notice)', 'Overdue Notice (phone notice)', 'Your item is overdue')
+              ");
+    
+    # add phone notifications to patron message preferences options
+    $dbh->do("INSERT INTO message_transports
+             (message_attribute_id, message_transport_type, is_digest, letter_module, letter_code) VALUES
+             (4, 'phone', 0, 'reserves', 'HOLD_PHONE'),
+             (2, 'phone', 0, 'circulation', 'PREDUE_PHONE')
+             ");
+    
+    # add TalkingTechItivaPhoneNotification syspref
+    $dbh->do("INSERT INTO systempreferences (variable,value,explanation,options,type) VALUES('TalkingTechItivaPhoneNotification',0,'If ON, enables Talking Tech I-tiva phone notifications',NULL,'YesNo');");
+    
+    print "Upgrade done (Support for Talking Tech i-tiva phone notification system)\n";
+    SetVersion($DBversion);
+}
+
+
+$DBversion = "3.09.00.XXX";
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+	$dbh->do(
+	"CREATE TABLE IF NOT EXISTS `vendor_edi_accounts` (`id` int(11) NOT NULL auto_increment,`description` text NOT NULL,`host` text,`username` text,`password` text,`last_activity` date default NULL,`provider` int(11) default NULL,`in_dir` text,`san` varchar(20) default NULL,PRIMARY KEY  (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8"
+	);
+	$dbh->do(
+	"CREATE TABLE IF NOT EXISTS `edifact_messages` (`key` int(11) NOT NULL auto_increment,`message_type` text NOT NULL,`date_sent` date default NULL,`provider` int(11) default NULL,`status` text,`basketno` int(11) NOT NULL default '0', edi LONGTEXT, remote_file TEXT, PRIMARY KEY  (`key`)) ENGINE=InnoDB DEFAULT CHARSET=utf8"
+	$dbh->do(
+	"CREATE TABLE IF NOT EXISTS `edifact_ean` (`branchcode` varchar(10) NOT NULL default '',`ean` varchar(15) NOT NULL default '',UNIQUE KEY `edifact_ean_branchcode` (`branchcode`)) ENGINE=InnoDB DEFAULT CHARSET=utf8"
+	);
+	$dbh->do(
+	"insert into permissions (module_bit, code, description) values (13, 'edi_manage', 'Manage EDIFACT transmissions')"
+	);
+    print "Upgrade to $DBversion done (Bug xxxx: Edifact quote and order processing.)\n";
+    SetVersion($DBversion);
+}
+
 =head1 FUNCTIONS
 
 =head2 TableExists($table)

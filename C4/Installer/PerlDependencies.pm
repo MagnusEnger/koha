@@ -513,6 +513,26 @@ our $PERL_DEPS = {
         'usage'    => 'Core',
         'required' => '1',
         'min_ver'  => '0.09',
+    },
+    'Template::Plugin::HtmlToText' => {
+        'usage'    => 'Core',
+        'required' => '1',
+        'min_ver'  => '0.03',
+    },
+    'Business::Edifact::Interchange' => {
+        'usage'    => 'Core',
+        'required' => '1',
+        'min_ver'  => '0.02',
+      },
+    'Net::FTP' => {
+        'usage'    => 'Core',
+        'required' => '1',
+        'min_ver'  => '2.77',
+      },
+    'Net::FTP::File' => {
+        'usage'    => 'Core',
+        'required' => '1',
+        'min_ver'  => '0.06',
       },
 };
 

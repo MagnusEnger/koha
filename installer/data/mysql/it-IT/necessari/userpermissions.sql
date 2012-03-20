@@ -40,6 +40,7 @@ INSERT INTO permissions (module_bit, code, description) VALUES
    (13, 'moderate_tags', 'Modera i tag inseriti dagli utenti'),
    (13, 'rotating_collections', 'Gestisci le collezioni circolanti (rotating collections)'),
    (13, 'upload_local_cover_images', 'Carica copertine in locale'),
+   (13, 'edi_manage', 'Manage EDIFACT transmissions'),
    (15, 'check_expiration', 'Controlla la scadenza di una risora in continuazione'),
    (15, 'claim_serials', 'Richiedi i fascicoli non arrivati'),
    (15, 'create_subscription', 'Crea un nuovo abbonamento'),
