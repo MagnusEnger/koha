@@ -38,6 +38,7 @@ use C4::Context;
 
 use C4::Members;
 use C4::Serials;
+use C4::Branch;
 
 use URI::Escape;
 
@@ -98,6 +99,7 @@ my $member_loop = [];
 for my $routing ( @routinglist ) {
     my $member=GetMember('borrowernumber' => $routing->{borrowernumber});
     $member->{location} = $member->{branchcode};
+    $member->{branchname} = GetBranchName($member->{branchcode});
     if ($member->{firstname} ) {
         $member->{name} = $member->{firstname} . q| |;
     }

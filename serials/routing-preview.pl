@@ -123,6 +123,8 @@ for my $routing (@routinglist) {
     my $member = GetMember( borrowernumber => $routing->{borrowernumber} );
     $member->{name}           = "$member->{firstname} $member->{surname}";
     $member->{vacation_flag}  = "$routing->{vacation_flag}";
+    my $branchname = GetBranchName($member->{branchcode});
+    $member->{branchname}     = $branchname;
     push @{$memberloop}, $member;
 }
 

@@ -15,7 +15,6 @@
    <div id="bd">
 
 <table>
-<<<<<<< HEAD
     <tr>
         <td colspan="5"><h3>[% libraryname %]</h3></td>
     </tr>
@@ -33,8 +32,8 @@
         [% UNLESS memberloo.vacation_flag %]
         <tr>
             <td>[% memberloo.name %]</td>
-            <td>[% memberloo.branchcode %]</td>
-            <td>&nbsp;</td>
+            <td>[% memberloo.branchname %]</td>
+            <td>[% memberloo.address %]</td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
         </tr>
