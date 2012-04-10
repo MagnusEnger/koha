@@ -2465,6 +2465,22 @@ sub is_barcode_in_use {
     return @{$occurences};
 }
 
+sub get_linked_orders {
+    my ( $biblionumber, $aqbooksellerid ) = @_;
+    if ( $biblionumber && $aqbooksellerid ) {
+        my $sql = <<'SQLEND';
+    select aqbasket.basketno, entrydate, purchaseordernumber, quantityreceived
+ from aqorders left join aqbasket on aqorders.basketno = aqbasket.basketno
+ where aqorders.biblionumber = ? and aqbasket.booksellerid=? order by entrydate desc;
+SQLEND
+        my $dbh = C4::Context->dbh;
+        return $dbh->selectall_arrayref( $sql, { Slice => {} },
+            $biblionumber, $aqbooksellerid );
+    }
+
+    return;
+}
+
 1;
 __END__
 

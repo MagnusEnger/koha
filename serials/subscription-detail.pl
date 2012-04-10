@@ -147,6 +147,8 @@ my ( $order, $bookseller, $tmpl_infos );
 #    }
 #}
 
+my $ord = C4::Serials::get_linked_orders($subs->{bibnum},$subs->{aqbooksellerid});
+
 $template->param(
 	subscriptionid => $subscriptionid,
     serialslist => \@serialslist,
@@ -168,6 +170,7 @@ $template->param(
     default_bib_view => $default_bib_view,
     (uc(C4::Context->preference("marcflavour"))) => 1,
     show_acquisition_details => defined $tmpl_infos->{ordered_exists} || defined $tmpl_infos->{spent_exists} ? 1 : 0,
+    orders           => $ord,
     );
 
 output_html_with_http_headers $query, $cookie, $template->output;
