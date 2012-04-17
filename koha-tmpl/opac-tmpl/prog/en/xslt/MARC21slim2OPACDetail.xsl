@@ -707,6 +707,18 @@
         </span>
         </xsl:for-each>
 
+<xsl:if test="marc:datafield[@tag=887]">
+<b>    <span class="results_summary">
+        <span class="label">Shelved at:
+        </span>
+        <xsl:for-each select="marc:datafield[@tag=887]">
+            <xsl:call-template name="subfieldSelect">
+                <xsl:with-param name="codes">a</xsl:with-param>
+            </xsl:call-template>
+        </xsl:for-each>
+    </span> </b>
+</xsl:if>
+
         <!-- 866 textual holdings -->
         <xsl:if test="marc:datafield[@tag=866]">
             <span class="results_summary holdings_note"><span class="label">Holdings Note: </span>
