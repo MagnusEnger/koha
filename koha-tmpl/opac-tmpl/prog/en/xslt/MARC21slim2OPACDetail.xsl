@@ -714,7 +714,7 @@
                     <xsl:call-template name="subfieldSelect">
                         <xsl:with-param name="codes">az</xsl:with-param>
                     </xsl:call-template>
-                    <xsl:choose><xsl:when test="position()=last()"><xsl:text></xsl:text></xsl:when><xsl:otherwise><xsl:text>; </xsl:text></xsl:otherwise></xsl:choose>
+                    <xsl:choose><xsl:when test="position()=last()"><xsl:text></xsl:text></xsl:when><xsl:otherwise><xsl:text>  -   </xsl:text></xsl:otherwise></xsl:choose>
                 </xsl:for-each>
             </span>
         </xsl:if>
