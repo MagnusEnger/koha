@@ -520,7 +520,7 @@
             </span>
         </xsl:if>
 
-<!-- Image processing code added here, takes precedence over text links including y3z text   -->
+	<!-- Image processing code added here, takes precedence over text links including y3z text   -->
         <xsl:if test="marc:datafield[@tag=856]">
         <span class="results_summary online_resources"><span class="label">Online Resources: </span>
         <xsl:for-each select="marc:datafield[@tag=856]">
@@ -550,6 +550,19 @@
             <xsl:when test="position()=last()"><xsl:text>  </xsl:text></xsl:when>
             <xsl:otherwise> | </xsl:otherwise>
             </xsl:choose>
+        </xsl:for-each>
+        </span>
+        </xsl:if>
+
+	<!-- BLDS Document Delivery Link (887$iDOCDEL$u) -->
+        <xsl:if test="marc:datafield[@tag=887]">
+        <span class="results_summary docdel"><span class="label">Document Delivery: </span>
+        <xsl:for-each select="marc:datafield[@tag=887]">
+                <a>
+                   <xsl:attribute name="href"><xsl:value-of select="marc:subfield[@code='u']"/></xsl:attribute>
+                   <xsl:attribute name="target">_blank</xsl:attribute>
+                   <xsl:text>Request a copy through Document Delivery</xsl:text>
+                </a>
         </xsl:for-each>
         </span>
         </xsl:if>
@@ -707,17 +720,16 @@
         </span>
         </xsl:for-each>
 
-<xsl:if test="marc:datafield[@tag=887]">
-<b>    <span class="results_summary">
-        <span class="label">Shelved at:
-        </span>
-        <xsl:for-each select="marc:datafield[@tag=887]">
-            <xsl:call-template name="subfieldSelect">
-                <xsl:with-param name="codes">a</xsl:with-param>
-            </xsl:call-template>
-        </xsl:for-each>
-    </span> </b>
-</xsl:if>
+	<!-- 852 BLDS Shelved At Location -->
+	<xsl:if test="marc:datafield[@tag=852]">
+	   <span class="results_summary shelved_at"><span class="label">Shelved at: </span>
+	      <xsl:for-each select="marc:datafield[@tag=852]">
+	          <xsl:call-template name="subfieldSelect">
+	              <xsl:with-param name="codes">a</xsl:with-param>
+	          </xsl:call-template>
+	      </xsl:for-each>
+	   </span>
+	</xsl:if>
 
         <!-- 866 textual holdings -->
         <xsl:if test="marc:datafield[@tag=866]">
@@ -726,7 +738,7 @@
                     <xsl:call-template name="subfieldSelect">
                         <xsl:with-param name="codes">az</xsl:with-param>
                     </xsl:call-template>
-                    <xsl:choose><xsl:when test="position()=last()"><xsl:text></xsl:text></xsl:when><xsl:otherwise><xsl:text>  -   </xsl:text></xsl:otherwise></xsl:choose>
+                    <xsl:choose><xsl:when test="position()=last()"><xsl:text></xsl:text></xsl:when><xsl:otherwise><xsl:text> - </xsl:text></xsl:otherwise></xsl:choose>
                 </xsl:for-each>
             </span>
         </xsl:if>
