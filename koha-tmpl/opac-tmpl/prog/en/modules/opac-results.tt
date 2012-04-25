@@ -204,7 +204,7 @@ $(document).ready(function(){
 [% IF ( RequestOnOpac ) %]
   [% IF ( opacuserlogin ) %]
   [% IF ( DisplayMultiPlaceHold ) %]
-    $("#placehold").html("<input class=\"submit\" type=\"submit\" value=\""+_("Place hold")+"\"/>");
+    $("#placehold").html("<input class=\"submit\" type=\"submit\" value=\""+_("Place reservation")+"\"/>");
     $("#placehold").find("input:submit").click(function(){
         holdMultiple();
         return false;
