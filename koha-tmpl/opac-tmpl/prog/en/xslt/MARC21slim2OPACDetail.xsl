@@ -731,15 +731,27 @@
 	   </span>
 	</xsl:if>
 
-        <!-- 866 textual holdings -->
+        <!-- 866 BLDS Textual Holdings -->
         <xsl:if test="marc:datafield[@tag=866]">
             <span class="results_summary holdings_note"><span class="label">Holdings Note: </span>
                 <xsl:for-each select="marc:datafield[@tag=866]">
+                    <xsl:sort select="position()" data-type="number" order="descending"/>
+                    <xsl:if test="position() &lt; 4">
+                    <li class="holding_visible" style="display:block">
                     <xsl:call-template name="subfieldSelect">
                         <xsl:with-param name="codes">az</xsl:with-param>
                     </xsl:call-template>
-                    <xsl:choose><xsl:when test="position()=last()"><xsl:text></xsl:text></xsl:when><xsl:otherwise><xsl:text> - </xsl:text></xsl:otherwise></xsl:choose>
+                    </li>
+                    </xsl:if>
+                    <xsl:if test="position() &gt; 3">
+                    <li class="holding_hidden" style="display:none">
+                    <xsl:call-template name="subfieldSelect">
+                        <xsl:with-param name="codes">az</xsl:with-param>
+                    </xsl:call-template>
+                    </li>
+                    </xsl:if>
                 </xsl:for-each>
+            <a id="h_slide" style="align:right;"><xsl:text>more...</xsl:text></a>
             </span>
         </xsl:if>
 
