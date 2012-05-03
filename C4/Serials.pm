@@ -2469,7 +2469,7 @@ sub get_linked_orders {
     my ( $biblionumber, $aqbooksellerid ) = @_;
     if ( $biblionumber && $aqbooksellerid ) {
         my $sql = <<'SQLEND';
-    select aqbasket.basketno, entrydate, purchaseordernumber, quantityreceived
+    select aqbasket.basketno, entrydate, ordernumber, purchaseordernumber, quantityreceived
  from aqorders left join aqbasket on aqorders.basketno = aqbasket.basketno
  where aqorders.biblionumber = ? and aqbasket.booksellerid=? order by entrydate desc;
 SQLEND

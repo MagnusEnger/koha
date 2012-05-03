@@ -427,7 +427,7 @@ $(document).ready(function() {
     <div class="rows">
     <ol>
         [% FOREACH order IN orders %]
-        <li><span class="label">[% order.purchaseordernumber -%]:</span>
+        <li><span class="label">PO [% order.ordernumber -%]:</span>
         <a href="/cgi-bin/koha/acqui/basket.pl?basketno=[% order.basketno -%]"> ([% order.basketno -%]) </a>
         </li>
         [% END %]
