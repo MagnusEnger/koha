@@ -299,12 +299,12 @@
                 <xsl:with-param name="basetags">260</xsl:with-param>
                 <xsl:with-param name="codes">abcg</xsl:with-param>
                 <xsl:with-param name="class">results_summary publisher</xsl:with-param>
-                <xsl:with-param name="label">Publisher: </xsl:with-param>
+                <xsl:with-param name="label">Imprint: </xsl:with-param>
             </xsl:call-template>
         </xsl:if>
 
         <xsl:if test="marc:datafield[@tag=260]">
-        <span class="results_summary publisher"><span class="label">Publisher: </span>
+        <span class="results_summary publisher"><span class="label">Imprint: </span>
             <xsl:for-each select="marc:datafield[@tag=260]">
                 <xsl:if test="marc:subfield[@code='a']">
                     <xsl:call-template name="subfieldSelect">
@@ -556,7 +556,7 @@
 
 	<!-- BLDS Document Delivery Link (887$iDOCDEL$u) -->
         <xsl:if test="marc:datafield[@tag=887]">
-        <span class="results_summary docdel"><span class="label">Document Delivery: </span>
+        <span class="results_summary docdel"><span class="label">Legacy Document Delivery: </span>
         <xsl:for-each select="marc:datafield[@tag=887]">
                 <a>
                    <xsl:attribute name="href"><xsl:value-of select="marc:subfield[@code='u']"/></xsl:attribute>
