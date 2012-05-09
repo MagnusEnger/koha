@@ -111,7 +111,7 @@ $.tablesorter.addParser({
     <li><label for="publishercode">Publisher:</label><input type="text" id="publishercode" name="publishercode" size="50" maxlength="80" /></li>
     <li><label for="place">Publication place:</label><input type="text" id="place" name="place" size="50" maxlength="80" /></li>
     <li><label for="isbn">Standard Number (ISBN, ISSN or Other):</label><input type="text" id="isbn" name="isbn" size="50" maxlength="80" /></li>
-    <li><label class="required" for="collectiontitle">Your Name:<br />Email:<br />Member of BLDS:</label><textarea id="collectiontitle" name="collectiontitle" rows="3" cols="40"></textarea></li>
+    <li><label class="required" for="collectiontitle">Your name:<br />Your email:<br />Are you a member of BLDS?</label><textarea id="collectiontitle" name="collectiontitle" rows="3" cols="40"></textarea></li>
     [% IF ( branch_loop ) %]
     <li><label for="branch">Library:</label>
         <select name="branch" id="branch">
