@@ -476,7 +476,7 @@
 
         <xsl:if test="marc:datafield[substring(@tag, 1, 1) = '6']">
             <span class="results_summary subjects"><span class="label">Subject(s): </span>
-            <xsl:for-each select="marc:datafield[substring(@tag, 1, 1) = '6']">
+            <xsl:for-each select="marc:datafield[substring(@tag, 1, 1) = '6' and not(@tag=655)]">
             <a>
             <xsl:choose>
             <xsl:when test="marc:subfield[@code=9] and $UseAuthoritiesForTracings='1'">
