@@ -496,6 +496,13 @@ YAHOO.util.Event.onContentReady("furtherm", function () {
         [% END %]
         [% END %]
 
+<!-- BLDS Request from Storage -->
+[% IF ( InStorage ) %]
+    <span class="results_summary request"><span class="label">In Storage: </span>
+      <a class="addtocart" href="#" onclick="addRecord('[% biblionumber %]'); return false;">Add to My Items</a>
+    </span>
+[% END %]
+
 <!-- This puts the LTFL reviews in, and if TabbedView is not set, puts the remaining content above the Tabs instead of in them -->
 [% IF ( LibraryThingForLibrariesID ) %]
 	[% UNLESS ( LibraryThingForLibrariesTabbedView ) %]
