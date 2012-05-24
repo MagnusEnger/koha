@@ -554,6 +554,17 @@
             </span>
         </xsl:if>
 
+        <!-- SPL:Original Version Note  -->
+        <xsl:if test="marc:datafield[@tag=534]">
+            <span class="results_summary"><span class="label">Original Version Note: </span>
+                <xsl:for-each select="marc:datafield[@tag=534]">
+                    <xsl:variable name="isbn" select="marc:subfield[@code='a']"/>
+                    <xsl:value-of select="marc:subfield[@code='a']"/>
+                    <xsl:choose><xsl:when test="position()=last()"><xsl:text>.</xsl:text></xsl:when><xsl:otherwise><xsl:text>; </xsl:text></xsl:otherwise></xsl:choose>
+                </xsl:for-each>
+            </span>
+        </xsl:if>
+
 <!-- Image processing code added here, takes precedence over text links including y3z text   -->
         <xsl:if test="marc:datafield[@tag=856]">
         <span class="results_summary online_resources"><span class="label">Online Resources: </span>
