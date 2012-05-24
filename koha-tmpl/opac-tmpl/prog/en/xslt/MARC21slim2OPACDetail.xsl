@@ -119,6 +119,12 @@
                             <xsl:with-param name="codes">b</xsl:with-param>
                         </xsl:call-template>
                     </xsl:if>
+                    <xsl:if test="marc:subfield[@code='c']">
+                        <xsl:text> </xsl:text>
+                        <xsl:call-template name="subfieldSelect">
+                            <xsl:with-param name="codes">c</xsl:with-param>
+                        </xsl:call-template>
+                    </xsl:if>
                 <xsl:text> </xsl:text>
                     <xsl:call-template name="subfieldSelect">
                         <xsl:with-param name="codes">fgknps</xsl:with-param>
