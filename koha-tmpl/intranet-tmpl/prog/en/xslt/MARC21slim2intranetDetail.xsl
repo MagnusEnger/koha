@@ -119,7 +119,7 @@
                     </xsl:if>
                     <xsl:text> </xsl:text>
                     <xsl:call-template name="subfieldSelect">
-                        <xsl:with-param name="codes">fgknps</xsl:with-param>
+                        <xsl:with-param name="codes">cfgknps</xsl:with-param>
                     </xsl:call-template>
             </xsl:for-each>
         </h1>
