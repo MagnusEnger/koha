@@ -96,7 +96,7 @@
             <h1 class="title">
                 <xsl:call-template name="m880Select">
                     <xsl:with-param name="basetags">245</xsl:with-param>
-                    <xsl:with-param name="codes">abhfgknps</xsl:with-param>
+                    <xsl:with-param name="codes">abchfgknps</xsl:with-param>
                 </xsl:call-template>
             </h1>
         </xsl:if>
