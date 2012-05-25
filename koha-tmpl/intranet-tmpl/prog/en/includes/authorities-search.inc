@@ -18,8 +18,8 @@
         </select>
         <input type="hidden" name="marclist" value="mainmainentry" />
         <select name="operator">
-            <option value="contains">contains</option>
             <option value="start">starts with</option>
+            <option value="contains">contains</option>
             <option value="is">is exactly</option>
         </select>
         <input id="value_anywhere" type="text" name="value" value="[% value %]" />
@@ -49,8 +49,8 @@
         <input type="hidden" name="and_or" value="and" />
         <input type="hidden" name="excluding" value="" />
         <select name="operator">
-            <option value="contains">contains</option>
             <option value="start">starts with</option>
+            <option value="contains">contains</option>
             <option value="is">is exactly</option>
         </select>
         <input id="value_mainentry" type="text" name="value" value="[% value %]" />
@@ -80,8 +80,8 @@
         <input type="hidden" name="and_or" value="and" />
         <input type="hidden" name="excluding" value="" />
         <select name="operator">
-            <option value="contains">contains</option>
             <option value="start">starts with</option>
+            <option value="contains">contains</option>
             <option value="is">is exactly</option>
         </select>
         <input id="value_mainmainentry" type="text" name="value" value="[% value %]" />
