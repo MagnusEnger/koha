@@ -184,6 +184,25 @@
     <!-- /LANGUAGE LIMIT -->
     </fieldset>
     </div>
+    <!-- SPL:Limit by Location -->
+    <div id="advsearch-shelvingloc" class="container">
+        <fieldset>
+            <legend>Limit to any of the following shelving locations:</legend>
+                <table>
+                <tr>
+                [% FOREACH loc IN shelvinglocsloop %]
+                <td>
+                <input type="checkbox" id="[% loc.ccl %]-[% loc.number %]" name="limit" value="mc-[% loc.ccl %]:[% loc.code %]"/>
+                <label for="[% loc.ccl %]-[% loc.number %]">[% loc.description %]</label>
+                </td>
+                [% IF loop.count() % 4 == 0 %]
+                    </tr><tr>
+                [% END %]
+                [% END %]
+                </tr>
+                </table>
+        </fieldset>
+    </div>    
 [% IF ( expanded_options ) %]
     [% IF ( usmarc ) %]
         <!-- SUBTYPE LIMITS -->

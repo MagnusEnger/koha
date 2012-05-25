@@ -169,6 +169,18 @@ $template->param(
 my $languages_limit_loop = getAllLanguages();
 $template->param(search_languages_loop => $languages_limit_loop,);
 
+# SPL:load the location limits (for search)
+my $shelvinglocsloop = [];
+my $shelflocations = GetAuthorisedValues('LOC');
+for my $loc ( sort { $a->{lib} cmp $b->{lib} } @{$shelflocations}) {
+    push @{$shelvinglocsloop}, {
+        ccl         => 'loc',
+        code        => $loc->{authorised_value},
+        description => $loc->{lib},
+    };
+}
+$template->param(shelvinglocsloop => $shelvinglocsloop);
+
 # load the Type stuff
 my $itemtypes = GetItemTypes;
 # the index parameter is different for item-level itemtypes
