@@ -45,7 +45,7 @@ my $branch_query = $dbh->prepare_cached(
 # Build hash of branches
 my %branches;
 $branch_query->execute() or die "Can't execute query: $branch_query->errstr\n";
-while ( ($branchname, $branchcode) = $branch_query->fetchrow_array() ) {
+while ( (my $branchname, my $branchcode) = $branch_query->fetchrow_array() ) {
      $branches{$branchname} = $branchcode;
 }
 $branch_query->finish();
