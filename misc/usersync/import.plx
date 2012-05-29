@@ -30,7 +30,7 @@ my $today  = "$mday-$mon-$year";
 
 # File
 my $path = "/home/syncuser/imports/";
-my $file = "people.csv";
+my $file = "People.csv";
 my $backup = "past/people-$today.csv";
 my $csv = Text::CSV::Encoded->new({encoding => "utf8", });
 # DB
@@ -38,7 +38,19 @@ my $dbh = C4::Context->dbh;
 my $bor_insert = $dbh->prepare_cached(
 'INSERT INTO borrowers(cardnumber,surname,firstname,othernames,address,email,branchcode,categorycode,password,userid) VALUES (?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE surname=VALUES(surname),firstname=VALUES(firstname),othernames=VALUES(othernames),address=VALUES(address),email=VALUES(email),branchcode=VALUES(branchcode),password=VALUES(password),userid=VALUES(userid);'
 );
+my $branch_query = $dbh->prepare_cached(
+'SELECT branchname, branchcode FROM branches;'
+);
 
+# Build hash of branches
+my %branches;
+$branch_query->execute() or die "Can't execute query: $branch_query->errstr\n";
+while ( ($branchname, $branchcode) = $branch_query->fetchrow_array() ) {
+     $branches{$branchname} = $branchcode;
+}
+$branch_query->finish();
+
+# Import Users
 open( IMPORT, "<", "$path/$file" ) or die $!;
 
 my $count  = 0;
@@ -62,12 +74,17 @@ $count++;
 	# Category
 	my $category = "USER";
 
-	# Capitalise Branch
-	my $branch = uc( $columns[5] );
-	$branch =~ s/\s//g;
-	$branch =~ s/^NULL/FIRMWIDE/g;
-	$branch =~ s/^DUBAI/UAE/g;
-	$branch =~ s/^SOUTHAFRICA/FIRMWIDE/g;
+	# Check Branch
+	my $branch = $columns[5];
+        if ( exists $branches{$branch} ) {
+            $branch = $branches{$branch};
+        }
+        elsif ( $branch eq "Dubai" ) {
+            $branch = 'UAE';
+        }
+        else {
+            $branch = 'FIRMWIDE';
+        }
 	
 	# Insert into 'borrowers'
         $bor_insert->execute(
@@ -76,32 +93,11 @@ $count++;
             $branch,		$category,	$password,
 	    $columns[3]
         );	    
-	
-#	print "Record: " . $count . "\n";
-#	print "Cardnumber: $columns[2]\n";
-#       print "Surname: $columns[0]\n";
-#	print "Firstname: $firstname\n";
-#       print "Othernames: $othernames\n";
-#	print "Address: $columns[6]\n";
-#	print "Email: $columns[4]\n";
-#	print "Branch: $branch\n";
-#	print "Category: $category\n";
-#	print "Password: $password\n";
-#	print "Username: $columns[3]\n";
-        
-	#print "Forenames: $columns[1]\n";
-        #print "EmployeeID: $columns[2]\n";
-        #print "Username: $columns[3]\n";
-        #print "Email: $columns[4]\n";
-        #print "Location: $columns[5]\n";
-        #print "Room Number: $columns[6]\n";
-#        print "\n\n";
     }
     else {
         my $err = $csv->error_input;
         push(@errors, $err);
 	$fails++;
-        #print "Parsing Line: " . $count . ". Failed to parse line: $err";
     }
 }
 print "Number of Fails: " . $fails . "\n";
@@ -115,3 +111,8 @@ system(
     "$path/$backup"
 );
 
+# Compress backup
+system(
+    "sudo", "gzip",
+    "$path/$backup"
+);
