@@ -366,9 +366,10 @@
                 <xsl:with-param name="label">Description: </xsl:with-param>
             </xsl:call-template>
         </xsl:if>
-
-        <xsl:if test="marc:datafield[@tag=300]">
-        <span class="results_summary description"><span class="label">Description: </span>
+       
+       <xsl:choose>
+        <xsl:when test="marc:datafield[@tag=300]/marc:subfield[@code='a']">
+        <span class="results_summary description"><span class="label">Physical details: </span>
             <xsl:for-each select="marc:datafield[@tag=300]">
                 <xsl:call-template name="chopPunctuation">
                   <xsl:with-param name="chopString">
@@ -380,7 +381,11 @@
                     <xsl:choose><xsl:when test="position()=last()"><xsl:text>.</xsl:text></xsl:when><xsl:otherwise><xsl:text>; </xsl:text></xsl:otherwise></xsl:choose>
             </xsl:for-each>
         </span>
-       </xsl:if>
+       </xsl:when>
+        <xsl:otherwise>
+        <!-- Do nothing subfield f -->
+        </xsl:otherwise>
+      </xsl:choose>
 
        <xsl:if test="marc:datafield[@tag=020]">
         <span class="results_summary isbn"><span class="label">ISBN: </span>
