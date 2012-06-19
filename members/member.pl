@@ -96,7 +96,7 @@ else {
 }
 
 my $searchfields = $input->param('searchfields');
-my @searchfields = $searchfields ? split( ',', $searchfields ) : ( "firstname", "surname", "othernames", "cardnumber", "userid", "email" );
+my @searchfields = $searchfields ? split( ',', $searchfields ) : ( "firstname", "surname", "cardnumber", "userid", "email" );
 
 $member =~ s/,//g;   #remove any commas from search string
 $member =~ s/\*/%/g;
