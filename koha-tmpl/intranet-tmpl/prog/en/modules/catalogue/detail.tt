@@ -279,6 +279,7 @@ function verify_images() {
                 [% IF ( volinfo ) %]<th>Publication details</th>[% END %]
                 [% IF ( itemdata_uri ) %]<th>url</th>[% END %]
                 [% IF ( itemdata_copynumber ) %]<th>Copy no.</th>[% END %]
+                [% IF ( itemdata_more_subfields_xml ) %]<th>Private Notes</th>[% END %]
                 [% IF materials %]<th>Materials specified</th>[% END %]
                 [% IF ( itemdata_itemnotes ) %]<th>Public notes</th>[% END %]
         [% IF ( SpineLabelShowPrintOnBibDetails ) %]<th>Spine label</th>[% END %]
@@ -401,6 +402,7 @@ function verify_images() {
 				[% IF ( itemdata_copynumber ) %]
 					<td class="copynumber">[% itemloo.copynumber %]</td>
 				[% END %]
+                                [% IF ( itemdata_more_subfields_xml ) %]<td class="hpnote">[% itemloo.more_subfields_xml %]</td>[% END %]
 	        [% IF materials %]
 		    <td class="materials"> [% itemloo.materials %] </td>
 		[% END %]
