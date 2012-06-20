@@ -367,6 +367,24 @@
         </span>
         </xsl:if>
 
+        <!-- WAHT: EBSCO Link -->
+        <xsl:if test="marc:datafield[@tag=022]">
+                <img src="/opac-tmpl/prog/images/ebsco.gif" alt="Journal A-Z list" title="Journal A-Z list" class="format"/> <span class="results_summary"><b><span class="label">Check our Journal A-Z list for online access: </span></b>
+        <xsl:for-each select="marc:datafield[@tag=022]">
+            <xsl:for-each select="marc:subfield[@code='a']">
+                    <a><xsl:attribute name="href">http://atoz.ebsco.com/titles.asp?txtKeyword=<xsl:value-of select="text()"/>&amp;SF=Titles&amp;id=3081&amp;cmdSearchSubmit=Search</xsl:attribute>
+                <xsl:if test="$OPACURLOpenInNewWindow='1'">
+                    <xsl:attribute name="target">_blank</xsl:attribute>
+                </xsl:if>
+                <xsl:value-of select="text()"/>
+                </a>
+            </xsl:for-each>
+                <xsl:choose><xsl:when test="position()=last()"><xsl:text>.</xsl:text></xsl:when><xsl:otherwise><xsl:text>; </xsl:text></xsl:otherwise></xsl:choose>
+        </xsl:for-each>
+        </span>
+        </xsl:if>
+
+
         <!-- Other Title  Statement: Alternate Graphic Representation (MARC 880) -->
         <xsl:if test="$display880">
             <xsl:call-template name="m880Select">
