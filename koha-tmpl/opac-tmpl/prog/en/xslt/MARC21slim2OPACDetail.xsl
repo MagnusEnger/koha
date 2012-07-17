@@ -559,7 +559,8 @@
         </span>
         </xsl:if>
 
-	<!-- BLDS Document Delivery Link (887$iDOCDEL$u) -->
+	<!-- BLDS Document Delivery Link (Legacy Method) (887$iDOCDEL$u) -->
+        <!--
         <xsl:if test="marc:datafield[@tag=887]">
         <span class="results_summary docdel"><span class="label">Legacy Document Delivery: </span>
         <xsl:for-each select="marc:datafield[@tag=887]">
@@ -571,6 +572,7 @@
         </xsl:for-each>
         </span>
         </xsl:if>
+        -->
 
         <!-- 530 -->
         <xsl:if test="marc:datafield[@tag=530]">

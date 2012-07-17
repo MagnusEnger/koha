@@ -496,6 +496,11 @@ YAHOO.util.Event.onContentReady("furtherm", function () {
         [% END %]
         [% END %]
 
+<!-- BLDS Document Delivery link -->
+    <span class="results_summary docdel"><span class="label">Document Delivery: </span>
+      <a title="Request Document" href="http://docdel.ids.ac.uk/blds/docdel1.cfm?bn=[% biblionumber %]">Request a copy through Document Delivery</a>
+    </span>
+
 <!-- BLDS Request from Storage -->
 [% IF ( InStorage ) %]
     <span class="results_summary request"><span class="label">In Storage: </span>
