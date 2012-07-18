@@ -498,7 +498,7 @@ YAHOO.util.Event.onContentReady("furtherm", function () {
 
 <!-- BLDS Document Delivery link -->
     <span class="results_summary docdel"><span class="label">Document Delivery: </span>
-      <a title="Request Document" href="http://docdel.ids.ac.uk/blds/docdel1.cfm?bn=[% biblionumber %]">Request a copy through Document Delivery</a>
+      <a title="Request Document" href="http://docdel.ids.ac.uk/blds/docdel1.cfm?bn=[% biblionumber %]" target="_blank">Request a copy through Document Delivery</a>
     </span>
 
 <!-- BLDS Request from Storage -->
