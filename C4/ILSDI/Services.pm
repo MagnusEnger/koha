@@ -761,4 +761,32 @@ sub CancelHold {
     return { code => 'Canceled' };
 }
 
+=head2 GetBiblionumber (BLDS Specific)
+
+Get a biblionumber given a recordnumber.
+
+Parameters:
+
+  - record_no (Required)
+        a record number
+
+=cut
+
+sub GetBiblionumber {
+    my ($cgi) = @_;
+
+    # Get the biblionumber or return an error code
+    my $recordnumber = $cgi->param('record_no');
+    my $dbh = C4::Context->dbh;
+    my $sth = $dbh->prepare("SELECT biblionumber FROM biblioitems WHERE lccn = ?");
+    $sth->execute($recordnumber);
+    my $biblionumber=$sth->fetchrow_array;
+    my $biblioitem->{'biblionumber'}       = $biblionumber;
+    return { code => 'RecordNotFound' } unless $$biblioitem{biblionumber};
+
+    # Return the biblionumber
+    return { record => $biblioitem };
+}
+
+
 1;

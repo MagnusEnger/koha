@@ -78,6 +78,8 @@ my @services = (
     #	Level 4: Robust/domain specific discovery platforms
     #	'SearchCourseReserves',              # TODO
     #	'Explain'                            # TODO
+    # Level 5: BLDS Specific
+    'GetBiblionumber',
 );
 
 # List of required arguments
@@ -94,7 +96,8 @@ my %required = (
     'RenewLoan'           => [ 'patron_id', 'item_id' ],
     'HoldTitle'           => [ 'patron_id', 'bib_id', 'request_location' ],
     'HoldItem'            => [ 'patron_id', 'bib_id', 'item_id' ],
-    'CancelHold' => [ 'patron_id', 'item_id' ],
+    'CancelHold' 	  => [ 'patron_id', 'item_id' ],
+    'GetBiblionumber' 	  => [ 'record_no'],
 );
 
 # List of optional arguments
@@ -112,6 +115,7 @@ my %optional = (
     'HoldTitle'  => [ 'pickup_location', 'needed_before_date', 'pickup_expiry_date' ],
     'HoldItem'   => [ 'pickup_location', 'needed_before_date', 'pickup_expiry_date' ],
     'CancelHold' => [],
+    'GetBiblionumber' => [],
 );
 
 # If no service is requested, display the online documentation
