@@ -1075,6 +1075,10 @@ sub getIndexes{
                     'withdrawn',
 
                     # subject related
+
+                    # ibex number
+                    'rn',
+                    'Ibex-number',
                   );
 
     return \@indexes;
