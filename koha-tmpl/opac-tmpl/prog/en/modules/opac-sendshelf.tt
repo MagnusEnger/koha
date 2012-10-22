@@ -1,11 +1,11 @@
 <SUBJECT>
-Your list : [% shelfname %]
+List of records from BLDS: [% shelfname %]
 <END_SUBJECT>
 
 <HEADER>
 Hi,
 
-[% firstname %] [% surname %], sent you from our online catalog, the virtual shelf called :  [% shelfname %].
+[% firstname %] [% surname %], sent you a list of items from the BLDS online catalogue:  [% shelfname %].
 
 Please note that the attached file is a MARC bibliographic records file
 which can be imported into personal bibliographic software like EndNote,
