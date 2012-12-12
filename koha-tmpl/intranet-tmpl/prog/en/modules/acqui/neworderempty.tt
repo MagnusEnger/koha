@@ -320,6 +320,15 @@ $(document).ready(function()
             [% END %]
         </ol>
     </fieldset>
+    
+    [% IF (biblionumber) %]
+    <fieldset class="rows">
+    	<legend>Reserve for patron</legend>
+    		<ol>
+    			<li><a href="/cgi-bin/koha/reserve/request.pl?biblionumber=[% biblionumber %]" target="_blank"><button type="button">Place a hold on this title</button></a></li>
+    		</ol>
+    </fieldset>
+    [% END %]
 
     [% IF ( suggestionid ) %]
         <fieldset class="rows">
