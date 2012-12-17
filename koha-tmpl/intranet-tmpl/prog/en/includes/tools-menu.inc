@@ -99,3 +99,4 @@
        <li><a href="/cgi-bin/koha/tools/quotes.pl">Quote editor</a></li>
     [% END %]
 </ul></div></div>
+
