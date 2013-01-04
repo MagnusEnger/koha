@@ -307,7 +307,7 @@
                 </xsl:if>
                 <xsl:text> </xsl:text>
                 <xsl:if test="marc:subfield[@code='b']">
-                <a href="/cgi-bin/koha/catalogue/search.pl?q=pb:{marc:subfield[@code='b']}">
+                <a href="/cgi-bin/koha/opac-search.pl?q=pb:{marc:subfield[@code='b']}">
                     <xsl:call-template name="subfieldSelect">
                         <xsl:with-param name="codes">b</xsl:with-param>
                     </xsl:call-template>
@@ -324,7 +324,7 @@
                     <xsl:choose><xsl:when test="position()=last()"><xsl:text></xsl:text></xsl:when><xsl:otherwise><xsl:text>; </xsl:text></xsl:otherwise></xsl:choose>
             </xsl:for-each>
         </span>
-        </xsl:if>
+        </xsl:if> 
 
         <!-- Edition Statement: Alternate Graphic Representation (MARC 880) -->
         <xsl:if test="$display880">
@@ -847,14 +847,14 @@
         </xsl:for-each>
         <xsl:if test="marc:subfield[@code='c'] or marc:subfield[@code='d'] or marc:subfield[@code='n']">
                 <xsl:call-template name="subfieldSelect">
-                    <xsl:with-param name="codes">cdn</xsl:with-param>
+                    <xsl:with-param name="codes">ndc</xsl:with-param>
                 </xsl:call-template>
         </xsl:if>
     </xsl:template>
 
     <xsl:template name="nameACDEQ">
             <xsl:call-template name="subfieldSelect">
-                <xsl:with-param name="codes">acdeq</xsl:with-param>
+                <xsl:with-param name="codes">andceq</xsl:with-param>
             </xsl:call-template>
     </xsl:template>
     <xsl:template name="termsOfAddress">
