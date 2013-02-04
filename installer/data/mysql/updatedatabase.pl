@@ -5288,6 +5288,68 @@ $DBversion = "3.08.07.000";
 if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
     print "Upgrade to $DBversion (3.8.7 release) done\n";
     SetVersion($DBversion);
+
+$DBversion = 'XXX';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("INSERT INTO `systempreferences` (variable,value,explanation,options,type) VALUES ('ILLModule','0','If ON, enables the Inter-Library Loan module','','YesNo')");
+	print "Upgrade to $DBversion done ( Add syspref ILLModule )\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = 'XXX';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("INSERT INTO `systempreferences` (variable,value,explanation,options,type) VALUES ('BookILLRequest','0','If ON, enables the requesting of books in the Inter-Library Loan module','','YesNo')");
+	print "Upgrade to $DBversion done ( Add syspref BookILLRequest )\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = 'XXX';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("INSERT INTO `systempreferences` (variable,value,explanation,options,type) VALUES ('JournalILLRequest','0','If ON, enables the requesting of journals in the Inter-Library Loan module','','YesNo')");
+	print "Upgrade to $DBversion done ( Add syspref JournalILLRequest )\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = 'XXX';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("INSERT INTO `systempreferences` (variable,value,explanation,options,type) VALUES ('ThesisILLRequest','0','If ON, enables the requesting of theses in the Inter-Library Loan module','','YesNo')");
+	print "Upgrade to $DBversion done ( Add syspref ThesisILLRequest )\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = 'XXX';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("INSERT INTO `systempreferences` (variable,value,explanation,options,type) VALUES ('OtherILLRequest','0','If ON, enables the requesting of generic items in the Inter-Library Loan module','','YesNo')");
+	print "Upgrade to $DBversion done ( Add syspref OtherILLRequest )\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = 'XXX';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("INSERT INTO `systempreferences` (variable,value,explanation,options,type) VALUES ('ILLRequestPrefix','ILLREQ-','Prefix for the ILL request ID','','free')");
+	print "Upgrade to $DBversion done ( Add syspref ILLRequestPrefix )\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = 'XXX';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("INSERT INTO `systempreferences` (variable,value,explanation,options,type) VALUES ('OpacILLRequests','0','If ON, allows patrons to view their ILL requests in the OPAC','','YesNo')");
+	print "Upgrade to $DBversion done ( Add syspref OpacILLRequests )\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = 'XXX';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("INSERT INTO `systempreferences` (variable,value,explanation,options,type) VALUES ('ILLEmailNotify','0','If ON, patrons receive an email notification of a placed request','','YesNo')");
+	print "Upgrade to $DBversion done ( Add syspref ILLEMailNotify )\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = 'XXX';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("INSERT INTO `permissions` (variable,value,explanation,options,type) VALUES ('ILLEmailNotify','0','If ON, patrons receive an email notification of a placed request','','YesNo')");
+	print "Upgrade to $DBversion done ( Add syspref ILLEMailNotify )\n";
+    SetVersion ($DBversion);
 }
 
 $DBversion = "3.08.08.000";
@@ -5296,6 +5358,61 @@ if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
     SetVersion($DBversion);
 }
 
+$DBversion = 'XXX';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("INSERT INTO `userflags` (bit,flag,flagdesc,defaulton) VALUES ('18','manageILL','Access ILL requests','0')");
+	print "Upgrade to $DBversion done ( Add userflag manageILL )\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = 'XXX';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("INSERT INTO `authorised_values` (category,authorised_value,lib) VALUES ('ILLTYPE','ILLBOOK','Book request')");
+	print "Upgrade to $DBversion done ( Add ILLTYPE: ILLBOOK authorised value )\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = 'XXX';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("INSERT INTO `authorised_values` (category,authorised_value,lib) VALUES ('ILLTYPE','ILLJOURNAL','Journal/Conference request')");
+	print "Upgrade to $DBversion done ( Add ILLTYPE: ILLJOURNAL authorised value )\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = 'XXX';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("INSERT INTO `authorised_values` (category,authorised_value,lib) VALUES ('ILLTYPE','ILLTHESIS','Thesis request')");
+	print "Upgrade to $DBversion done ( Add ILLTYPE: ILLTHESIS authorised value )\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = 'XXX';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("INSERT INTO `authorised_values` (category,authorised_value,lib) VALUES ('ILLTYPE','ILLOTHER','Other request')");
+	print "Upgrade to $DBversion done ( Add ILLTYPE: ILLOTHER authorised value )\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = 'XXX';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("INSERT INTO `authorised_values` (category,authorised_value,lib) VALUES ('ILLSTATUS','NEW','New request')");
+	print "Upgrade to $DBversion done ( Add ILLSTATUS: NEW authorised value )\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = 'XXX';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("CREATE TABLE `illrequest` (`requestid` int(11) unsigned NOT NULL auto_increment, `requestnumber` int(11) NOT NULL, `borrowernumber` int(11) NOT NULL, `biblionumber` int(11) default NULL, `status` varchar(50) NOT NULL default '', `date_placed` date default NULL, `reply_date` date default NULL, `modified_date` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, `completed_date` date default NULL, `request_type` varchar(50) NOT NULL default '', `orig_branch` varchar(50) default NULL, `service_branch` varchar(50) default NULL, `title` mediumtext, `author_editor` mediumtext, `journal_title` mediumtext, `publisher` mediumtext, `issn` mediumtext, `year` mediumtext, `season` mediumtext, `month` mediumtext, `day` mediumtext, `volume` mediumtext, `part` mediumtext, `issue` mediumtext,`special_issue` mediumtext, `article_title` mediumtext, `author_names` mediumtext, `pages` mediumtext, `notes` mediumtext, `conference_title` mediumtext, `conference_author` mediumtext, `conference_venue` mediumtext, `conference_date` mediumtext, `isbn` mediumtext, `edition` mediumtext, `chapter_title` mediumtext, `composer` mediumtext, `ismn` mediumtext, `university` mediumtext, `dissertation` mediumtext, `scale` mediumtext, `identifier` mediumtext, `shelfmark` mediumtext, PRIMARY KEY  (`requestid`), UNIQUE KEY `requestnumber` (`requestnumber`), KEY `borrowernumber` (`borrowernumber`), KEY `status` (`status`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+	print "Upgrade to $DBversion done ( Add illrequest table )\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = 'XXX';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    $dbh->do("ALTER TABLE `categories` ADD `illlimit` SMALLINT DEFAULT 0 AFTER `hidelostitems`");
+	print "Upgrade to $DBversion done ( Add ill limit column to categories table )\n";
+    SetVersion ($DBversion);
+}
 
 =head1 FUNCTIONS
 

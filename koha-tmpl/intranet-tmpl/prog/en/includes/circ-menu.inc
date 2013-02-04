@@ -74,6 +74,9 @@
     [% IF ( EnhancedMessagingPreferences ) %]
     [% END %]	
 	[% IF ( sentnotices ) %]<li class="active">[% ELSE %]<li>[% END %]<a href="/cgi-bin/koha/members/notices.pl?borrowernumber=[% borrowernumber %]">Notices</a></li>
+	[% IF ( ILLModule ) %]
+	[% IF ( ill ) %]<li class="active">[% ELSE %]<li>[% END %]<a href="/cgi-bin/koha/members/illrequests.pl?borrowernumber=[% borrowernumber %]">ILL Requests</a></li>
+	[% END %]
 </ul></div>
 [% END %]
 
