@@ -238,20 +238,6 @@ sub update_invoice_status {
 	$sth->execute('Processed',$invoicenumber,$message_id);
 }
 
-sub get_ordernumber_from_supplier_ref {
-	my $supplierreference=shift;
-	my @result;
-	my $ordernumber;
-	my $dbh = C4::Context->dbh;
-	my $sth = $dbh->prepare('select ordernumber from aqorders where supplierreference=?');
-	$sth->execute($supplierreference);
-	while (@result = $sth->fetchrow_array())
-	{
-		$ordernumber=$result[0];
-	}
-	return $ordernumber;
-}
-
 sub record_activity {
 	my ($account_or_id,$last_activity) = @_;
 	$account_or_id or return;
@@ -271,11 +257,11 @@ sub record_activity {
 }
 
 sub update_item_order {
-	my ($ordernumber,$datereceived,$gstrate,$quantity,$unitprice,$invoiceid)=@_;
+	my ($supplier_ref,$datereceived,$gstrate,$quantity,$unitprice,$invoiceid)=@_;
 	my $dbh = C4::Context->dbh;
 	my $sth = $dbh->prepare('update aqorders set datereceived=?, gstrate=?, quantityreceived=?,
-		unitprice=?, invoiceid=? where ordernumber=?');
-	$sth->execute($datereceived,$gstrate,$quantity,$unitprice,$invoiceid,$ordernumber);
+		unitprice=?, invoiceid=? where supplierreference=?');
+	$sth->execute($datereceived,$gstrate,$quantity,$unitprice,$invoiceid,$supplier_ref);
 }
 
 sub process_invoices {
@@ -304,10 +290,9 @@ sub process_invoices {
 			
 			foreach my $item (@{$inv->{items}})
 			{
-				my $ordernumber=get_ordernumber_from_supplier_ref($item->{supplier_ref});
-				if ($ordernumber)
+				if ($item->{supplier_ref})
 				{
-					update_item_order($ordernumber,$item->{datereceived},$item->{gstrate},$item->{quantity},$item->{unit_price},$invoiceid);
+					update_item_order($item->{supplier_ref},$item->{datereceived},$item->{gstrate},$item->{quantity},$item->{unit_price},$invoiceid);
 				}
 			}
 			
