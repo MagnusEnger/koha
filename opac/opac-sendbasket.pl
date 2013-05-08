@@ -31,7 +31,6 @@ use C4::Biblio;
 use C4::Items;
 use C4::Auth;
 use C4::Output;
-use C4::Biblio;
 use C4::Members;
 
 my $query = new CGI;
@@ -81,7 +80,7 @@ if ( $email_add ) {
 
     my @bibs = split( /\//, $bib_list );
     my @results;
-    my $iso2709;
+    my $iso2709 = q{};
     my $marcflavour = C4::Context->preference('marcflavour');
     foreach my $biblionumber (@bibs) {
         $template2->param( biblionumber => $biblionumber );
@@ -104,10 +103,10 @@ if ( $email_add ) {
         $dat->{MARCSUBJCTS}    = $marcsubjctsarray;
         $dat->{MARCAUTHORS}    = $marcauthorsarray;
         $dat->{HASAUTHORS}     = $hasauthors;
-        $dat->{'biblionumber'} = $biblionumber;
+        $dat->{biblionumber} = $biblionumber;
         $dat->{ITEM_RESULTS}   = \@items;
 
-        $iso2709 .= $record->as_usmarc();
+        $iso2709 .= $record->as_formatted();
 
         push( @results, $dat );
     }
@@ -149,7 +148,7 @@ if ( $email_add ) {
     my $boundary = "====" . time() . "====";
 
     $mail{'content-type'} = "multipart/mixed; boundary=\"$boundary\"";
-    my $isofile = encode_base64(encode("UTF-8", $iso2709));
+#    my $isofile = encode_base64(encode("UTF-8", $iso2709));
     $boundary = '--' . $boundary;
     $mail{body} = <<END_OF_BODY;
 $boundary
@@ -160,11 +159,10 @@ Content-Transfer-Encoding: quoted-printable
 $email_header
 $body
 $boundary
-Content-Type: application/octet-stream; name="basket.iso2709"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="basket.iso2709"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 
-$isofile
+$iso2709
 $boundary--
 END_OF_BODY
 
