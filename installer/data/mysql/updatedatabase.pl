@@ -6125,6 +6125,13 @@ if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
 
 $DBversion = "XXX";
 if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+   $dbh->do("alter table vendor_edi_accounts modify column san varchar(20) default NULL");
+   print "Upgrade to $DBversion done (Update vendor_edi_accounts.san for legacy systems using EDI v1)\n";
+   SetVersion ($DBversion);
+}
+
+$DBversion = "XXX";
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
    $dbh->do("insert into permissions (module_bit, code, description) values (13, 'edi_manage', 'Manage EDIFACT transmissions')");
    print "Upgrade to $DBversion done (Added edi_manage permission)\n";
    SetVersion ($DBversion);
