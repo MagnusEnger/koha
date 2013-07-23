@@ -16,9 +16,6 @@
 
 <table>
     <tr>
-        <td colspan="2"><h3>[% libraryname %]</h3></td>
-    </tr>
-    <tr>
         <td colspan="2"><b>Title:</b> [% title |html %]<br />[% issue %]</td>
     </tr>
     <tr>
