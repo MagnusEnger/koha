@@ -124,6 +124,8 @@ my $memberloop = [];
 for my $routing (@routinglist) {
     my $member = GetMember( borrowernumber => $routing->{borrowernumber} );
     $member->{name}           = "$member->{firstname} $member->{surname}";
+    $member->{address}        = "$member->{address}";
+    $member->{address2}       = "$member->{address2}";
     push @{$memberloop}, $member;
 }
 
