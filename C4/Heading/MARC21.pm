@@ -94,6 +94,7 @@ my $bib_heading_fields = {
     '650' => { auth_type => 'TOPIC_TERM', subfields => 'abvxyz', subject => 1 },
     '651' => { auth_type => 'GEOGR_NAME', subfields => 'avxyz',  subject => 1 },
     '655' => { auth_type => 'GENRE/FORM', subfields => 'avxyz',  subject => 1 },
+    '690' => { auth_type => 'TOPIC_TERM', subfields => 'abvxyz', subject => 1 },
     '700' => { auth_type => 'PERSO_NAME', subfields => 'abcdfghjklmnopqrst' },
     '710' => { auth_type => 'CORPO_NAME', subfields => 'abcdfghklmnoprst' },
     '711' => { auth_type => 'MEETI_NAME', subfields => 'acdfghjklnpqst' },
