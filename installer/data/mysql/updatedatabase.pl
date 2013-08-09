@@ -8497,6 +8497,14 @@ if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
     SetVersion ($DBversion);
 }
 
+$DBversion = "3.17.00.XXX";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do("INSERT INTO `systempreferences` (variable,value,explanation,options,type) VALUES('OpacHighlightedStopWords','and|And|or|Or',NULL,'List of words to NOT highlight when OpacHitHighlight is enabled','free')"
+    );
+    print "Upgrade to $DBversion done (Bug 6149: Operator highlighted in search results)\n";
+    SetVersion($DBversion);
+}
+
 =head1 FUNCTIONS
 
 =head2 TableExists($table)
