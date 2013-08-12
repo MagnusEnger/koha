@@ -391,6 +391,12 @@ if ($indexes[0] && !$indexes[1]) {
 # an operand can be a single term, a phrase, or a complete ccl query
 my @operands = $cgi->param('q');
 @operands = map { uri_unescape($_) } @operands;
+for my $query_string ( @operands ) {
+    if ( $query_string !~/:/) {
+        $query_string=~s/-/ /g;
+    }
+}
+
 
 $template->{VARS}->{querystring} = join(' ', @operands);
 
@@ -451,9 +457,18 @@ my ($error,$query,$simple_query,$query_cgi,$query_desc,$limit,$limit_cgi,$limit_
 
 my @results;
 
-## I. BUILD THE QUERY
+## I. ^([^:=]*BUILD THE QUERY
 ( $error,$query,$simple_query,$query_cgi,$query_desc,$limit,$limit_cgi,$limit_desc,$stopwords_removed,$query_type) = buildQuery(\@operators,\@operands,\@indexes,\@limits,\@sort_by, 0, $lang);
-
+# also need to allow hyphens in search tokens such as "Control-number:1234"
+# so only change - to space if no = or :, otherwise after it
+if($query=~m{^([^:=]*[:=])(.*)$}){		# this was messing with constructs such as rcn:h21886 and (bib-level:a or bib-level:b)
+#	my $d1=$1;
+#	my $d2=$2;
+#	$d2=~s/-/ /g;
+#	$query=$d1 . $d2;
+} else {
+	$query =~s/-/ /g;			# FIXME: kludge to allow hyphenated words to be searched as word after hyphens was being ignored
+}
 sub _input_cgi_parse {
     my @elements;
     for my $this_cgi ( split('&',shift) ) {

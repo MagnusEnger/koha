@@ -413,6 +413,11 @@ if ($indexes[0] && (!$indexes[1] || $params->{'scan'})) {
 
 # an operand can be a single term, a phrase, or a complete ccl query
 my @operands = map uri_unescape($_), $cgi->param('q');
+for my $query_string ( @operands ) {
+    if ( $query_string !~/:/) {
+        $query_string=~s/-/ /g;
+    }
+}
 
 # limits are use to limit to results to a pre-defined category such as branch or language
 my @limits = map uri_unescape($_), $cgi->param('limit');
@@ -486,7 +491,16 @@ my @results;
 
 ## I. BUILD THE QUERY
 ( $error,$query,$simple_query,$query_cgi,$query_desc,$limit,$limit_cgi,$limit_desc,$stopwords_removed,$query_type) = buildQuery(\@operators,\@operands,\@indexes,\@limits,\@sort_by,$scan,$lang);
-
+# also need to allow hyphens in search tokens such as "Control-number:1234"
+# so only change - to space if no = or :, otherwise after it
+if($query=~m{^([^:=]*[:=])(.*)$}){		# this was breaking constructs like rcn:h21886 and (bib-level:a or bib-level:b)
+#        my $d1=$1;
+#        my $d2=$2;
+#        $d2=~s/-/ /g;
+#        $query=$d1 . $d2;
+} else {
+        $query =~s/-/ /g;                       # FIXME: kludge to allow hyphenated words to be searched as word after hyphens was being ignored
+}
 ## parse the query_cgi string and put it into a form suitable for <input>s
 my @query_inputs;
 my $scan_index_to_use;
