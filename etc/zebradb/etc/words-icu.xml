@@ -1,5 +1,5 @@
 <icu_chain locale="">
-  <transliterate rule="\'>\ "/>
+  <transliterate rule="\- > \ "/>
   <transliterate rule="[:Number:] { '-' > '' "/>
   <transform rule="[:Control:] Any-Remove"/>
   <tokenize rule="l"/>
