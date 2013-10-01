@@ -1,0 +1,5 @@
+#: opac-tmpl/prog/en/modules/sco/sco-main.tt:316
+#, c-format
+msgid "Please enter your card number:"
+msgstr "Bitte geben Sie Ihren Windows Usernamen ein:"
+
