@@ -1,0 +1,30 @@
+#: opac-tmpl/ccsr/en/includes/masthead.inc:29
+#: opac-tmpl/ccsr/en/includes/masthead.inc:30
+#, c-format
+msgid "Title phrase"
+msgstr "Titel, exakt"
+
+#: opac-tmpl/ccsr/en/includes/masthead.inc:33
+#: opac-tmpl/ccsr/en/includes/masthead.inc:34
+#, c-format
+msgid "Author phrase"
+msgstr "Verfasser, exakt"
+
+#: opac-tmpl/ccsr/en/includes/masthead.inc:37
+#: opac-tmpl/ccsr/en/includes/masthead.inc:38
+#, c-format
+msgid "Subject phrase"
+msgstr "Schlagwort, exakt"
+
+#: opac-tmpl/ccsr/en/includes/masthead.inc:43
+#: opac-tmpl/ccsr/en/includes/masthead.inc:44
+#, c-format
+msgid "Series phrase"
+msgstr "Reihe, exakt"
+
+#: opac-tmpl/ccsr/en/includes/masthead.inc:47
+#: opac-tmpl/ccsr/en/includes/masthead.inc:48
+#, c-format
+msgid "Journal Search"
+msgstr "Zeitschriftensuche"
+
