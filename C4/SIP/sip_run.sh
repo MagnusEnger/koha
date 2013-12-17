@@ -15,16 +15,17 @@
 #   sip_run.sh /path/to/SIPconfig.xml
 #   sip_run.sh ~/my_sip/SIPconfig.xml sip_out.log sip_err.log
 
-
-for x in HOME PERL5LIB KOHA_CONF ; do
-        echo $x=${!x}
-        if [ -z ${!x} ] ; then
-                echo ERROR: $x not defined;
-                exit 1;
-        fi;
-done;
-unset x;
-cd $PERL5LIB/C4/SIP;
+KOHABASE=/home/koha/kohaclone
+HOME=/home/koha
+#for x in HOME PERL5LIB KOHA_CONF ; do
+#        echo $x=${!x}
+#        if [ -z ${!x} ] ; then
+#                echo ERROR: $x not defined;
+#                exit 1;
+#        fi;
+#done;
+#unset x;
+cd $KOHABASE/C4/SIP;
 echo;
 echo Running from `pwd`;
 
