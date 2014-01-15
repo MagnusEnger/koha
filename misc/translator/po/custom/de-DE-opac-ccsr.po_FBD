@@ -28,3 +28,8 @@ msgstr "Reihe, exakt"
 msgid "Journal Search"
 msgstr "Zeitschriftensuche"
 
+#: opac-tmpl/ccsr/en/includes/masthead.inc:49
+#: opac-tmpl/ccsr/en/includes/masthead.inc:50
+#, c-format
+msgid "Description Search"
+msgstr "Medientypsuche"
