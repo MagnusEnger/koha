@@ -1,5 +1,9 @@
 #: opac-tmpl/prog/en/modules/sco/sco-main.tt:316
 #, c-format
-msgid "Please enter your card number:"
+msgid "Please scan your card number (London Office) or Network Login (Other offices):"
 msgstr "Bitte geben Sie Ihren Windows Usernamen ein:"
 
+#: opac-tmpl/prog/en/xslt/MARC21slim2OPACDetailfbd.xsl:415
+#, c-format
+msgid "Frequency: "
+msgstr "Erscheinungsweise: "
