@@ -22,7 +22,7 @@ use warnings;
 use CGI;
 use C4::Auth;
 use C4::Output;
-use C4::Edifact qw/GetEDIAccountDetails/;
+use C4::Edifact qw/GetEDIAccountDetails GetVendorList/;
 
 my $input = CGI->new();
 
@@ -36,7 +36,7 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
         debug           => ( $ENV{DEBUG} ) ? 1 : 0,
     }
 );
-my $vendorlist = C4::Edifact::GetVendorList;
+my $vendorlist = GetVendorList();
 
 my $op = $input->param('op');
 $template->param( op => $op );
@@ -47,10 +47,10 @@ if ( $op eq 'add' ) {
 if ( $op eq 'edit' ) {
     $template->param( opeditsubmit => 'editsubmit' );
     my $edi_details      = GetEDIAccountDetails( $input->param('id') );
-    my $selectedprovider = $edi_details->{'provider'};
-    foreach my $prov (@$vendorlist) {
+    my $selectedprovider = $edi_details->{provider};
+    foreach my $prov ( @{$vendorlist} ) {
         $prov->{selected} = 'selected'
-          if $prov->{'id'} == $selectedprovider;
+          if $prov->{id} == $selectedprovider;
     }
     $template->param(
         editid      => $edi_details->{id},

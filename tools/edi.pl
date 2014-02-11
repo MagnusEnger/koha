@@ -22,7 +22,7 @@ use warnings;
 use CGI;
 use C4::Auth;
 use C4::Output;
-use C4::Edifact;
+use C4::Edifact qw/GetEDIfactMessageList/;
 
 my $input = CGI->new();
 
@@ -37,7 +37,7 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     }
 );
 
-my $messagelist = C4::Edifact::GetEDIfactMessageList();
+my $messagelist = GetEDIfactMessageList();
 
 $template->param( messagelist => $messagelist );
 

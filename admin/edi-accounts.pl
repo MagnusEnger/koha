@@ -22,7 +22,7 @@ use warnings;
 use CGI;
 use C4::Auth;
 use C4::Output;
-use C4::Edifact qw/GetEDIAccounts/;
+use C4::Edifact qw/GetEDIAccounts CreateEDIDetails UpdateEDIDetails /;
 
 my $input = CGI->new();
 
@@ -69,4 +69,4 @@ if ( $op eq 'editsubmit' ) {
 my $ediaccounts = GetEDIAccounts();
 $template->param( ediaccounts => $ediaccounts );
 
-output_html_with_http_headers( $input, $cookie, $template->output);
+output_html_with_http_headers( $input, $cookie, $template->output );

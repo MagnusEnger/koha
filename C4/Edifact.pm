@@ -28,9 +28,8 @@ use C4::Items;
 use Business::ISBN;
 use parent qw(Exporter);
 
-our $VERSION = 0.01;
-our $debug   = $ENV{DEBUG} || 0;
-our @EXPORT  = qw(
+our $VERSION   = 0.02;
+our @EXPORT_OK = qw(
   GetVendorList
   DeleteEDIDetails
   CreateEDIDetails

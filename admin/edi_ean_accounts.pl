@@ -22,7 +22,7 @@ use warnings;
 use CGI;
 use C4::Auth;
 use C4::Output;
-use C4::Edifact qw/GetEDIfactEANs/;
+use C4::Edifact qw/GetEDIfactEANs delete_edi_ean create_edi_ean update_edi_ean/;
 
 my $input = CGI->new();
 
@@ -41,8 +41,8 @@ my $op = $input->param('op');
 $template->param( op => $op );
 
 if ( $op eq 'delsubmit' ) {
-    my $del = C4::Edifact::delete_edi_ean( $input->param('branchcode'),
-        $input->param('ean') );
+    my $del =
+      delete_edi_ean( $input->param('branchcode'), $input->param('ean') );
     $template->param( opdelsubmit => 1 );
 }
 
