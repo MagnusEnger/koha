@@ -45,23 +45,36 @@ if ( $op eq 'delsubmit' ) {
     $template->param( opdelsubmit => 1 );
 }
 
+#FIXME  $inputparm path is not used in Create or Update
 if ( $op eq 'addsubmit' ) {
     CreateEDIDetails(
-        $input->param('provider'), $input->param('description'),
-        $input->param('host'),     $input->param('user'),
-        $input->param('pass'),     $input->param('path'),
-        $input->param('in_dir'),   $input->param('san')
+        {
+            description => $input->param('description'),
+            host        => $input->param('host'),
+            user        => $input->param('user'),
+            pass        => $input->param('pass'),
+            provider    => $input->param('provider'),
+            path        => $input->param('path'),
+            in_dir      => $input->param('in_dir'),
+            san         => $input->param('san'),
+        }
     );
     $template->param( opaddsubmit => 1 );
 }
 
 if ( $op eq 'editsubmit' ) {
     UpdateEDIDetails(
-        $input->param('editid'), $input->param('description'),
-        $input->param('host'),   $input->param('user'),
-        $input->param('pass'),   $input->param('provider'),
-        $input->param('path'),   $input->param('in_dir'),
-        $input->param('san')
+        {
+            editid      => $input->param('editid'),
+            description => $input->param('description'),
+            host        => $input->param('host'),
+            user        => $input->param('user'),
+            pass        => $input->param('pass'),
+            provider    => $input->param('provider'),
+            path        => $input->param('path'),
+            in_dir      => $input->param('in_dir'),
+            san         => $input->param('san'),
+        }
     );
     $template->param( opeditsubmit => 1 );
 }

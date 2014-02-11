@@ -101,8 +101,8 @@ Inserts a new EDI vendor FTP account
 =cut
 
 sub CreateEDIDetails {
-    my ( $provider, $description, $host, $user, $pass, $in_dir, $san ) = @_;
-    if ($provider) {
+    my ($arg_ref) = @_;
+    if ( $arg_ref->{provider} ) {
         my $dbh = C4::Context->dbh;
         my $sql = <<'END_INSSQL';
 insert into vendor_edi_accounts
@@ -110,8 +110,12 @@ insert into vendor_edi_accounts
   values (?,?,?,?,?,?,?)
 END_INSSQL
         my $sth = $dbh->prepare($sql);
-        $sth->execute( $description, $host, $user, $pass, $provider, $in_dir,
-            $san );
+        $sth->execute(
+            $arg_ref->{description}, $arg_ref->{host},
+            $arg_ref->{user},        $arg_ref->{pass},
+            $arg_ref->{provider},    $arg_ref->{in_dir},
+            $arg_ref->{san}
+        );
     }
     return;
 }
@@ -123,17 +127,20 @@ Update a vendor's FTP account
 =cut
 
 sub UpdateEDIDetails {
-    my ( $editid, $description, $host, $user, $pass, $provider, $in_dir, $san )
-      = @_;
-    if ($editid) {
+    my ($arg_ref) = @_;
+    if ( $arg_ref->{editid} ) {
         my $dbh = C4::Context->dbh;
         my $sql = <<'END_UPDSQL';
 update vendor_edi_accounts set description=?, host=?,
 username=?, password=?, provider=?, in_dir=?, san=? where id=?
 END_UPDSQL
         my $sth = $dbh->prepare($sql);
-        $sth->execute( $description, $host, $user, $pass, $provider, $in_dir,
-            $san, $editid );
+        $sth->execute(
+            $arg_ref->{description}, $arg_ref->{host},
+            $arg_ref->{user},        $arg_ref->{pass},
+            $arg_ref->{provider},    $arg_ref->{in_dir},
+            $arg_ref->{san},         $arg_ref->{editid}
+        );
     }
     return;
 }
@@ -236,7 +243,7 @@ sub GetBranchList {
       select branches.branchname, branches.branchcode from branches
       order by branches.branchname asc
 END_SQL
-    my $sth = $dbh->prepare( $sql );
+    my $sth = $dbh->prepare($sql);
     $sth->execute();
     my $branches = $sth->fetchall_arrayref( {} );
     return $branches;
