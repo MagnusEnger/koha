@@ -129,10 +129,11 @@ $template->param( skip_confirm_reopen => 1) if $confirm_pref eq '2';
 #	my $edifile=CreateEDIOrder($basketno,$booksellerid);
 #	$template->param(edifile => $edifile);
 #}
-if ( $op eq 'edisend') {
-	my $edisend=SendEDIOrder($basketno,$booksellerid);
-	$template->param(edisend => $edisend);
-}
+# FIXME SendEDIOrder no longer exists
+#if ( $op eq 'edisend') {
+#	my $edisend=SendEDIOrder($basketno,$booksellerid);
+#	$template->param(edisend => $edisend);
+#}
 
 if ( $op eq 'delete_confirm' ) {
     my $basketno = $query->param('basketno');
