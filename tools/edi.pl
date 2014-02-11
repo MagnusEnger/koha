@@ -24,27 +24,21 @@ use C4::Auth;
 use C4::Output;
 use C4::Edifact;
 
-
-use vars qw($debug);
-
-BEGIN {
-	$debug = $ENV{DEBUG} || 0;
-}
-
 my $input = CGI->new();
 
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
-	{ template_name => "tools/edi.tmpl",
-		query => $input,
-		type => "intranet",
-		authnotrequired => 0,
-		flagsrequired => { borrowers => 1 },
-		debug => ($debug) ? 1 : 0,
-	}
+    {
+        template_name   => 'tools/edi.tmpl',
+        query           => $input,
+        type            => 'intranet',
+        authnotrequired => 0,
+        flagsrequired   => { borrowers => 1 },
+        debug           => ( $ENV{DEBUG} ) ? 1 : 0,
+    }
 );
 
 my $messagelist = C4::Edifact::GetEDIfactMessageList();
 
-$template->param(messagelist => $messagelist);
+$template->param( messagelist => $messagelist );
 
-output_html_with_http_headers $input, $cookie, $template->output;
+output_html_with_http_headers( $input, $cookie, $template->output );
