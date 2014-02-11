@@ -69,12 +69,13 @@ Returns a list of vendors from aqbooksellers to populate drop down select menu
 =cut
 
 sub GetVendorList {
-	my $dbh = C4::Context->dbh;
-	my $sth;
-	$sth = $dbh->prepare('select id, name from aqbooksellers order by name asc');
-	$sth->execute();
-	my $vendorlist = $sth->fetchall_arrayref( {} );
-	return $vendorlist;
+    my $dbh = C4::Context->dbh;
+    my $sth;
+    $sth =
+      $dbh->prepare('select id, name from aqbooksellers order by name asc');
+    $sth->execute();
+    my $vendorlist = $sth->fetchall_arrayref( {} );
+    return $vendorlist;
 }
 
 =head2 DeleteEDIDetails
@@ -84,14 +85,14 @@ Remove a vendor's FTP account
 =cut
 
 sub DeleteEDIDetails {
-	my $id = shift;
-	my $dbh = C4::Context->dbh;
-	my $sth;
-	if ($id) {
-		$sth=$dbh->prepare('delete from vendor_edi_accounts where id=?');
-		$sth->execute($id);
-	}
-	return;
+    my $id  = shift;
+    my $dbh = C4::Context->dbh;
+    my $sth;
+    if ($id) {
+        $sth = $dbh->prepare('delete from vendor_edi_accounts where id=?');
+        $sth->execute($id);
+    }
+    return;
 }
 
 =head2 CreateEDIDetails
@@ -101,16 +102,19 @@ Inserts a new EDI vendor FTP account
 =cut
 
 sub CreateEDIDetails {
-	my ( $provider, $description, $host, $user, $pass, $in_dir, $san ) = @_;
-	my $dbh = C4::Context->dbh;
-	my $sth;
-	if ($provider) {
-		$sth = $dbh->prepare('insert into vendor_edi_accounts
-			(description, host, username, password, provider, in_dir, san)
-			values (?,?,?,?,?,?,?)');
-		$sth->execute( $description, $host, $user, $pass, $provider, $in_dir, $san );
-	}
-	return;
+    my ( $provider, $description, $host, $user, $pass, $in_dir, $san ) = @_;
+    my $dbh = C4::Context->dbh;
+    my $sth;
+    if ($provider) {
+        $sth = $dbh->prepare(
+            'insert into vendor_edi_accounts
+            (description, host, username, password, provider, in_dir, san)
+            values (?,?,?,?,?,?,?)'
+        );
+        $sth->execute( $description, $host, $user, $pass, $provider, $in_dir,
+            $san );
+    }
+    return;
 }
 
 =head2 UpdateEDIDetails
@@ -120,15 +124,19 @@ Update a vendor's FTP account
 =cut
 
 sub UpdateEDIDetails {
-	my ($editid, $description, $host, $user, $pass, $provider, $in_dir, $san) = @_;
-	my $dbh = C4::Context->dbh;
-	my $sth;
-	if ($editid) {
-		$sth=$dbh->prepare('update vendor_edi_accounts set description=?, host=?,
-			username=?, password=?, provider=?, in_dir=?, san=? where id=?');
-		$sth->execute($description, $host, $user, $pass, $provider, $in_dir, $san, $editid);
-	}
-	return;
+    my ( $editid, $description, $host, $user, $pass, $provider, $in_dir, $san )
+      = @_;
+    my $dbh = C4::Context->dbh;
+    my $sth;
+    if ($editid) {
+        $sth = $dbh->prepare(
+            'update vendor_edi_accounts set description=?, host=?,
+            username=?, password=?, provider=?, in_dir=?, san=? where id=?'
+        );
+        $sth->execute( $description, $host, $user, $pass, $provider, $in_dir,
+            $san, $editid );
+    }
+    return;
 }
 
 =head2 GetEDIAccounts
@@ -138,16 +146,18 @@ Returns all vendor FTP accounts
 =cut
 
 sub GetEDIAccounts {
-	my $dbh = C4::Context->dbh;
-	my $sth;
-	$sth=$dbh->prepare('select vendor_edi_accounts.id, aqbooksellers.id as providerid,
-		aqbooksellers.name as vendor, vendor_edi_accounts.description,
-		vendor_edi_accounts.last_activity from vendor_edi_accounts inner join
-		aqbooksellers on vendor_edi_accounts.provider = aqbooksellers.id
-		order by aqbooksellers.name asc');
-	$sth->execute();
-	my $ediaccounts = $sth->fetchall_arrayref( {} );
-	return $ediaccounts;
+    my $dbh = C4::Context->dbh;
+    my $sth;
+    $sth = $dbh->prepare(
+        'select vendor_edi_accounts.id, aqbooksellers.id as providerid,
+        aqbooksellers.name as vendor, vendor_edi_accounts.description,
+        vendor_edi_accounts.last_activity from vendor_edi_accounts inner join
+        aqbooksellers on vendor_edi_accounts.provider = aqbooksellers.id
+        order by aqbooksellers.name asc'
+    );
+    $sth->execute();
+    my $ediaccounts = $sth->fetchall_arrayref( {} );
+    return $ediaccounts;
 }
 
 =head2 GetEDIAccountDetails
@@ -157,16 +167,16 @@ Returns FTP account details for a given vendor
 =cut
 
 sub GetEDIAccountDetails {
-	my $id=shift;
-	my $dbh = C4::Context->dbh;
-	my $sth;
-	if ($id) {
-		$sth=$dbh->prepare('select * from vendor_edi_accounts where id=?');
-		$sth->execute($id);
-		my $edi_details = $sth->fetchrow_hashref;
-		return $edi_details;
-	}
-	return;
+    my $id  = shift;
+    my $dbh = C4::Context->dbh;
+    my $sth;
+    if ($id) {
+        $sth = $dbh->prepare('select * from vendor_edi_accounts where id=?');
+        $sth->execute($id);
+        my $edi_details = $sth->fetchrow_hashref;
+        return $edi_details;
+    }
+    return;
 }
 
 =head2 GetEDIfactMessageList
@@ -176,79 +186,88 @@ Returns a list of edifact_messages that have been processed, including the type 
 =cut
 
 sub GetEDIfactMessageList {
-	my $dbh = C4::Context->dbh;
-	my $sth;
-	$sth=$dbh->prepare('select edifact_messages.key, edifact_messages.message_type,
-		DATE_FORMAT(edifact_messages.date_sent,"%d/%m/%Y") as date_sent,
-		aqbooksellers.id as providerid, aqbooksellers.name as providername,
-		edifact_messages.status, edifact_messages.basketno, edifact_messages.invoicenumber from edifact_messages
-		inner join aqbooksellers on edifact_messages.provider = aqbooksellers.id
-		order by edifact_messages.date_sent desc, edifact_messages.key desc');
-	$sth->execute();
-	my $messagelist = $sth->fetchall_arrayref( {} );
-	return $messagelist;
+    my $dbh = C4::Context->dbh;
+    my $sth;
+    $sth = $dbh->prepare(
+        'select edifact_messages.key, edifact_messages.message_type,
+        DATE_FORMAT(edifact_messages.date_sent,"%d/%m/%Y") as date_sent,
+        aqbooksellers.id as providerid, aqbooksellers.name as providername,
+        edifact_messages.status, edifact_messages.basketno, edifact_messages.invoicenumber from edifact_messages
+        inner join aqbooksellers on edifact_messages.provider = aqbooksellers.id
+        order by edifact_messages.date_sent desc, edifact_messages.key desc'
+    );
+    $sth->execute();
+    my $messagelist = $sth->fetchall_arrayref( {} );
+    return $messagelist;
 }
 
 sub CheckVendorFTPAccountExists {
-	my $booksellerid=shift;
-	my $dbh = C4::Context->dbh;
-	my $sth;
-	my @rows;
-	my $cnt;
-	$sth = $dbh->prepare('select count(id) from vendor_edi_accounts where provider=?');
-	$sth->execute($booksellerid);
-	if ($sth->rows==0)
-	{
-		return undef;
-	}
-	else
-	{
-		return 1;
-	}
+    my $booksellerid = shift;
+    my $dbh          = C4::Context->dbh;
+    my $sth;
+    my @rows;
+    my $cnt;
+    $sth = $dbh->prepare(
+        'select count(id) from vendor_edi_accounts where provider=?');
+    $sth->execute($booksellerid);
+    if ( $sth->rows == 0 ) {
+        return;
+    }
+    else {
+        return 1;
+    }
 }
 
 sub GetEDIfactEANs {
-	my $dbh = C4::Context->dbh;
-	my $sth = $dbh->prepare('select branches.branchname, edifact_ean.ean, edifact_ean.branchcode from
-		branches inner join edifact_ean on edifact_ean.branchcode=branches.branchcode
-		order by branches.branchname asc');
-	$sth->execute();
-	my $eans = $sth->fetchall_arrayref( {} );
-	return $eans;
+    my $dbh = C4::Context->dbh;
+    my $sth = $dbh->prepare(
+'select branches.branchname, edifact_ean.ean, edifact_ean.branchcode from
+        branches inner join edifact_ean on edifact_ean.branchcode=branches.branchcode
+        order by branches.branchname asc'
+    );
+    $sth->execute();
+    my $eans = $sth->fetchall_arrayref( {} );
+    return $eans;
 }
 
 sub GetBranchList {
-	my $dbh = C4::Context->dbh;
-	my $sth = $dbh->prepare('select branches.branchname, branches.branchcode from branches
-		order by branches.branchname asc');
-	$sth->execute();
-	my $branches = $sth->fetchall_arrayref( {} );
-	return $branches;
+    my $dbh = C4::Context->dbh;
+    my $sth = $dbh->prepare(
+        'select branches.branchname, branches.branchcode from branches
+        order by branches.branchname asc'
+    );
+    $sth->execute();
+    my $branches = $sth->fetchall_arrayref( {} );
+    return $branches;
 }
 
 sub delete_edi_ean {
-	my ($branchcode,$ean) = @_;
-	my $dbh = C4::Context->dbh;
-	my $sth=$dbh->prepare('delete from edifact_ean where branchcode=? and ean=?');
-	$sth->execute($branchcode,$ean);
-	return;
+    my ( $branchcode, $ean ) = @_;
+    my $dbh = C4::Context->dbh;
+    my $sth =
+      $dbh->prepare('delete from edifact_ean where branchcode=? and ean=?');
+    $sth->execute( $branchcode, $ean );
+    return;
 }
 
 sub create_edi_ean {
-	my ($branchcode,$ean) = @_;
-	my $dbh = C4::Context->dbh;
-	my $sth = $dbh->prepare('insert into edifact_ean (branchcode,ean) values (?,?)');
-	$sth->execute($branchcode,$ean);
-	return;
+    my ( $branchcode, $ean ) = @_;
+    my $dbh = C4::Context->dbh;
+    my $sth =
+      $dbh->prepare('insert into edifact_ean (branchcode,ean) values (?,?)');
+    $sth->execute( $branchcode, $ean );
+    return;
 }
 
 sub update_edi_ean {
-	my ($branchcode,$ean,$oldbranchcode,$oldean) = @_;
-	my $dbh = C4::Context->dbh;
-	my $sth=$dbh->prepare('update edifact_ean set branchcode=?, ean=? where
-		branchcode=? and ean=?');
-	$sth->execute($branchcode,$ean,$oldbranchcode,$oldean);
-	return;
+    my ( $branchcode, $ean, $oldbranchcode, $oldean ) = @_;
+    my $dbh = C4::Context->dbh;
+    my $sth = $dbh->prepare(
+        'update edifact_ean set branchcode=?, ean=? where
+branchcode=? and ean=?'
+    );
+    $sth->execute( $branchcode, $ean, $oldbranchcode, $oldean );
+    return;
 }
 
 1;
