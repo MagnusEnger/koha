@@ -22,55 +22,51 @@ use warnings;
 use CGI;
 use C4::Auth;
 use C4::Output;
-use C4::Edifact;
-
-use vars qw($debug);
-
-BEGIN {
-	$debug = $ENV{DEBUG} || 0;
-}
+use C4::Edifact qw/GetEDIAccounts/;
 
 my $input = CGI->new();
 
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
-	{ template_name => "admin/edi-accounts.tmpl",
-		query => $input,
-		type => "intranet",
-		authnotrequired => 0,
-		flagsrequired => { borrowers => 1 },
-		debug => ($debug) ? 1 : 0,
-	}
+    {
+        template_name   => 'admin/edi-accounts.tmpl',
+        query           => $input,
+        type            => 'intranet',
+        authnotrequired => 0,
+        flagsrequired   => { borrowers => 1 },
+        debug           => ( $ENV{DEBUG} ) ? 1 : 0,
+    }
 );
 
-my $op=$input->param('op');
-$template->param(op => $op);
+my $op = $input->param('op');
+$template->param( op => $op );
 
-if ($op eq "delsubmit") {
-	my $del = C4::Edifact::DeleteEDIDetails($input->param('id'));
-	$template->param(opdelsubmit => 1);
+if ( $op eq 'delsubmit' ) {
+    my $del = C4::Edifact::DeleteEDIDetails( $input->param('id') );
+    $template->param( opdelsubmit => 1 );
 }
 
-if ( $op eq "addsubmit" ) {
+if ( $op eq 'addsubmit' ) {
     CreateEDIDetails(
         $input->param('provider'), $input->param('description'),
-        $input->param('host'), $input->param('user'),
-        $input->param('pass'), $input->param('path'),
-        $input->param('in_dir'), $input->param('san')
+        $input->param('host'),     $input->param('user'),
+        $input->param('pass'),     $input->param('path'),
+        $input->param('in_dir'),   $input->param('san')
     );
-    $template->param(opaddsubmit => 1);
+    $template->param( opaddsubmit => 1 );
 }
 
-if ($op eq "editsubmit" ) {
-	UpdateEDIDetails( $input->param('editid'), $input->param('description'),
-		$input->param('host'), $input->param('user'),
-		$input->param('pass'), $input->param('provider'),
-		$input->param('path'), $input->param('in_dir'),
-		$input->param('san')
-	);
-	$template->param(opeditsubmit => 1);
+if ( $op eq 'editsubmit' ) {
+    UpdateEDIDetails(
+        $input->param('editid'), $input->param('description'),
+        $input->param('host'),   $input->param('user'),
+        $input->param('pass'),   $input->param('provider'),
+        $input->param('path'),   $input->param('in_dir'),
+        $input->param('san')
+    );
+    $template->param( opeditsubmit => 1 );
 }
 
-my $ediaccounts = C4::Edifact::GetEDIAccounts;
-$template->param(ediaccounts => $ediaccounts);
+my $ediaccounts = GetEDIAccounts();
+$template->param( ediaccounts => $ediaccounts );
 
-output_html_with_http_headers $input, $cookie, $template->output;
+output_html_with_http_headers( $input, $cookie, $template->output);

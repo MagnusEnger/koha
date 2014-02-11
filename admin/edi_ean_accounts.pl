@@ -22,49 +22,44 @@ use warnings;
 use CGI;
 use C4::Auth;
 use C4::Output;
-use C4::Edifact;
-
-use vars qw($debug);
-
-BEGIN {
-	$debug = $ENV{DEBUG} || 0;
-}
+use C4::Edifact qw/GetEDIfactEANs/;
 
 my $input = CGI->new();
 
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
-	{ template_name => "admin/edi_ean_accounts.tt",
-		query => $input,
-		type => "intranet",
-		authnotrequired => 0,
-		flagsrequired => { borrowers => 1 },
-		debug => ($debug) ? 1 : 0,
-	}
+    {
+        template_name   => 'admin/edi_ean_accounts.tt',
+        query           => $input,
+        type            => 'intranet',
+        authnotrequired => 0,
+        flagsrequired   => { borrowers => 1 },
+        debug           => ( $ENV{DEBUG} ) ? 1 : 0,
+    }
 );
 
-my $op=$input->param('op');
-$template->param(op => $op);
+my $op = $input->param('op');
+$template->param( op => $op );
 
-if ($op eq "delsubmit") {
-	my $del = C4::Edifact::delete_edi_ean($input->param('branchcode'),$input->param('ean'));
-	$template->param(opdelsubmit => 1);
+if ( $op eq 'delsubmit' ) {
+    my $del = C4::Edifact::delete_edi_ean( $input->param('branchcode'),
+        $input->param('ean') );
+    $template->param( opdelsubmit => 1 );
 }
 
-if ( $op eq "addsubmit" ) {
-    create_edi_ean(
-        $input->param('branchcode'),$input->param('ean')
+if ( $op eq 'addsubmit' ) {
+    create_edi_ean( $input->param('branchcode'), $input->param('ean') );
+    $template->param( opaddsubmit => 1 );
+}
+
+if ( $op eq 'editsubmit' ) {
+    update_edi_ean(
+        $input->param('branchcode'),    $input->param('ean'),
+        $input->param('oldbranchcode'), $input->param('oldean')
     );
-    $template->param(opaddsubmit => 1);
+    $template->param( opeditsubmit => 1 );
 }
 
-if ($op eq "editsubmit" ) {
-	update_edi_ean(
-		$input->param('branchcode'),$input->param('ean'),$input->param('oldbranchcode'),$input->param('oldean')
-	);
-	$template->param(opeditsubmit => 1);
-}
+my $eans = GetEDIfactEANs();
+$template->param( eans => $eans );
 
-my $eans = C4::Edifact::GetEDIfactEANs;
-$template->param(eans => $eans);
-
-output_html_with_http_headers $input, $cookie, $template->output;
+output_html_with_http_headers( $input, $cookie, $template->output );
