@@ -2,22 +2,23 @@
 
 use strict;
 use warnings;
+use C4::Context;
 
-my $edidir="$ENV{'PERL5LIB'}/misc/edi_files/";	# koha
+my $idir   = C4::Context->config('intranetdir');
+my $edidir = "$idir/misc/edi_files/";              # koha
+
 #my $edidir="/tmp/";								# evergreen
 
-my @logfiles=('$edidir/edi_ftp.log','$edidir/edi_quote_error.log');
-my $rotate_size=10485760;	# 10MB
+my @logfiles = ( '$edidir/edi_ftp.log', '$edidir/edi_quote_error.log' );
+my $rotate_size = 10485760;                        # 10MB
 
-my ($sec,$min,$hour,$mday,$mon,$year) = localtime(time);
-my $currdate=sprintf "%4d%02d%02d",$year+1900,$mon+1,$mday;
+my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime(time);
+my $currdate = sprintf "%4d%02d%02d", $year + 1900, $mon + 1, $mday;
 
-foreach my $file (@logfiles)
-{
-	my $current_size= -s $file;
-	print "$current_size\n";
-	if ($current_size>$rotate_size)
-	{
-		rename($file,$file.".".$currdate);
-	}
+foreach my $file (@logfiles) {
+    my $current_size = -s $file;
+    print "$current_size\n";
+    if ( $current_size > $rotate_size ) {
+        rename $file, $file . "." . $currdate;
+    }
 }
