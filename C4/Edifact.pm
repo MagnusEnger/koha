@@ -205,8 +205,6 @@ sub CheckVendorFTPAccountExists {
     my $booksellerid = shift;
     my $dbh          = C4::Context->dbh;
     my $sth;
-    my @rows;
-    my $cnt;
     $sth = $dbh->prepare(
         'select count(id) from vendor_edi_accounts where provider=?');
     $sth->execute($booksellerid);
