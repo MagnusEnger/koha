@@ -24,33 +24,33 @@ use C4::Auth;
 use C4::Koha;
 use C4::Output;
 use CGI;
-use C4::Edifact;
+use C4::Edifact qw/GetEDIfactEANs/;
 
-my $eans=GetEDIfactEANs();
-my $total_eans=scalar(@{$eans});
-my $query        = new CGI;
-my $basketno     = $query->param('basketno');
+my $eans       = GetEDIfactEANs();
+my $total_eans = @{$eans};
+my $query      = CGI->new();
+my $basketno   = $query->param('basketno');
 my $ean;
 
-if ($total_eans==1)
-{
-	$ean=@{$eans}[0]->{'ean'};
-	print $query->redirect("/cgi-bin/koha/acqui/basket.pl?basketno=$basketno&op=ediorder&ean=$ean");
+if ( $total_eans == 1 ) {
+    $ean = $eans->[0]->{ean};
+    print $query->redirect(
+        "/cgi-bin/koha/acqui/basket.pl?basketno=$basketno&op=ediorder&ean=$ean"
+    );
 }
-else
-{
-	my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
-		{
-			template_name   => "acqui/edi_ean.tt",
-			query           => $query,
-			type            => "intranet",
-			authnotrequired => 0,
-			flagsrequired   => { acquisition => 'order_manage' },
-			debug           => 1,
-		}
-	);
-	$template->param(eans=>$eans);
-	$template->param(basketno=>$basketno);
+else {
+    my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
+        {
+            template_name   => 'acqui/edi_ean.tt',
+            query           => $query,
+            type            => 'intranet',
+            authnotrequired => 0,
+            flagsrequired   => { acquisition => 'order_manage' },
+            debug           => 1,
+        }
+    );
+    $template->param( eans     => $eans );
+    $template->param( basketno => $basketno );
 
-	output_html_with_http_headers $query, $cookie, $template->output;
+    output_html_with_http_headers( $query, $cookie, $template->output );
 }
