@@ -36,7 +36,8 @@ use C4::Members qw/GetMember/;  #needed for permissions checking for changing ba
 use C4::Items;
 use C4::Suggestions;
 use Date::Calc qw/Add_Delta_Days/;
-use C4::Edifact;
+use C4::Edifact qw/ CheckVendorFTPAccountExists/;
+use Rebus::EDI;
 
 =head1 NAME
 
@@ -103,7 +104,10 @@ unless (CanUserManageBasket($loggedinuser, $basket, $userflags)) {
 # if no booksellerid in parameter, get it from basket
 # warn "=>".$basket->{booksellerid};
 
-$booksellerid = $basket->{booksellerid} unless $booksellerid;
+if (!$booksellerid) {
+    $booksellerid = $basket->{booksellerid};
+}
+
 my $ediaccount = CheckVendorFTPAccountExists($booksellerid);
 $template->param(ediaccount=>$ediaccount);
 my ($bookseller) = GetBookSellerFromId($booksellerid);
@@ -114,7 +118,6 @@ if (!defined $op) {
 }
 
 if ( $op eq 'ediorder') {
-	use Rebus::EDI;
 	my $edi=Rebus::EDI->new();
 	$edi->send_orders($basketno,$ean);
 	$template->param(edifile => 1);
