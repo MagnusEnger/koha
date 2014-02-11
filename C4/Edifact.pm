@@ -102,14 +102,14 @@ Inserts a new EDI vendor FTP account
 
 sub CreateEDIDetails {
     my ( $provider, $description, $host, $user, $pass, $in_dir, $san ) = @_;
-    my $dbh = C4::Context->dbh;
-    my $sth;
     if ($provider) {
-        $sth = $dbh->prepare(
-            'insert into vendor_edi_accounts
-            (description, host, username, password, provider, in_dir, san)
-            values (?,?,?,?,?,?,?)'
-        );
+        my $dbh = C4::Context->dbh;
+        my $sql = <<'END_INSSQL';
+insert into vendor_edi_accounts
+  (description, host, username, password, provider, in_dir, san)
+  values (?,?,?,?,?,?,?)
+END_INSSQL
+        my $sth = $dbh->prepare($sql);
         $sth->execute( $description, $host, $user, $pass, $provider, $in_dir,
             $san );
     }
@@ -125,13 +125,13 @@ Update a vendor's FTP account
 sub UpdateEDIDetails {
     my ( $editid, $description, $host, $user, $pass, $provider, $in_dir, $san )
       = @_;
-    my $dbh = C4::Context->dbh;
-    my $sth;
     if ($editid) {
-        $sth = $dbh->prepare(
-            'update vendor_edi_accounts set description=?, host=?,
-            username=?, password=?, provider=?, in_dir=?, san=? where id=?'
-        );
+        my $dbh = C4::Context->dbh;
+        my $sql = <<'END_UPDSQL';
+update vendor_edi_accounts set description=?, host=?,
+username=?, password=?, provider=?, in_dir=?, san=? where id=?
+END_UPDSQL
+        my $sth = $dbh->prepare($sql);
         $sth->execute( $description, $host, $user, $pass, $provider, $in_dir,
             $san, $editid );
     }
@@ -146,14 +146,14 @@ Returns all vendor FTP accounts
 
 sub GetEDIAccounts {
     my $dbh = C4::Context->dbh;
-    my $sth;
-    $sth = $dbh->prepare(
-        'select vendor_edi_accounts.id, aqbooksellers.id as providerid,
+    my $sql = <<'ENDACCSQL';
+        select vendor_edi_accounts.id, aqbooksellers.id as providerid,
         aqbooksellers.name as vendor, vendor_edi_accounts.description,
         vendor_edi_accounts.last_activity from vendor_edi_accounts inner join
         aqbooksellers on vendor_edi_accounts.provider = aqbooksellers.id
-        order by aqbooksellers.name asc'
-    );
+        order by aqbooksellers.name asc
+ENDACCSQL
+    my $sth = $dbh->prepare($sql);
     $sth->execute();
     my $ediaccounts = $sth->fetchall_arrayref( {} );
     return $ediaccounts;
@@ -185,16 +185,18 @@ Returns a list of edifact_messages that have been processed, including the type 
 =cut
 
 sub GetEDIfactMessageList {
+    my $sql = <<'ENDMSGSQL';
+    select edifact_messages.key, edifact_messages.message_type,
+    DATE_FORMAT(edifact_messages.date_sent,"%d/%m/%Y") as date_sent,
+    aqbooksellers.id as providerid, aqbooksellers.name as providername,
+    edifact_messages.status, edifact_messages.basketno,
+   :w
+ edifact_messages.invoicenumber from edifact_messages
+    inner join aqbooksellers on edifact_messages.provider = aqbooksellers.id
+    order by edifact_messages.date_sent desc, edifact_messages.key desc
+ENDMSGSQL
     my $dbh = C4::Context->dbh;
-    my $sth;
-    $sth = $dbh->prepare(
-        'select edifact_messages.key, edifact_messages.message_type,
-        DATE_FORMAT(edifact_messages.date_sent,"%d/%m/%Y") as date_sent,
-        aqbooksellers.id as providerid, aqbooksellers.name as providername,
-        edifact_messages.status, edifact_messages.basketno, edifact_messages.invoicenumber from edifact_messages
-        inner join aqbooksellers on edifact_messages.provider = aqbooksellers.id
-        order by edifact_messages.date_sent desc, edifact_messages.key desc'
-    );
+    my $sth = $dbh->prepare($sql);
     $sth->execute();
     my $messagelist = $sth->fetchall_arrayref( {} );
     return $messagelist;
@@ -217,11 +219,12 @@ sub CheckVendorFTPAccountExists {
 
 sub GetEDIfactEANs {
     my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare(
-'select branches.branchname, edifact_ean.ean, edifact_ean.branchcode from
-        branches inner join edifact_ean on edifact_ean.branchcode=branches.branchcode
-        order by branches.branchname asc'
-    );
+    my $sql = <<'ENDSEL';
+select branches.branchname, edifact_ean.ean, edifact_ean.branchcode from
+ branches inner join edifact_ean on edifact_ean.branchcode=branches.branchcode
+ order by branches.branchname asc'
+ENDSEL
+    my $sth = $dbh->prepare($sql);
     $sth->execute();
     my $eans = $sth->fetchall_arrayref( {} );
     return $eans;
@@ -229,10 +232,11 @@ sub GetEDIfactEANs {
 
 sub GetBranchList {
     my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare(
-        'select branches.branchname, branches.branchcode from branches
-        order by branches.branchname asc'
-    );
+    my $sql = <<'END_SQL';
+      select branches.branchname, branches.branchcode from branches
+      order by branches.branchname asc
+END_SQL
+    my $sth = $dbh->prepare( $sql );
     $sth->execute();
     my $branches = $sth->fetchall_arrayref( {} );
     return $branches;
@@ -260,8 +264,7 @@ sub update_edi_ean {
     my ( $branchcode, $ean, $oldbranchcode, $oldean ) = @_;
     my $dbh = C4::Context->dbh;
     my $sth = $dbh->prepare(
-        'update edifact_ean set branchcode=?, ean=? where
-branchcode=? and ean=?'
+'update edifact_ean set branchcode=?, ean=? where branchcode=? and ean=?'
     );
     $sth->execute( $branchcode, $ean, $oldbranchcode, $oldean );
     return;
