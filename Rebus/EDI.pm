@@ -4,6 +4,10 @@ package Rebus::EDI;
 
 use strict;
 use warnings;
+use Readonly;
+
+use Rebus::EDI::System::Koha;
+use Rebus::EDI::Vendor::Default;
 
 =head1 NAME
 
@@ -17,42 +21,42 @@ Version 0.01
 
 our $VERSION = '0.01';
 
-our @vendors = (
+Readonly my @vendors => (
     {
-        name   => "Bertrams",
-        san    => "0143731",
-        ean    => "",
-        module => "Default"
+        name   => 'Bertrams',
+        san    => '0143731',
+        ean    => '',
+        module => 'Default'
     },
     {
-        name   => "Bertrams",
-        san    => "5013546025078",
-        ean    => "",
-        module => "Default"
+        name   => 'Bertrams',
+        san    => '5013546025078',
+        ean    => '',
+        module => 'Default'
     },
     {
-        name   => "Dawsons",
-        san    => "",
-        ean    => "5013546027856",
-        module => "Default"
+        name   => 'Dawsons',
+        san    => '',
+        ean    => '5013546027856',
+        module => 'Default'
     },
     {
-        name   => "Coutts",
-        san    => "",
-        ean    => "5013546048686",
-        module => "Default"
+        name   => 'Coutts',
+        san    => '',
+        ean    => '5013546048686',
+        module => 'Default'
     },
     {
-        name   => "Tomlinsons",
-        san    => "",
-        ean    => "5033075063552",
-        module => "Default"
+        name   => 'Tomlinsons',
+        san    => '',
+        ean    => '5033075063552',
+        module => 'Default'
     },
     {
-        name   => "PTFS Europe",
-        san    => "",
-        ean    => "5011234567890",
-        module => "Default"
+        name   => 'PTFS Europe',
+        san    => '',
+        ean    => '5011234567890',
+        module => 'Default'
     },
 );
 
@@ -60,8 +64,7 @@ sub new {
     my $class  = shift;
     my $system = shift;
     my $self   = {};
-    $self->{system} = 'koha';
-    use Rebus::EDI::System::Koha;
+    $self->{system}     = 'koha';
     $self->{edi_system} = Rebus::EDI::System::Koha->new();
     bless $self, $class;
     return $self;
@@ -95,10 +98,12 @@ sub send_orders {
     my $order_details =
       $self->{edi_system}->retrieve_order_details( $orders, $ean );
     foreach my $order ( @{$order_details} ) {
-        my $module = $order->{module};
-        require "Rebus/EDI/Vendor/$module.pm";
-        $module = "Rebus::EDI::Vendor::$module";
-        import $module;
+
+        #        my $module = $order->{module};
+        #        require "Rebus/EDI/Vendor/$module.pm";
+        #        $module = "Rebus::EDI::Vendor::$module";
+        #        import $module;
+        my $module        = 'Rebus::EDI::Vendor::Default';
         my $vendor_module = $module->new();
         my $order_message = $vendor_module->create_order_message($order);
         my $order_file    = $self->{edi_system}
@@ -108,7 +113,6 @@ sub send_orders {
 
 sub string35escape {
     my $string = shift;
-    my $section;
     my $colon_string;
     my @sections;
     if ( length($string) > 35 ) {
@@ -117,8 +121,8 @@ sub string35escape {
         {
             push @sections, substr( $string, $counter, $chunk );
         }
-        foreach $section (@sections) {
-            $colon_string .= $section . ":";
+        foreach my $section (@sections) {
+            $colon_string .= "$section:";
         }
         chop($colon_string);
     }

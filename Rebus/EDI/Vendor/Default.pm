@@ -4,17 +4,18 @@ package Rebus::EDI::Vendor::Default;
 
 use strict;
 use warnings;
-
-use parent qw(Exporter);
-our @EXPORT = qw(
-  test
-);
+use Business::Edifact::Interchange;
+use DateTime;
+use Business::ISBN;
+use Net::FTP::File;
+use C4::Context;
+use Rebus::EDI;
+use Carp;
 
 ### Evergreen
 #our $edidir                =    "/tmp/";
 
 ### Koha
-our $edidir = "$ENV{'PERL5LIB'}/misc/edi_files/";
 
 =head1 NAME
 
@@ -31,17 +32,17 @@ our $VERSION = '0.01';
 sub new {
     my $class = shift;
     my $self  = {};
+    my $idir  = C4::Context->config('intranetdir');
+    $self->{edidir} = "$idir/misc/edi_files/";
     bless $self, $class;
     return $self;
 }
 
 sub parse_invoice {
     my ( $self, $invoice ) = @_;
-    use Business::Edifact::Interchange;
-    use DateTime;
-    my $edi = Business::Edifact::Interchange->new;
+    my $edi = Business::Edifact::Interchange->new();
     my @parsed_invoice;
-    $edi->parse_file( $edidir . $invoice->{filename} );
+    $edi->parse_file( $self->{edidir} . $invoice->{filename} );
     my $messages      = $edi->messages();
     my $message_count = @{$messages};
     my $count;
@@ -151,10 +152,9 @@ sub parse_invoice {
 
 sub parse_quote {
     my ( $self, $quote ) = @_;
-    use Business::Edifact::Interchange;
-    my $edi = Business::Edifact::Interchange->new;
+    my $edi = Business::Edifact::Interchange->new();
     my @parsed_quote;
-    $edi->parse_file( $edidir . $quote->{filename} );
+    $edi->parse_file( $self->{edidir} . $quote->{filename} );
     my $messages      = $edi->messages();
     my $message_count = @{$messages};
     my $count;
@@ -298,8 +298,6 @@ sub create_order_message {
 
     ### Lineitems
     foreach my $lineitem ( @{ $order->{lineitems} } ) {
-        use Rebus::EDI;
-        use Business::ISBN;
         $linecount++;
         my $note;
         my $isbn;
@@ -485,24 +483,18 @@ sub post_process_message_file {
 
     ### connect to vendor ftp account
     my $filename = substr( $remote_file, rindex( $remote_file, '/' ) + 1 );
-    use Net::FTP::File;
     my $ftp = Net::FTP->new( $ftp_account->{host}, Timeout => 10 )
-      or die "Couldn't connect";
+      or croak "Couldn't connect";
     $ftp->login( $ftp_account->{username}, $ftp_account->{password} )
-      or die "Couldn't log in";
-    $ftp->cwd( $ftp_account->{in_dir} ) or die "Couldn't change directory";
-
-    ### move file to another directory
-#my $new_dir='processed';
-#my $new_file=$new_dir."/".$filename;
-#$ftp->copy($filename, $new_file) or die "Couldn't move remote file to $new_file ";
-#$ftp->delete($filename);
-#$ftp->quit;
+      or croak "Couldn't log in";
+    $ftp->cwd( $ftp_account->{in_dir} ) or croak "Couldn't change directory";
 
     ### rename file
     $filename =~ s/$qext/$rext/g;
     $ftp->rename( $remote_file, $filename )
-      or die "Couldn't rename remote file";
+      or croak "Couldn't rename remote file";
+    $ftp->quit();
+    return;
 }
 
 1;

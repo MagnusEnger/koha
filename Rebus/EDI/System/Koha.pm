@@ -15,7 +15,17 @@ Version 0.01
 
 =cut
 
+use Rebus::EDI::Custom::Default;
+use Rebus::EDI::Vendor::Default;
+use Rebus::EDI;
+use Carp;
+use Business::ISBN;
+use Readonly;
+use Net::FTP;
 use C4::Context;
+use C4::Acquisition;
+use C4::Biblio;
+use C4::Items;
 
 our $VERSION = '0.01';
 
@@ -23,15 +33,13 @@ our $VERSION = '0.01';
 #our $edidir				=	"/tmp/";
 
 ### Koha
-our $edidir = "$ENV{'PERL5LIB'}/misc/edi_files/";
-
-our $ftplogfile        = "$edidir/edi_ftp.log";
-our $quoteerrorlogfile = "$edidir/edi_quote_error.log";
-our $edi_quote_user    = 0;
 
 sub new {
     my $class = shift;
     my $self  = {};
+    my $idir  = C4::Context->config('intranetdir');
+    $self->{edidir}     = "$idir/misc/edi_files/";
+    $self->{ftplogfile} = "$self->{edidir}/edi_ftp.log";
     bless $self, $class;
     return $self;
 }
@@ -51,6 +59,7 @@ sub retrieve_vendor_ftp_accounts {
     my $set = $sth->fetchall_arrayref( {} );
     my @accounts;
     my $new_account;
+
     foreach my $account (@$set) {
         $new_account = {
             account_id     => $account->{account_id},
@@ -69,6 +78,7 @@ sub retrieve_vendor_ftp_accounts {
 
 sub download_messages {
     my ( $self, $ftp_accounts, $message_type ) = @_;
+    Readonly my $edi_quote_user => 0;
     my $message_extension;
     if ( $message_type eq 'QUOTE' ) {
         $message_extension = ".ceq";
@@ -84,58 +94,57 @@ sub download_messages {
         print "account: " . $account->{vendor} . "\n";
 
         #get files
-        use Net::FTP;
         my $newerr;
-        my @ERRORS;
+        my @errors;
         my @files;
-        open( EDIFTPLOG, ">>$ftplogfile" )
-          or die "Could not open $ftplogfile\n";
+        open my $log_fh, '>>', $self->{ftplogfile}
+          or croak "Could not open $self->{ftplogfile} : $!";
         my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime(time);
-        printf EDIFTPLOG "\n\n%4d-%02d-%02d %02d:%02d:%02d\n-----\n",
+        printf $log_fh "\n\n%4d-%02d-%02d %02d:%02d:%02d\n-----\n",
           $year + 1900, $mon + 1, $mday, $hour, $min, $sec;
-        print EDIFTPLOG "Connecting to " . $account->{server} . "... ";
+        print $log_fh "Connecting to " . $account->{server} . "... ";
         my $ftp =
           Net::FTP->new( $account->{server}, Timeout => 10, Passive => 1 )
           or $newerr = 1;
-        push @ERRORS, "Can't ftp to " . $account->{server} . ": $!\n"
+        push @errors, "Can't ftp to " . $account->{server} . ": $!\n"
           if $newerr;
-        myerr(@ERRORS) if $newerr;
+        $self->myerr(@errors) if $newerr;
 
         if ( !$newerr ) {
             $newerr = 0;
-            print EDIFTPLOG "connected.\n";
+            print $log_fh "connected.\n";
 
             $ftp->login( $account->{ftpuser}, $account->{ftppass} )
               or $newerr = 1;
-            print EDIFTPLOG "Getting file list\n";
-            push @ERRORS, "Can't login to " . $account->{server} . ": $!\n"
+            print $log_fh "Getting file list\n";
+            push @errors, "Can't login to " . $account->{server} . ": $!\n"
               if $newerr;
             $ftp->quit if $newerr;
-            myerr(@ERRORS) if $newerr;
+            $self->myerr(@errors) if $newerr;
             if ( !$newerr ) {
-                print EDIFTPLOG "Logged in\n";
+                print $log_fh "Logged in\n";
                 $ftp->cwd( $account->{ftpdir} ) or $newerr = 1;
-                push @ERRORS,
+                push @errors,
                   "Can't cd in server " . $account->{server} . " $!\n"
                   if $newerr;
-                myerr(@ERRORS) if $newerr;
+                $self->myerr(@errors) if $newerr;
                 $ftp->quit if $newerr;
 
                 @files = $ftp->ls or $newerr = 1;
-                push @ERRORS,
+                push @errors,
                   "Can't get file list from server "
                   . $account->{server} . " $!\n"
                   if $newerr;
-                myerr(@ERRORS) if $newerr;
+                $self->myerr(@errors) if $newerr;
                 if ( !$newerr ) {
-                    print EDIFTPLOG "Got  file list\n";
+                    print $log_fh "Got  file list\n";
                     foreach (@files) {
                         my $filename = $_;
                         if ( ( index lc($filename), $message_extension ) > -1 )
                         {
                             my $description = sprintf "%s/%s",
                               $account->{server}, $filename;
-                            print EDIFTPLOG "Found file: $description - ";
+                            print $log_fh "Found file: $description - ";
 
                             # deduplicate vs. acct/filenames already in DB
                             my $hits = find_duplicate_messages(
@@ -144,25 +153,27 @@ sub download_messages {
 
                             my $match = 0;
                             if ( scalar(@$hits) ) {
-                                print EDIFTPLOG
+                                print $log_fh
                                   "File already retrieved. Skipping.\n";
                                 $match = 1;
                             }
                             if ( $match ne 1 ) {
-                                chdir "$edidir";
+                                chdir $self->{edidir};
                                 $ftp->get($filename) or $newerr = 1;
-                                push @ERRORS,
+                                push @errors,
                                   "Can't transfer file ($filename) from "
                                   . $account->{server} . " $!\n"
                                   if $newerr;
                                 $ftp->quit if $newerr;
-                                myerr(@ERRORS) if $newerr;
+                                $self->myerr(@errors) if $newerr;
                                 if ( !$newerr ) {
-                                    print EDIFTPLOG "File retrieved\n";
-                                    open FILE, "$edidir/$filename"
-                                      or die "Couldn't open file: $!\n";
-                                    my $message_content = join( "", <FILE> );
-                                    close FILE;
+                                    print $log_fh "File retrieved\n";
+                                    open my $fh, '<',
+                                      "$self->{edidir}/$filename"
+                                      or croak
+                                      "Couldn't open file: $filename $!";
+                                    my $message_content = join q{}, <$fh>;
+                                    close $fh;
                                     my $logged_message = LogMessage(
                                         $message_content,
                                         $account->{ftpdir} . "/" . $filename,
@@ -190,16 +201,18 @@ sub download_messages {
             $ftp->quit;
         }
         $newerr = 0;
+        close $log_fh;
     }
     return @local_files;
 }
 
 sub myerr {
-    my @ERRORS = shift;
-    open( EDIFTPLOG, ">>$ftplogfile" ) or die "Could not open $ftplogfile\n";
-    print EDIFTPLOG "Error: ";
-    print EDIFTPLOG @ERRORS;
-    close EDIFTPLOG;
+    my ( $self, @err ) = @_;
+    open my $fh, '>>', $self->{ftplogfile}
+      or croak "Could not open $self->{ftplogfile} : $!";
+    print $fh 'Error: ', @err;
+    close $fh;
+    return;
 }
 
 sub find_duplicate_messages {
@@ -305,6 +318,7 @@ sub record_activity {
     $sth->execute($account_or_id);
     my @result;
     my $provider;
+
     while ( @result = $sth->fetchrow_array() ) {
         $provider = $result[0];
     }
@@ -331,14 +345,11 @@ sub process_invoices {
     my ( $self, $invoices ) = @_;
     foreach my $invoice (@$invoices) {
         my $vendor_san = get_vendor_san( $invoice->{account_id} );
-        my $module     = get_vendor_module($vendor_san);
-        $module or return;
-        require "Rebus/EDI/Vendor/$module.pm";
-        $module = "Rebus::EDI::Vendor::$module";
-        import $module;
+
+        #my $module     = get_vendor_module($vendor_san);
+        my $module         = 'Rebus::EDI::Vendor::Default';
         my $vendor_module  = $module->new();
         my $parsed_invoice = $vendor_module->parse_invoice($invoice);
-        use C4::Acquisition;
 
         foreach my $inv ( @{$parsed_invoice} ) {
             my $invoiceid = AddInvoice(
@@ -377,14 +388,9 @@ sub process_quotes {
         my $vendor_san = get_vendor_san( $quote->{account_id} );
         my $module     = get_vendor_module($vendor_san);
         $module or return;
-        require "Rebus/EDI/Vendor/$module.pm";
-        $module = "Rebus::EDI::Vendor::$module";
-        import $module;
+        $module = "Rebus::EDI::Vendor::Default";
         my $vendor_module = $module->new();
         my @parsed_quote  = $vendor_module->parse_quote($quote);
-        use C4::Acquisition;
-        use C4::Biblio;
-        use C4::Items;
         my $order_id =
           NewBasket( $quote->{account_id}, 0, $quote->{filename}, '', '', '' );
 
@@ -407,7 +413,6 @@ sub process_quotes {
                     publisher => $item->{publisher},
                     year      => $item->{year},
                 };
-                use Rebus::EDI::Custom::Default;
                 my $local_transform = Rebus::EDI::Custom::Default->new();
                 my $koha_copy =
                   $local_transform->transform_local_quote_copy($quote_copy);
@@ -573,8 +578,7 @@ sub get_vendor_san {
 sub get_vendor_module {
     my $san = shift;
     my $module;
-    use Rebus::EDI;
-    my @vendor_list = Rebus::EDI::list_vendors();
+    my @vendor_list = Rebus::EDI->list_vendors();
     foreach my $vendor (@vendor_list) {
         if ( $san eq $vendor->{san} || $san eq $vendor->{ean} ) {
             $module = $vendor->{module};
@@ -603,8 +607,6 @@ sub check_order_item_exists {
         return $biblionumber, $bibitemnumber;
     }
     else {
-        use Rebus::EDI;
-        use Business::ISBN;
         my $edi = Rebus::EDI->new();
         $isbn = $edi->cleanisbn($isbn);
         if ( length($isbn) == 10 ) {
@@ -690,13 +692,13 @@ sub retrieve_order_details {
 
 sub create_order_file {
     my ( $self, $order_message, $order_id ) = @_;
-    my $filename = "$edidir/ediorder_$order_id.CEP";
-    open( EDIORDER, ">$filename" );
-    print EDIORDER $order_message;
-    close EDIORDER;
+    my $filename = "$self->{edidir}/ediorder_$order_id.CEP";
+    open my $fh, '>', $filename;
+    print $fh $order_message;
+    close $fh;
     my $vendor_ftp_account = get_vendor_ftp_account_by_order_id($order_id);
     my $sent_order =
-      send_order_message( $filename, $vendor_ftp_account, $order_message,
+      $self->send_order_message( $filename, $vendor_ftp_account, $order_message,
         $order_id );
     return $filename;
 }
@@ -727,64 +729,64 @@ sub get_vendor_ftp_account_by_order_id {
 }
 
 sub send_order_message {
-    my ( $filename, $ftpaccount, $order_message, $order_id ) = @_;
-    my @ERRORS;
+    my ( $self, $filename, $ftpaccount, $order_message, $order_id ) = @_;
+    my @errors;
     my $newerr;
     my $result;
 
-    open( EDIFTPLOG, ">>$ftplogfile" ) or die "Could not open $ftplogfile\n";
+    open my $log_fh, '>>', $self->{ftplogfile}
+      or croak "Could not open $self->{ftplogfile}: $!";
     my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime(time);
-    printf EDIFTPLOG "\n\n%4d-%02d-%02d %02d:%02d:%02d\n-----\n", $year + 1900,
+    printf $log_fh "\n\n%4d-%02d-%02d %02d:%02d:%02d\n-----\n", $year + 1900,
       $mon + 1, $mday, $hour, $min, $sec;
 
     # check edi order file exists
     if ( -e $filename ) {
-        use Net::FTP;
 
-        print EDIFTPLOG "Connecting to " . $ftpaccount->{host} . "... ";
+        print $log_fh "Connecting to ", $ftpaccount->{host}, "... ";
 
         # connect to ftp account
         my $ftp =
           Net::FTP->new( $ftpaccount->{host}, Timeout => 10, Passive => 1 )
           or $newerr = 1;
-        push @ERRORS, "Can't ftp to " . $ftpaccount->{host} . ": $!\n"
+        push @errors, "Can't ftp to " . $ftpaccount->{host} . ": $!\n"
           if $newerr;
-        myerr(@ERRORS) if $newerr;
+        $self->myerr(@errors) if $newerr;
         if ( !$newerr ) {
             $newerr = 0;
-            print EDIFTPLOG "connected.\n";
+            print $log_fh "connected.\n";
 
             # login
             $ftp->login( "$ftpaccount->{username}", "$ftpaccount->{password}" )
               or $newerr = 1;
             $ftp->quit if $newerr;
-            print EDIFTPLOG "Logging in...\n";
-            push @ERRORS, "Can't login to " . $ftpaccount->{host} . ": $!\n"
+            print $log_fh "Logging in...\n";
+            push @errors, "Can't login to " . $ftpaccount->{host} . ": $!\n"
               if $newerr;
-            myerr(@ERRORS) if $newerr;
+            $self->myerr(@errors) if $newerr;
             if ( !$newerr ) {
-                print EDIFTPLOG "Logged in\n";
+                print $log_fh "Logged in\n";
 
                 # cd to directory
                 $ftp->cwd("$ftpaccount->{path}") or $newerr = 1;
-                push @ERRORS,
+                push @errors,
                   "Can't cd in server " . $ftpaccount->{host} . " $!\n"
                   if $newerr;
-                myerr(@ERRORS) if $newerr;
+                $self->myerr(@errors) if $newerr;
                 $ftp->quit if $newerr;
 
                 # put file
                 if ( !$newerr ) {
                     $newerr = 0;
                     $ftp->put($filename) or $newerr = 1;
-                    push @ERRORS,
+                    push @errors,
                       "Can't write order file to server "
                       . $ftpaccount->{host} . " $!\n"
                       if $newerr;
-                    myerr(@ERRORS) if $newerr;
+                    $self->myerr(@errors) if $newerr;
                     $ftp->quit if $newerr;
                     if ( !$newerr ) {
-                        print EDIFTPLOG
+                        print $log_fh
                           "File: $filename transferred successfully\n";
                         $ftp->quit;
                         unlink($filename);
@@ -804,8 +806,10 @@ sub send_order_message {
         }
     }
     else {
-        print EDIFTPLOG "Order file $filename does not exist\n";
+        print $log_fh "Order file $filename does not exist\n";
     }
+    close $log_fh;
+    return;
 }
 
 sub log_order {
@@ -820,6 +824,7 @@ sub log_order {
     );
     $sth->execute( 'ORDER', $date_sent, $edi_account_id, 'Sent', $order_id,
         $content, $remote );
+    return;
 }
 
 sub quote_or_order {
@@ -842,13 +847,11 @@ sub quote_or_order {
 }
 
 sub get_order_lineitems {
-    my $order_id = shift;
-    use C4::Acquisition;
+    my $order_id  = shift;
     my @lineitems = GetOrders($order_id);
     my @fleshed_lineitems;
     foreach my $lineitem (@lineitems) {
-        use Rebus::EDI;
-        my $clean_isbn = Rebus::EDI::cleanisbn( $lineitem->{isbn} );
+        my $clean_isbn = Rebus::EDI->cleanisbn( $lineitem->{isbn} );
         my $fleshed_lineitem;
         $fleshed_lineitem->{binding}  = 'O';
         $fleshed_lineitem->{currency} = 'GBP';
@@ -917,6 +920,7 @@ sub get_lineitem_additional_info {
 		aqorders_items.itemnumber=items.itemnumber where aqorders_items.ordernumber=?"
     );
     $sth->execute($ordernumber);
+
     while ( @rows = $sth->fetchrow_array() ) {
         $homebranch = $rows[0];
         $callnumber = $rows[1];
