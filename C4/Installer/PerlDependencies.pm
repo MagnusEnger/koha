@@ -707,7 +707,7 @@ our $PERL_DEPS = {
     'Business::Edifact::Interchange' => {
         'usage'    => 'EDIFACT messaging',
         'required' => '0',
-        'min_ver'  => '0.4',
+        'min_ver'  => '0.07',
       },
     'Net::FTP::File' => {
         'usage'    => 'EDIFACT messaging',
