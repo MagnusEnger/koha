@@ -3,6 +3,8 @@
 use warnings;
 use strict;
 
+use Carp;
+use Net::FTP;
 use C4::Context;
 use Rebus::EDI;
 
@@ -20,7 +22,7 @@ my @bertrams_ftp_accounts = (
     },
 );
 
-# construct hash containing Bertrams FTP details (server, vendor, ftpuser, ftppass, ftpdir)
+# construct an array of hash_ref containing Bertrams FTP details (server, vendor, ftpuser, ftppass, ftpdir)
 
 # downloads files and returns an array of hashes containing each message details (filename, message_content, ftp_account)
 my @downloaded_messages = download_messages( \@bertrams_ftp_accounts );
@@ -71,13 +73,13 @@ sub split_messages {
         use Net::FTP::File;
         my $ftp = Net::FTP->new( $downloaded_message->{ftp_account}->{server},
             Timeout => 10 )
-          or die "Couldn't connect";
+          or croak "Couldn't connect";
         $ftp->login(
             $downloaded_message->{ftp_account}->{ftpuser},
             $downloaded_message->{ftp_account}->{ftppass}
-        ) or die "Couldn't log in";
+        ) or croak "Couldn't log in";
         $ftp->cwd( $downloaded_message->{ftp_account}->{ftpdir} )
-          or die "Couldn't change directory";
+          or croak "Couldn't change directory";
 
         ### rename file
         my $rext         = '.EEI';
@@ -85,88 +87,90 @@ sub split_messages {
         my $new_filename = $downloaded_message->{filename};
         $new_filename =~ s/$qext/$rext/g;
         $ftp->rename( $downloaded_message->{filename}, $new_filename )
-          or die "Couldn't rename remote file";
+          or croak "Couldn't rename remote file";
         print "Original message file renamed to prevent duplicate processing\n";
     }
 }
 
 sub create_new_message {
     my $message = shift;
-    open( NEWMESSAGE, ">>$edidir" . $message->{filename} )
-      or die "Could not open " . $message->{filename} . "\n";
-    print NEWMESSAGE $message->{una};
-    print NEWMESSAGE $message->{lineitems};
-    print NEWMESSAGE $message->{unz};
-    close NEWMESSAGE;
+    open my $fh, '>>', $edidir . $message->{filename}
+      or croak "Could not open $message->{filename}: $!";
+    print $fh $message->{una};
+    print $fh $message->{lineitems};
+    print $fh $message->{unz};
+    close $fh;
     print $edidir. $message->{filename} . " successfully created\n";
     send_new_message( $message->{filename}, $message->{ftp_account} );
+    return;
 }
 
 sub send_new_message {
     my ( $filename, $ftpaccount, $new_message ) = @_;
-    my @ERRORS;
+    my @errors;
     my $newerr;
     my $result;
 
-    open( EDIFTPLOG, ">>$ftplogfile" ) or die "Could not open $ftplogfile\n";
+    open my $log_fh, '>>', $ftplogfile
+      or croak "Could not open $ftplogfile: $!";
     my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime(time);
-    printf EDIFTPLOG "\n\n%4d-%02d-%02d %02d:%02d:%02d\n-----\n", $year + 1900,
+    printf $log_fh "\n\n%4d-%02d-%02d %02d:%02d:%02d\n-----\n", $year + 1900,
       $mon + 1, $mday, $hour, $min, $sec;
 
     # check edi message file exists
     if ( -e $edidir . $filename ) {
         use Net::FTP;
 
-        print EDIFTPLOG "Connecting to " . $ftpaccount->{server} . "... ";
+        print $log_fh "Connecting to " . $ftpaccount->{server} . "... ";
 
         # connect to ftp account
         my $ftp =
           Net::FTP->new( $ftpaccount->{server}, Timeout => 10, Passive => 1 )
           or $newerr = 1;
-        push @ERRORS, "Can't ftp to " . $ftpaccount->{server} . ": $!\n"
+        push @errors, "Can't ftp to " . $ftpaccount->{server} . ": $!\n"
           if $newerr;
-        myerr(@ERRORS) if $newerr;
+        myerr(@errors) if $newerr;
         if ( !$newerr ) {
             $newerr = 0;
-            print EDIFTPLOG "connected.\n";
+            print $log_fh "connected.\n";
 
             # login
             $ftp->login( "$ftpaccount->{ftpuser}", "$ftpaccount->{ftppass}" )
               or $newerr = 1;
             $ftp->quit if $newerr;
-            print EDIFTPLOG "Logging in...\n";
-            push @ERRORS, "Can't login to " . $ftpaccount->{server} . ": $!\n"
+            print $log_fh "Logging in...\n";
+            push @errors, "Can't login to " . $ftpaccount->{server} . ": $!\n"
               if $newerr;
-            myerr(@ERRORS) if $newerr;
+            myerr(@errors) if $newerr;
             if ( !$newerr ) {
-                print EDIFTPLOG "Logged in\n";
+                print $log_fh "Logged in\n";
 
                 # cd to directory
                 $ftp->cwd("$ftpaccount->{ftpdir}") or $newerr = 1;
-                push @ERRORS,
+                push @errors,
                   "Can't cd in server " . $ftpaccount->{server} . " $!\n"
                   if $newerr;
-                myerr(@ERRORS) if $newerr;
+                myerr(@errors) if $newerr;
                 $ftp->quit if $newerr;
 
                 # put file
                 if ( !$newerr ) {
                     $newerr = 0;
                     $ftp->put( $edidir . $filename ) or $newerr = 1;
-                    push @ERRORS,
+                    push @errors,
                       "Can't write message file to server "
                       . $ftpaccount->{server} . " $!\n"
                       if $newerr;
-                    myerr(@ERRORS) if $newerr;
+                    myerr(@errors) if $newerr;
                     $ftp->quit if $newerr;
                     if ( !$newerr ) {
-                        print EDIFTPLOG
+                        print $log_fh
                           "File: $edidir$filename transferred successfully\n";
                         print
                           "File: $edidir$filename transferred successfully\n";
                         $ftp->quit;
                         unlink( $edidir . $filename )
-                          or die
+                          or croak
                           "Could not delete local file: $edidir$filename\n";
                         print "Local file: $edidir$filename deleted\n";
                     }
@@ -175,87 +179,88 @@ sub send_new_message {
         }
     }
     else {
-        print EDIFTPLOG "Message file $edidir$filename does not exist\n";
+        print $log_fh "Message file $edidir$filename does not exist\n";
         print "Message file $edidir$filename does not exist\n";
     }
+    close $log_fh;
+    return;
 }
 
 sub download_messages {
     my ($ftp_accounts) = @_;
     my @local_files;
-    foreach my $account (@$ftp_accounts) {
+    foreach my $account ( @{$ftp_accounts} ) {
 
         #get vendor details
-        print "server: " . $account->{server} . "\n";
-        print "account: " . $account->{vendor} . "\n";
+        print "server: $account->{server}\n";
+        print "account: $account->{vendor}\n";
 
         #get files
-        use Net::FTP;
         my $newerr;
-        my @ERRORS;
+        my @errors;
         my @files;
-        open( EDIFTPLOG, ">>$ftplogfile" )
-          or die "Could not open $ftplogfile\n";
+        open my $edi_log_fh, '>>', $ftplogfile
+          or croak "Could not open $ftplogfile:$!";
         my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime(time);
-        printf EDIFTPLOG "\n\n%4d-%02d-%02d %02d:%02d:%02d\n-----\n",
+        printf $edi_log_fh "\n\n%4d-%02d-%02d %02d:%02d:%02d\n-----\n",
           $year + 1900, $mon + 1, $mday, $hour, $min, $sec;
-        print EDIFTPLOG "Connecting to " . $account->{server} . "... ";
+        print $edi_log_fh "Connecting to " . $account->{server} . "... ";
         my $ftp =
           Net::FTP->new( $account->{server}, Timeout => 10, Passive => 1 )
           or $newerr = 1;
-        push @ERRORS, "Can't ftp to " . $account->{server} . ": $!\n"
+        push @errors, "Can't ftp to " . $account->{server} . ": $!\n"
           if $newerr;
-        myerr(@ERRORS) if $newerr;
+        myerr(@errors) if $newerr;
 
         if ( !$newerr ) {
             $newerr = 0;
-            print EDIFTPLOG "connected.\n";
+            print $edi_log_fh "connected.\n";
 
             $ftp->login( $account->{ftpuser}, $account->{ftppass} )
               or $newerr = 1;
-            print EDIFTPLOG "Getting file list\n";
-            push @ERRORS, "Can't login to " . $account->{server} . ": $!\n"
+            print $edi_log_fh "Getting file list\n";
+            push @errors, "Can't login to " . $account->{server} . ": $!\n"
               if $newerr;
             $ftp->quit if $newerr;
-            myerr(@ERRORS) if $newerr;
+            myerr(@errors) if $newerr;
             if ( !$newerr ) {
-                print EDIFTPLOG "Logged in\n";
+                print $edi_log_fh "Logged in\n";
                 $ftp->cwd( $account->{ftpdir} ) or $newerr = 1;
-                push @ERRORS,
+                push @errors,
                   "Can't cd in server " . $account->{server} . " $!\n"
                   if $newerr;
-                myerr(@ERRORS) if $newerr;
+                myerr(@errors) if $newerr;
                 $ftp->quit if $newerr;
 
                 @files = $ftp->ls or $newerr = 1;
-                push @ERRORS,
+                push @errors,
                   "Can't get file list from server "
                   . $account->{server} . " $!\n"
                   if $newerr;
-                myerr(@ERRORS) if $newerr;
+                myerr(@errors) if $newerr;
                 if ( !$newerr ) {
-                    print EDIFTPLOG "Got  file list\n";
+                    print $edi_log_fh "Got  file list\n";
                     foreach (@files) {
                         my $filename = $_;
                         if ( ( index lc($filename), '.cei' ) > -1 ) {
                             my $description = sprintf "%s/%s",
                               $account->{server}, $filename;
-                            print EDIFTPLOG "Found file: $description - ";
+                            print $edi_log_fh "Found file: $description - ";
 
-                            chdir "$edidir";
+                            chdir $edidir;
                             $ftp->get($filename) or $newerr = 1;
-                            push @ERRORS,
+                            push @errors,
                               "Can't transfer file ($filename) from "
-                              . $account->{server} . " $!\n"
+                              . "$account->{server} $!\n"
                               if $newerr;
                             $ftp->quit if $newerr;
-                            myerr(@ERRORS) if $newerr;
+                            myerr(@errors) if $newerr;
                             if ( !$newerr ) {
-                                print EDIFTPLOG "File retrieved\n";
-                                open FILE, "$edidir/$filename"
-                                  or die "Couldn't open file: $!\n";
-                                my $message_content = join( "", <FILE> );
-                                close FILE;
+                                print $edi_log_fh "File retrieved\n";
+                                open my $f, '<', "$edidir/$filename"
+                                  or croak "Couldn't open file: $!\n";
+                                my $message_content = join '', <$f>;
+                                close $f;
                                 my $message_file = {
                                     filename        => $filename,
                                     message_content => $message_content,
@@ -270,15 +275,16 @@ sub download_messages {
 
             $ftp->quit;
         }
+        close $edi_log_fh;
         $newerr = 0;
     }
     return @local_files;
 }
 
 sub myerr {
-    my @ERRORS = shift;
-    open( EDIFTPLOG, ">>$ftplogfile" ) or die "Could not open $ftplogfile\n";
-    print EDIFTPLOG "Error: ";
-    print EDIFTPLOG @ERRORS;
-    close EDIFTPLOG;
+    my @errors = @_;
+    open my $fh, '>>', $ftplogfile or croak "Could not open $ftplogfile: $!";
+    print $fh "Error: ", @errors;
+    close $fh;
+    return;
 }
