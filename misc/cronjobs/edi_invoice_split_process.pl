@@ -5,6 +5,7 @@ use strict;
 
 use Carp;
 use Net::FTP;
+use Net::FTP::File;
 use C4::Context;
 use Rebus::EDI;
 
@@ -70,7 +71,6 @@ sub split_messages {
         }
 
         # rename original message file on remote server
-        use Net::FTP::File;
         my $ftp = Net::FTP->new( $downloaded_message->{ftp_account}->{server},
             Timeout => 10 )
           or croak "Couldn't connect";
