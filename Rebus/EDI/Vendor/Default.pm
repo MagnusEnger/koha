@@ -76,7 +76,7 @@ sub parse_invoice {
                 }
             }
             $shippingfund = Rebus::EDI::System::Koha::get_budget_id(
-                C4::Context->preference("EDIInvoicesShippingBudget") );
+                C4::Context->preference('EDIInvoicesShippingBudget') );
         }
 
         my $items = $messages->[$count]->items();
@@ -164,7 +164,7 @@ sub parse_quote {
 
         foreach my $item ( @{$items} ) {
             my $parsed_item = {
-                author => $item->author_surname . ", "
+                author => $item->author_surname . ', '
                   . $item->author_firstname,
                 title          => $item->title,
                 isbn           => $item->{item_number},
@@ -184,10 +184,10 @@ sub parse_quote {
                 my $shelfmark = $item->shelfmark;
                 my $ftxlin;
                 my $ftxlno;
-                if ( $item->{free_text}->{qualifier} eq "LIN" ) {
+                if ( $item->{free_text}->{qualifier} eq 'LIN' ) {
                     $ftxlin = $item->{free_text}->{text};
                 }
-                if ( $item->{free_text}->{qualifier} eq "LNO" ) {
+                if ( $item->{free_text}->{qualifier} eq 'LNO' ) {
                     $ftxlno = $item->{free_text}->{text};
                 }
                 my $note;
@@ -218,53 +218,52 @@ sub create_order_message {
     my ( $self, $order ) = @_;
     my @datetime  = localtime(time);
     my $longyear  = ( $datetime[5] + 1900 );
-    my $shortyear = sprintf "%02d", ( $datetime[5] - 100 );
-    my $date      = sprintf "%02d%02d", ( $datetime[4] + 1 ), $datetime[3];
-    my $hourmin   = sprintf "%02d%02d", $datetime[2], $datetime[1];
+    my $shortyear = sprintf '%02d', ( $datetime[5] - 100 );
+    my $date      = sprintf '%02d%02d', ( $datetime[4] + 1 ), $datetime[3];
+    my $hourmin   = sprintf '%02d%02d', $datetime[2], $datetime[1];
     my $year      = ( $datetime[5] - 100 );
-    my $month     = sprintf "%02d", ( $datetime[4] + 1 );
+    my $month     = sprintf '%02d', ( $datetime[4] + 1 );
     my $linecount = 0;
     my $segment   = 0;
     my $exchange  = int( rand(99999999999999) );
     my $ref       = int( rand(99999999999999) );
 
     ### opening header
-    my $order_message = "UNA:+.? '";
+    my $order_message = q{UNA:+.? '};
 
     ### Library SAN or EAN
-    $order_message .= "UNB+UNOC:2";
+    $order_message .= 'UNB+UNOC:2';
     if ( length( $order->{org_san} ) != 13 ) {
-        $order_message .= "+" . $order->{org_san} . ":31B";  # use SAN qualifier
+        $order_message .= q{+} . $order->{org_san} . ':31B'; # use SAN qualifier
     }
     else {
-        $order_message .= "+" . $order->{org_san} . ":14";   # use EAN qualifier
+        $order_message .= q{+} . $order->{org_san} . ':14';  # use EAN qualifier
     }
 
     ### Vendor SAN or EAN
     if ( length( $order->{san_or_ean} ) != 13 ) {
         $order_message .=
-          "+" . $order->{san_or_ean} . ":31B";               # use SAN qualifier
+          q{+} . $order->{san_or_ean} . ':31B';              # use SAN qualifier
     }
     else {
         $order_message .=
-          "+" . $order->{san_or_ean} . ":14";                # use EAN qualifier
+          q{+} . $order->{san_or_ean} . ':14';               # use EAN qualifier
     }
 
     ### date/time, exchange reference number
-    $order_message .=
-      "+$shortyear$date:$hourmin+" . $exchange . "++ORDERS+++EANCOM'";
+    $order_message .= "+$shortyear$date:$hourmin+$exchange++ORDERS+++EANCOM'";
 
     ### message reference number
-    $order_message .= "UNH+" . $ref . "+ORDERS:D:96A:UN:EAN008'";
+    $order_message .= "UNH+$ref+ORDERS:D:96A:UN:EAN008'";
     $segment++;
 
     ### Order number and quote confirmation reference (if in response to quote)
     if ( $order->{quote_or_order} eq 'q' ) {
-        $order_message .= "BGM+22V+" . $order->{order_id} . "+9'";
+        $order_message .= "BGM+22V+$order->{order_id}+9'";
         $segment++;
     }
     else {
-        $order_message .= "BGM+220+" . $order->{order_id} . "+9'";
+        $order_message .= "BGM+220+$order->{order_id}+9'";
         $segment++;
     }
 
@@ -274,26 +273,26 @@ sub create_order_message {
 
     ### Library Address Identifier (SAN or EAN)
     if ( length( $order->{org_san} ) != 13 ) {
-        $order_message .= "NAD+BY+" . $order->{org_san} . "::31B'";
+        $order_message .= "NAD+BY+$order->{org_san}::31B'";
         $segment++;
     }
     else {
-        $order_message .= "NAD+BY+" . $order->{org_san} . "::9'";
+        $order_message .= "NAD+BY+$order->{org_san}::9'";
         $segment++;
     }
 
     ### Vendor address identifier (SAN or EAN)
     if ( length( $order->{san_or_ean} ) != 13 ) {
-        $order_message .= "NAD+SU+" . $order->{san_or_ean} . "::31B'";
+        $order_message .= "NAD+SU+$order->{san_or_ean}::31B'";
         $segment++;
     }
     else {
-        $order_message .= "NAD+SU+" . $order->{san_or_ean} . "::9'";
+        $order_message .= "NAD+SU+$order->{san_or_ean}::9'";
         $segment++;
     }
 
     ### Library's internal ID for Vendor
-    $order_message .= "NAD+SU+" . $order->{provider_id} . "::92'";
+    $order_message .= "NAD+SU+$order->{provider_id}::92'";
     $segment++;
 
     ### Lineitems
@@ -301,18 +300,18 @@ sub create_order_message {
         $linecount++;
         my $note;
         my $isbn;
-        if (   length( $lineitem->{isbn} ) == 10
-            || substr( $lineitem->{isbn}, 0, 3 ) eq "978"
-            || index( $lineitem->{isbn}, "|" ) != -1 )
+        if (   length $lineitem->{isbn} == 10
+            || $lineitem->{isbn} =~ m/^978/
+            || $lineitem->{isbn} !~ m/[|]/ )
         {
-            $isbn = Rebus::EDI::cleanisbn( $lineitem->{isbn} );
+            $isbn = Rebus::EDI->cleanisbn( $lineitem->{isbn} );
             $isbn = Business::ISBN->new($isbn);
             if ($isbn) {
                 if ( $isbn->is_valid ) {
                     $isbn = ( $isbn->as_isbn13 )->isbn;
                 }
                 else {
-                    $isbn = "0";
+                    $isbn = 0;
                 }
             }
             else {
@@ -323,51 +322,53 @@ sub create_order_message {
             $isbn = $lineitem->{isbn};
         }
 
+        #FIXME shouldnt isbn be set in loop
+
         ### line number, isbn
-        $order_message .= "LIN+$linecount++" . $isbn . ":EN'";
+        $order_message .= "LIN+$linecount++$isbn:EN'";
         $segment++;
 
         ### isbn as main product identification
-        $order_message .= "PIA+5+" . $isbn . ":IB'";
+        $order_message .= "PIA+5+$isbn:IB'";
         $segment++;
 
         ### title
         $order_message .=
-          "IMD+L+050+:::"
-          . Rebus::EDI::string35escape(
-            Rebus::EDI::escape_reserved( $lineitem->{title} ) )
-          . "'";
+          'IMD+L+050+:::'
+          . Rebus::EDI->string35escape(
+            Rebus::EDI->escape_reserved( $lineitem->{title} ) )
+          . q{'};
         $segment++;
 
         ### author
         $order_message .=
-          "IMD+L+009+:::"
-          . Rebus::EDI::string35escape(
-            Rebus::EDI::escape_reserved( $lineitem->{author} ) )
-          . "'";
+          'IMD+L+009+:::'
+          . Rebus::EDI->string35escape(
+            Rebus::EDI->escape_reserved( $lineitem->{author} ) )
+          . q{'};
         $segment++;
 
         ### publisher
         $order_message .=
-          "IMD+L+109+:::"
-          . Rebus::EDI::string35escape(
-            Rebus::EDI::escape_reserved( $lineitem->{publisher} ) )
-          . "'";
+          'IMD+L+109+:::'
+          . Rebus::EDI->string35escape(
+            Rebus::EDI->escape_reserved( $lineitem->{publisher} ) )
+          . q{'};
         $segment++;
 
         ### date of publication
-        $order_message .= "IMD+L+170+:::"
-          . Rebus::EDI::escape_reserved( $lineitem->{year} ) . "'";
+        $order_message .= 'IMD+L+170+:::'
+          . Rebus::EDI->escape_reserved( $lineitem->{year} ) . q{'};
         $segment++;
 
         ### binding
-        $order_message .= "IMD+L+220+:::"
-          . Rebus::EDI::escape_reserved( $lineitem->{binding} ) . "'";
+        $order_message .= 'IMD+L+220+:::'
+          . Rebus::EDI->escape_reserved( $lineitem->{binding} ) . q{'};
         $segment++;
 
         ### quantity
-        $order_message .= "QTY+21:"
-          . Rebus::EDI::escape_reserved( $lineitem->{quantity} ) . "'";
+        $order_message .= 'QTY+21:'
+          . Rebus::EDI->escape_reserved( $lineitem->{quantity} ) . q{'};
         $segment++;
 
         ### copies
@@ -378,48 +379,47 @@ sub create_order_message {
             $segment++;
 
             ### copy number
-            $order_message .= "GIR+" . sprintf( "%03d", $copyno );
+            $order_message .= sprintf 'GIR+%03d', $copyno;
 
             ### quantity
-            $order_message .= "+"
-              . Rebus::EDI::escape_reserved( $lineitem->{quantity} ) . ":LQT";
+            $order_message .= q{+}
+              . Rebus::EDI->escape_reserved( $lineitem->{quantity} ) . ':LQT';
             $gir_cnt++;
 
             ### Library branchcode
-            $order_message .= "+" . $copy->{llo} . ":LLO";
+            $order_message .= q{+} . $copy->{llo} . ':LLO';
             $gir_cnt++;
 
             ### Fund code
-            $order_message .= "+" . $copy->{lfn} . ":LFN";
+            $order_message .= q{+} . $copy->{lfn} . ':LFN';
             $gir_cnt++;
 
             ### call number
             if ( $copy->{lcl} ) {
-                $order_message .= "+" . $copy->{lcl} . ":LCL";
+                $order_message .= q{+} . $copy->{lcl} . ':LCL';
                 $gir_cnt++;
             }
 
             ### copy location
             if ( $copy->{lsq} ) {
-                $order_message .= "+"
-                  . Rebus::EDI::string35escape(
-                    Rebus::EDI::escape_reserved( $copy->{lsq} ) )
+                $order_message .= q{+}
+                  . Rebus::EDI->string35escape(
+                    Rebus::EDI->escape_reserved( $copy->{lsq} ) )
                   . ":LSQ";
                 $gir_cnt++;
             }
 
             ### circ modifier
             if ( $gir_cnt >= 5 ) {
-                $order_message .= "'GIR+"
-                  . sprintf( "%03d", $copyno ) . "+"
-                  . $copy->{lst} . ":LST";
+                $order_message .= q{'GIR+} . sprintf '%03d',
+                  $copyno . q{+} . $copy->{lst} . ':LST';
             }
             else {
-                $order_message .= "+" . $copy->{lst} . ":LST";
+                $order_message .= q{+} . $copy->{lst} . ':LST';
             }
 
             ### close GIR segment
-            $order_message .= "'";
+            $order_message .= q{'};
 
             $note = $copy->{note};
         }
@@ -432,26 +432,26 @@ sub create_order_message {
 
         ### price
         if ( $lineitem->{price} ) {
-            $order_message .= "PRI+AAB:" . $lineitem->{price} . "'";
+            $order_message .= "PRI+AAB:$lineitem->{price}" . q{'};
             $segment++;
         }
 
         ### currency
-        $order_message .= "CUX+2:" . $lineitem->{currency} . ":9'";
+        $order_message .= "CUX+2:$lineitem->{currency}:9'";
         $segment++;
 
         ### Local order number
-        $order_message .= "RFF+LI:" . $lineitem->{rff} . "'";
+        $order_message .= "RFF+LI:$lineitem->{rff}" . q{'};
         $segment++;
 
         ### Quote reference (if in response to quote)
         if ( $order->{quote_or_order} eq 'q' ) {
-            $order_message .= "RFF+QLI:" . $lineitem->{qli} . "'";
+            $order_message .= "RFF+QLI:$lineitem->{qli}" . q{'};
             $segment++;
         }
     }
     ### summary section header and number of lineitems contained in message
-    $order_message .= "UNS+S'";
+    $order_message .= q{UNS+S'};
     $segment++;
 
     ### Number of lineitems contained in the message_count
@@ -460,10 +460,10 @@ sub create_order_message {
 
     ### number of segments in the message (+1 to include the UNT segment itself) and reference number from UNH segment
     $segment++;
-    $order_message .= "UNT+$segment+" . $ref . "'";
+    $order_message .= "UNT+$segment+$ref" . q{'};
 
     ### Exchange reference number from UNB segment
-    $order_message .= "UNZ+1+" . $exchange . "'";
+    $order_message .= "UNZ+1+$exchange" . q{'};
     return $order_message;
 }
 
@@ -482,17 +482,17 @@ sub post_process_message_file {
     }
 
     ### connect to vendor ftp account
-    my $filename = substr( $remote_file, rindex( $remote_file, '/' ) + 1 );
+    my $filename = substr $remote_file, rindex( $remote_file, q{/} ) + 1;
     my $ftp = Net::FTP->new( $ftp_account->{host}, Timeout => 10 )
-      or croak "Couldn't connect";
+      or croak 'Couldn\'t connect';
     $ftp->login( $ftp_account->{username}, $ftp_account->{password} )
-      or croak "Couldn't log in";
-    $ftp->cwd( $ftp_account->{in_dir} ) or croak "Couldn't change directory";
+      or croak 'Couldn\'t log in';
+    $ftp->cwd( $ftp_account->{in_dir} ) or croak 'Couldn\'t change directory';
 
     ### rename file
     $filename =~ s/$qext/$rext/g;
     $ftp->rename( $remote_file, $filename )
-      or croak "Couldn't rename remote file";
+      or croak 'Couldn\'t rename remote file';
     $ftp->quit();
     return;
 }

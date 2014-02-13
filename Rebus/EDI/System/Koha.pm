@@ -4,6 +4,7 @@ package Rebus::EDI::System::Koha;
 
 use strict;
 use warnings;
+use English qw( -no_match_vars);
 
 =head1 NAME
 
@@ -29,11 +30,6 @@ use C4::Items;
 
 our $VERSION = '0.01';
 
-### Evergreen
-#our $edidir				=	"/tmp/";
-
-### Koha
-
 sub new {
     my $class = shift;
     my $self  = {};
@@ -47,20 +43,21 @@ sub new {
 sub retrieve_vendor_ftp_accounts {
     my $self = shift;
     my $dbh  = C4::Context->dbh;
-    my $sth  = $dbh->prepare(
-        'select vendor_edi_accounts.id as edi_account_id,
-		aqbooksellers.id as account_id, aqbooksellers.name as vendor,
-		vendor_edi_accounts.host as server, vendor_edi_accounts.username as ftpuser,
-		vendor_edi_accounts.password as ftppass, vendor_edi_accounts.in_dir as ftpdir
-		from vendor_edi_accounts inner join aqbooksellers on
-		vendor_edi_accounts.provider = aqbooksellers.id'
-    );
+    my $sql  = <<'ENDSEL';
+        select vendor_edi_accounts.id as edi_account_id,
+        aqbooksellers.id as account_id, aqbooksellers.name as vendor,
+        vendor_edi_accounts.host as server, vendor_edi_accounts.username as ftpuser,
+        vendor_edi_accounts.password as ftppass, vendor_edi_accounts.in_dir as ftpdir
+        from vendor_edi_accounts inner join aqbooksellers on
+        vendor_edi_accounts.provider = aqbooksellers.id
+ENDSEL
+    my $sth = $dbh->prepare($sql);
     $sth->execute();
-    my $set = $sth->fetchall_arrayref( {} );
+    my $tuples = $sth->fetchall_arrayref( {} );
     my @accounts;
     my $new_account;
 
-    foreach my $account (@$set) {
+    foreach my $account ( @{$tuples} ) {
         $new_account = {
             account_id     => $account->{account_id},
             edi_account_id => $account->{edi_account_id},
@@ -71,7 +68,7 @@ sub retrieve_vendor_ftp_accounts {
             ftpdir         => $account->{ftpdir},
             po_org_unit    => 0,
         };
-        push( @accounts, $new_account );
+        push @accounts, $new_account;
     }
     return @accounts;
 }
@@ -87,62 +84,68 @@ sub download_messages {
         $message_extension = ".cei";
     }
     my @local_files;
-    foreach my $account (@$ftp_accounts) {
+    foreach my $account ( @{$ftp_accounts} ) {
 
         #get vendor details
-        print "server: " . $account->{server} . "\n";
-        print "account: " . $account->{vendor} . "\n";
+        #        print "server: " . $account->{server} . "\n";
+        #        print "account: " . $account->{vendor} . "\n";
 
         #get files
         my $newerr;
         my @errors;
         my @files;
         open my $log_fh, '>>', $self->{ftplogfile}
-          or croak "Could not open $self->{ftplogfile} : $!";
-        my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime(time);
+          or croak "Could not open $self->{ftplogfile} : $OS_ERROR";
+        my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime;
         printf $log_fh "\n\n%4d-%02d-%02d %02d:%02d:%02d\n-----\n",
           $year + 1900, $mon + 1, $mday, $hour, $min, $sec;
-        print $log_fh "Connecting to " . $account->{server} . "... ";
+        print $log_fh "Connecting to $account->{server} ... ";
         my $ftp =
           Net::FTP->new( $account->{server}, Timeout => 10, Passive => 1 )
           or $newerr = 1;
-        push @errors, "Can't ftp to " . $account->{server} . ": $!\n"
-          if $newerr;
-        $self->myerr(@errors) if $newerr;
 
-        if ( !$newerr ) {
-            $newerr = 0;
+        if ($newerr) {
+            push @errors, "Can't ftp to $account->{server}: $OS_ERROR\n";
+            $self->myerr(@errors);
+        }
+        else {
             print $log_fh "connected.\n";
 
             $ftp->login( $account->{ftpuser}, $account->{ftppass} )
               or $newerr = 1;
             print $log_fh "Getting file list\n";
-            push @errors, "Can't login to " . $account->{server} . ": $!\n"
-              if $newerr;
-            $ftp->quit if $newerr;
-            $self->myerr(@errors) if $newerr;
-            if ( !$newerr ) {
-                print $log_fh "Logged in\n";
-                $ftp->cwd( $account->{ftpdir} ) or $newerr = 1;
+            if ($newerr) {
                 push @errors,
-                  "Can't cd in server " . $account->{server} . " $!\n"
-                  if $newerr;
-                $self->myerr(@errors) if $newerr;
-                $ftp->quit if $newerr;
+                  "Can't login to " . $account->{server} . ": $OS_ERROR\n";
+                $ftp->quit;
+                $self->myerr(@errors);
+            }
+            else {
+                print $log_fh "Logged in\n";
+                if ($newerr) {
+                    $ftp->cwd( $account->{ftpdir} );
+                    push @errors,
+                        "Can't cd in server "
+                      . $account->{server}
+                      . " $OS_ERROR\n";
+                    $self->myerr(@errors);
+                    $ftp->quit;
+
+                    # FIXME Where now ??
+                }
 
                 @files = $ftp->ls or $newerr = 1;
-                push @errors,
-                  "Can't get file list from server "
-                  . $account->{server} . " $!\n"
-                  if $newerr;
-                $self->myerr(@errors) if $newerr;
-                if ( !$newerr ) {
+                if ($newerr) {
+                    push @errors,
+"Can't get file list from server $account->{server} $OS_ERROR\n";
+                    $self->myerr(@errors);
+                }
+                else {
                     print $log_fh "Got  file list\n";
-                    foreach (@files) {
-                        my $filename = $_;
+                    foreach my $filename (@files) {
                         if ( ( index lc($filename), $message_extension ) > -1 )
                         {
-                            my $description = sprintf "%s/%s",
+                            my $description = sprintf '%s/%s',
                               $account->{server}, $filename;
                             print $log_fh "Found file: $description - ";
 
@@ -152,31 +155,35 @@ sub download_messages {
                                 $account->{ftpdir}, $filename );
 
                             my $match = 0;
-                            if ( scalar(@$hits) ) {
+                            if ( @{$hits} ) {
                                 print $log_fh
                                   "File already retrieved. Skipping.\n";
                                 $match = 1;
                             }
-                            if ( $match ne 1 ) {
+                            if ( $match != 1 ) {
                                 chdir $self->{edidir};
                                 $ftp->get($filename) or $newerr = 1;
-                                push @errors,
-                                  "Can't transfer file ($filename) from "
-                                  . $account->{server} . " $!\n"
-                                  if $newerr;
-                                $ftp->quit if $newerr;
-                                $self->myerr(@errors) if $newerr;
-                                if ( !$newerr ) {
+                                if ($newerr) {
+                                    push @errors,
+"Can't transfer file ($filename) from $account->{server} $OS_ERROR\n";
+                                    $ftp->quit;
+                                    $self->myerr(@errors);
+                                }
+                                else {
+                                    # FIXME deep nesting
                                     print $log_fh "File retrieved\n";
                                     open my $fh, '<',
                                       "$self->{edidir}/$filename"
                                       or croak
-                                      "Couldn't open file: $filename $!";
-                                    my $message_content = join q{}, <$fh>;
+                                      "Couldn't open file: $filename $OS_ERROR";
+                                    my $message_content = do {
+                                        local $INPUT_RECORD_SEPARATOR;
+                                        <$fh>;
+                                    };
                                     close $fh;
                                     my $logged_message = LogMessage(
                                         $message_content,
-                                        $account->{ftpdir} . "/" . $filename,
+                                        "$account->{ftpdir}/$filename",
                                         $account->{server},
                                         $account->{edi_account_id},
                                         $message_type
@@ -190,7 +197,7 @@ sub download_messages {
                                         edi_account_id =>
                                           $account->{edi_account_id},
                                     };
-                                    push( @local_files, $message_file );
+                                    push @local_files, $message_file;
                                 }
                             }
                         }
@@ -209,7 +216,7 @@ sub download_messages {
 sub myerr {
     my ( $self, @err ) = @_;
     open my $fh, '>>', $self->{ftplogfile}
-      or croak "Could not open $self->{ftplogfile} : $!";
+      or croak "Could not open $self->{ftplogfile} : $OS_ERROR";
     print $fh 'Error: ', @err;
     close $fh;
     return;
@@ -218,12 +225,16 @@ sub myerr {
 sub find_duplicate_messages {
     my ( $edi_account_id, $ftpdir, $filename ) = @_;
     my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare(
-        'select edifact_messages.key from edifact_messages
-		inner join vendor_edi_accounts on vendor_edi_accounts.provider=edifact_messages.provider
-		where vendor_edi_accounts.id=? and edifact_messages.remote_file=? and status<>?'
-    );
-    $sth->execute( $edi_account_id, $ftpdir . "/" . $filename, 'Processed' );
+
+    #FIXME if we only want a count select a couynt
+    my $sql = <<'ENDSQL';
+        select edifact_messages.key from edifact_messages
+        inner join vendor_edi_accounts on vendor_edi_accounts.provider=edifact_messages.provider
+        where vendor_edi_accounts.id=? and edifact_messages.remote_file=? and status<>?
+ENDSQL
+    my $file = "$ftpdir/$filename";
+    my $sth  = $dbh->($sql);
+    $sth->execute( $edi_account_id, $file, 'Processed' );
     my $hits = $sth->fetchall_arrayref( {} );
     return $hits;
 }
@@ -231,66 +242,69 @@ sub find_duplicate_messages {
 # updates last activity in acq.edi_account and writes a new entry to acq.edi_message
 sub LogMessage {
     my ( $content, $remote, $server, $account_or_id, $m_type ) = @_;
-    $content or return;
-    my $message_type;
-    if ( $m_type eq 'quotes' ) {
-        $message_type = 'QUOTES';
+    if ( !defined $content ) {
+        return;
     }
-    if ( $m_type eq 'invoices' ) {
-        $message_type = 'INVOIC';
-    }
-    my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime(time);
-    my $last_activity =
-      sprintf( "%4d-%02d-%02d", $year + 1900, $mon + 1, $mday );
-    my $account = record_activity( $account_or_id, $last_activity );
-    $message_type = ( $content =~ /'UNH\+\w+\+(\S{6}):/ ) ? $1 : $m_type;
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare(
-        'insert into edifact_messages (message_type, date_sent, provider,
-		status, edi, remote_file) values (?,?,?,?,?,?)'
-    );
-    $sth->execute( $message_type, $last_activity, $account, 'Received',
-        $content, $remote );
-    my $insert_id =
-      $dbh->last_insert_id( undef, undef, qw(edifact_messages key), undef );
 
-    return $insert_id;
+    #    my %mtypes = (
+    # .       quotes => 'QUOTES',
+    #  .      invoices => 'INVOIC',
+    #   . );
+    #    my $message_type = $mtypes{$m_type};
+    my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime;
+    my $last_activity = sprintf '%4d-%02d-%02d', $year + 1900, $mon + 1, $mday;
+    my $account = record_activity( $account_or_id, $last_activity );
+    my $message_type;
+    if ( $content =~ /'UNH\+\w+\+(\S{6}):/ ) {
+        $message_type = $1;
+    }
+    else {
+        $message_type = $m_type;
+    }
+    my $dbh = C4::Context->dbh;
+    my $sql =
+        'insert into edifact_messages (message_type, date_sent, provider, '
+      . 'status, edi, remote_file) values (?,?,?,?,?,?)';
+    $dbh->do( $sql, {}, $message_type, $last_activity, $account, 'Received',
+        $content, $remote );
+    return $dbh->last_insert_id( undef, undef, qw(edifact_messages key),
+        undef );
+
 }
 
 sub update_quote_status {
     my ( $quote_id, $edi_account_id, $basketno ) = @_;
-    my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime(time);
-    my $last_activity =
-      sprintf( "%4d-%02d-%02d", $year + 1900, $mon + 1, $mday );
-    my $account = record_activity( $edi_account_id, $last_activity );
-    my $dbh     = C4::Context->dbh;
-    my $sth     = $dbh->prepare(
-        'update edifact_messages set edifact_messages.status=?,
-		basketno=? where edifact_messages.key=?'
-    );
-    $sth->execute( 'Processed', $basketno, $quote_id );
+    my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime;
+    my $last_activity = sprintf '%4d-%02d-%02d', $year + 1900, $mon + 1, $mday;
+    record_activity( $edi_account_id, $last_activity );
+    my $update_sql =
+        'update edifact_messages set edifact_messages.status=?,'
+      . 'basketno=? where edifact_messages.key=?';
+    my $dbh = C4::Context->dbh;
+    $dbh->do( $update_sql, {}, 'Processed', $basketno, $quote_id );
+    return;
 }
 
 sub update_invoice_status {
     my ( $message_id, $edi_account_id, $invoicenumber ) = @_;
-    my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime(time);
+    my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime;
     my $last_activity =
       sprintf( "%4d-%02d-%02d", $year + 1900, $mon + 1, $mday );
-    my $account = record_activity( $edi_account_id, $last_activity );
-    my $dbh     = C4::Context->dbh;
-    my $sth     = $dbh->prepare(
-        'update edifact_messages set edifact_messages.status=?,
-		invoicenumber=? where edifact_messages.key=?'
-    );
-    $sth->execute( 'Processed', $invoicenumber, $message_id );
+    record_activity( $edi_account_id, $last_activity );
+    my $update_sql =
+        'update edifact_messages set edifact_messages.status=?, '
+      . 'invoicenumber=? where edifact_messages.key=?';
+    my $dbh = C4::Context->dbh;
+    $dbh->do( $update_sql, {}, 'Processed', $invoicenumber, $message_id );
+    return;
 }
 
 sub get_ordernumber_from_supplier_ref {
     my $supplierreference = shift;
     my @splitreference;
-    if ( index( $supplierreference, "/" ) != -1 ) {
-        @splitreference = split( /\//, $supplierreference );
-        $supplierreference = $splitreference[1];
+    if ( index( $supplierreference, q{/} ) != -1 ) {
+        @splitreference      = split                 #/#, $supplierreference;
+          $supplierreference = $splitreference[1];
     }
 
     my @result;
@@ -310,21 +324,19 @@ sub record_activity {
     $account_or_id or return;
     my $dbh = C4::Context->dbh;
     my $sth = $dbh->prepare(
-        'update vendor_edi_accounts set last_activity=? where
-		id=?'
-    );
+        'update vendor_edi_accounts set last_activity=? where id=?');
     $sth->execute( $last_activity, $account_or_id );
     $sth = $dbh->prepare('select provider from vendor_edi_accounts where id=?');
     $sth->execute($account_or_id);
-    my @result;
     my $provider;
 
-    while ( @result = $sth->fetchrow_array() ) {
+    while ( my @result = $sth->fetchrow_array() ) {
         $provider = $result[0];
     }
     return $provider;
 }
 
+# FIXME pass a ref_arg
 sub update_item_order {
     my (
         $ordernumber, $datereceived, $gstrate,
@@ -332,18 +344,18 @@ sub update_item_order {
     ) = @_;
     my $dbh = C4::Context->dbh;
     my $sth = $dbh->prepare(
-        'update aqorders set datereceived=?, gstrate=?, quantityreceived=?,
-		unitprice=?, invoiceid=? where ordernumber=?'
+'update aqorders set datereceived=?, gstrate=?, quantityreceived=?, unitprice=?, invoiceid=? where ordernumber=?'
     );
     $sth->execute(
         $datereceived, $gstrate,   $quantity,
         $unitprice,    $invoiceid, $ordernumber
     );
+    return;
 }
 
 sub process_invoices {
     my ( $self, $invoices ) = @_;
-    foreach my $invoice (@$invoices) {
+    foreach my $invoice ( @{$invoices} ) {
         my $vendor_san = get_vendor_san( $invoice->{account_id} );
 
         #my $module     = get_vendor_module($vendor_san);
@@ -380,11 +392,12 @@ sub process_invoices {
                 $vendor_ftp_account, 'invoice' );
         }
     }
+    return;
 }
 
 sub process_quotes {
     my ( $self, $quotes ) = @_;
-    foreach my $quote (@$quotes) {
+    foreach my $quote ( @{$quotes} ) {
         my $vendor_san = get_vendor_san( $quote->{account_id} );
         my $module     = get_vendor_module($vendor_san);
         $module or return;
@@ -392,7 +405,8 @@ sub process_quotes {
         my $vendor_module = $module->new();
         my @parsed_quote  = $vendor_module->parse_quote($quote);
         my $order_id =
-          NewBasket( $quote->{account_id}, 0, $quote->{filename}, '', '', '' );
+          NewBasket( $quote->{account_id}, 0, $quote->{filename}, q{}, q{},
+            q{} );
 
         foreach my $item (@parsed_quote) {
             foreach my $copy ( @{ $item->{copies} } ) {
@@ -420,37 +434,37 @@ sub process_quotes {
                 my $lsq_identifier = $local_transform->lsq_identifier();
 
                 # create biblio record
-                my $record = TransformKohaToMarc(
+                my $marcrecord = TransformKohaToMarc(
                     {
-                        "biblio.title"  => $koha_copy->{title},
-                        "biblio.author" => $koha_copy->{author}
+                        'biblio.title'  => $koha_copy->{title},
+                        'biblio.author' => $koha_copy->{author}
                         ? $koha_copy->{author}
-                        : "",
-                        "biblio.seriestitle" => "",
-                        "biblioitems.isbn"   => $koha_copy->{isbn}
+                        : q{},
+                        'biblio.seriestitle' => q{},
+                        'biblioitems.isbn'   => $koha_copy->{isbn}
                         ? $koha_copy->{isbn}
-                        : "",
-                        "biblioitems.publishercode" => $koha_copy->{publisher}
+                        : q{},
+                        'biblioitems.publishercode' => $koha_copy->{publisher}
                         ? $koha_copy->{publisher}
-                        : "",
-                        "biblioitems.publicationyear" => $koha_copy->{year}
+                        : q{},
+                        'biblioitems.publicationyear' => $koha_copy->{year}
                         ? $koha_copy->{year}
-                        : "",
-                        "biblio.copyrightdate" => $koha_copy->{year}
+                        : q{},
+                        'biblio.copyrightdate' => $koha_copy->{year}
                         ? $koha_copy->{year}
-                        : "",
-                        "biblioitems.cn_source"  => "ddc",
-                        "items.cn_source"        => "ddc",
-                        "items.notforloan"       => "-1",
+                        : q{},
+                        'biblioitems.cn_source'  => 'ddc',
+                        'items.cn_source'        => 'ddc',
+                        'items.notforloan'       => -1,
                         "items.$lsq_identifier"  => $koha_copy->{lsq},
-                        "items.homebranch"       => $koha_copy->{llo},
-                        "items.holdingbranch"    => $koha_copy->{llo},
-                        "items.booksellerid"     => $quote->{account_id},
-                        "items.price"            => $koha_copy->{price},
-                        "items.replacementprice" => $koha_copy->{price},
-                        "items.itemcallnumber"   => $koha_copy->{lcl},
-                        "items.itype"            => $koha_copy->{lst},
-                        "items.cn_sort"          => "",
+                        'items.homebranch'       => $koha_copy->{llo},
+                        'items.holdingbranch'    => $koha_copy->{llo},
+                        'items.booksellerid'     => $quote->{account_id},
+                        'items.price'            => $koha_copy->{price},
+                        'items.replacementprice' => $koha_copy->{price},
+                        'items.itemcallnumber'   => $koha_copy->{lcl},
+                        'items.itype'            => $koha_copy->{lst},
+                        'items.cn_sort'          => q{},
                     }
                 );
 
@@ -460,16 +474,16 @@ sub process_quotes {
 
                 if ( !defined $biblionumber ) {
 
-                    # create the record in catalogue, with framework ''
+                    # create the record in catalogue, with framework q{}
                     ( $biblionumber, $bibitemnumber ) =
-                      AddBiblio( $record, '' );
+                      AddBiblio( $marcrecord, q{} );
                 }
 
                 # create order line
-                my %orderinfo = (
+                my $orderinfo = {
                     basketno          => $order_id,
-                    ordernumber       => "",
-                    subscription      => "no",
+                    ordernumber       => q{},
+                    subscription      => 'no',
                     uncertainprice    => 0,
                     biblionumber      => $biblionumber,
                     title             => $koha_copy->{title},
@@ -477,15 +491,13 @@ sub process_quotes {
                     biblioitemnumber  => $bibitemnumber,
                     rrp               => $koha_copy->{price},
                     ecost             => $koha_copy->{ecost},
-                    sort1             => "",
-                    sort2             => "",
+                    sort1             => q{},
+                    sort2             => q{},
                     supplierreference => $item->{item_reference},
                     listprice         => $koha_copy->{price},
                     branchcode        => $koha_copy->{llo},
                     budget_id         => $koha_copy->{budget_id},
-                );
-
-                my $orderinfo = \%orderinfo;
+                };
 
                 my ( $retbasketno, $ordernumber ) = NewOrder($orderinfo);
 
@@ -493,7 +505,7 @@ sub process_quotes {
                 if ( C4::Context->preference('AcqCreateItem') eq 'ordering' ) {
                     my $itemnumber;
                     ( $biblionumber, $bibitemnumber, $itemnumber ) =
-                      AddItemFromMarc( $record, $biblionumber );
+                      AddItemFromMarc( $marcrecord, $biblionumber );
                     NewOrderItem( $itemnumber, $ordernumber );
                 }
             }
@@ -508,14 +520,14 @@ sub process_quotes {
         return 1;
 
     }
+    return;
 }
 
 sub get_vendor_ftp_account {
     my $edi_account_id = shift;
     my $dbh            = C4::Context->dbh;
     my $sth            = $dbh->prepare(
-        'select host,username,password,in_dir from vendor_edi_accounts
-		where id=?'
+'select host,username,password,in_dir from vendor_edi_accounts where id=?'
     );
     $sth->execute($edi_account_id);
     my @result;
@@ -590,12 +602,11 @@ sub get_vendor_module {
 
 sub check_order_item_exists {
     my $isbn = shift;
-    my $dbh  = C4::Context->dbh;
-    my $sth;
     my @matches;
     my $biblionumber;
     my $bibitemnumber;
-    $sth = $dbh->prepare(
+    my $dbh = C4::Context->dbh;
+    my $sth = $dbh->prepare(
         'select biblionumber, biblioitemnumber from biblioitems where isbn=?');
     $sth->execute($isbn);
 
@@ -659,7 +670,7 @@ sub retrieve_orders {
 
 sub retrieve_order_details {
     my ( $self, $orders, $ean ) = @_;
-    my @fleshed_orders;
+    my $fleshed_orders = [];
     foreach my $order ( @{$orders} ) {
         my $fleshed_order;
         $fleshed_order = {
@@ -677,22 +688,24 @@ sub retrieve_order_details {
         while ( @result = $sth->fetchrow_array() ) {
             $san = $result[0];
         }
-        $fleshed_order->{'module'}     = get_vendor_module($san);
-        $fleshed_order->{'san_or_ean'} = $san;
-        $fleshed_order->{'org_san'}    = $ean;
-        $fleshed_order->{'quote_or_order'} =
+        $fleshed_order->{module}     = get_vendor_module($san);
+        $fleshed_order->{san_or_ean} = $san;
+        $fleshed_order->{org_san}    = $ean;
+        $fleshed_order->{quote_or_order} =
           quote_or_order( $order->{order_id} );
         my @lineitems = get_order_lineitems( $order->{order_id} );
-        $fleshed_order->{'lineitems'} = \@lineitems;
+        $fleshed_order->{lineitems} = \@lineitems;
 
-        push @fleshed_orders, $fleshed_order;
+        push @{$fleshed_orders}, $fleshed_order;
     }
-    return \@fleshed_orders;
+    return $fleshed_orders;
 }
 
 sub create_order_file {
     my ( $self, $order_message, $order_id ) = @_;
     my $filename = "$self->{edidir}/ediorder_$order_id.CEP";
+
+    # FIXME check return
     open my $fh, '>', $filename;
     print $fh $order_message;
     close $fh;
@@ -707,11 +720,12 @@ sub get_vendor_ftp_account_by_order_id {
     my $order_id = shift;
     my $vendor_ftp_account;
     my @result;
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare(
+    my $sql = <<'ENDVEA';
         'select vendor_edi_accounts.* from vendor_edi_accounts, aqbasket
-		where vendor_edi_accounts.provider=aqbasket.booksellerid and aqbasket.basketno=?'
-    );
+        where vendor_edi_accounts.provider=aqbasket.booksellerid and aqbasket.basketno=?'
+ENDVEA
+    my $dbh = C4::Context->dbh;
+    my $sth = $dbh->prepare($sql);
     $sth->execute($order_id);
     while ( @result = $sth->fetchrow_array() ) {
         $vendor_ftp_account->{id}             = $result[0];
@@ -728,6 +742,7 @@ sub get_vendor_ftp_account_by_order_id {
     return $vendor_ftp_account;
 }
 
+# FIXME refactor this sub
 sub send_order_message {
     my ( $self, $filename, $ftpaccount, $order_message, $order_id ) = @_;
     my @errors;
@@ -735,63 +750,64 @@ sub send_order_message {
     my $result;
 
     open my $log_fh, '>>', $self->{ftplogfile}
-      or croak "Could not open $self->{ftplogfile}: $!";
-    my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime(time);
+      or croak "Could not open $self->{ftplogfile}: $OS_ERROR";
+    my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime;
     printf $log_fh "\n\n%4d-%02d-%02d %02d:%02d:%02d\n-----\n", $year + 1900,
       $mon + 1, $mday, $hour, $min, $sec;
 
     # check edi order file exists
     if ( -e $filename ) {
 
-        print $log_fh "Connecting to ", $ftpaccount->{host}, "... ";
+        print $log_fh "Connecting to $ftpaccount->{host}... ";
 
         # connect to ftp account
         my $ftp =
           Net::FTP->new( $ftpaccount->{host}, Timeout => 10, Passive => 1 )
           or $newerr = 1;
-        push @errors, "Can't ftp to " . $ftpaccount->{host} . ": $!\n"
-          if $newerr;
-        $self->myerr(@errors) if $newerr;
-        if ( !$newerr ) {
-            $newerr = 0;
+        if ($newerr) {
+            push @errors,
+              "Can't ftp to " . $ftpaccount->{host} . ": $OS_ERROR\n";
+            $self->myerr(@errors);
+        }
+        else {
             print $log_fh "connected.\n";
 
             # login
             $ftp->login( "$ftpaccount->{username}", "$ftpaccount->{password}" )
               or $newerr = 1;
-            $ftp->quit if $newerr;
             print $log_fh "Logging in...\n";
-            push @errors, "Can't login to " . $ftpaccount->{host} . ": $!\n"
-              if $newerr;
-            $self->myerr(@errors) if $newerr;
-            if ( !$newerr ) {
+            if ($newerr) {
+                $ftp->quit;
+                push @errors, "Can't login to $ftpaccount->{host}: $OS_ERROR\n";
+                $self->myerr(@errors);
+            }
+            else {    #!$newerr
                 print $log_fh "Logged in\n";
 
                 # cd to directory
                 $ftp->cwd("$ftpaccount->{path}") or $newerr = 1;
-                push @errors,
-                  "Can't cd in server " . $ftpaccount->{host} . " $!\n"
-                  if $newerr;
-                $self->myerr(@errors) if $newerr;
-                $ftp->quit if $newerr;
-
-                # put file
-                if ( !$newerr ) {
-                    $newerr = 0;
-                    $ftp->put($filename) or $newerr = 1;
+                if ($newerr) {
                     push @errors,
-                      "Can't write order file to server "
-                      . $ftpaccount->{host} . " $!\n"
-                      if $newerr;
-                    $self->myerr(@errors) if $newerr;
-                    $ftp->quit if $newerr;
-                    if ( !$newerr ) {
+                      "Can't cd in server $ftpaccount->{host} $OS_ERROR\n";
+                    $self->myerr(@errors);
+                    $ftp->quit;
+                }
+                else {    # !$newerr
+                          # put file
+                    $ftp->put($filename) or $newerr = 1;
+                    if ($newerr) {
+                        push @errors,
+"Can\'t write order file to server $ftpaccount->{host} $OS_ERROR\n";
+                        $self->myerr(@errors);
+                        $ftp->quit;
+                    }
+                    else {    # !$newerr
                         print $log_fh
                           "File: $filename transferred successfully\n";
                         $ftp->quit;
-                        unlink($filename);
+                        unlink $filename;
                         record_activity( $ftpaccount->{id} );
-                        my $pos = rindex( $filename, "/" );
+                        my $pos = rindex $filename, q{/};
                         log_order(
                             $order_message,
                             $ftpaccount->{path} . substr( $filename, $pos ),
@@ -814,13 +830,12 @@ sub send_order_message {
 
 sub log_order {
     my ( $content, $remote, $edi_account_id, $order_id ) = @_;
-    my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime(time);
-    my $date_sent = sprintf( "%4d-%02d-%02d", $year + 1900, $mon + 1, $mday );
+    my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime;
+    my $date_sent = sprintf '%4d-%02d-%02d', $year + 1900, $mon + 1, $mday;
 
     my $dbh = C4::Context->dbh;
     my $sth = $dbh->prepare(
-'insert into edifact_messages (message_type,date_sent,provider,status,basketno,
-		edi,remote_file) values (?,?,?,?,?,?,?)'
+'insert into edifact_messages (message_type,date_sent,provider,status,basketno, edi,remote_file) values (?,?,?,?,?,?,?)'
     );
     $sth->execute( 'ORDER', $date_sent, $edi_account_id, 'Sent', $order_id,
         $content, $remote );
@@ -832,9 +847,10 @@ sub quote_or_order {
     my @result;
     my $quote_or_order;
     my $dbh = C4::Context->dbh;
+
+    #FIXME Just need a count
     my $sth = $dbh->prepare(
-        'select edifact_messages.key from edifact_messages
-		where basketno=? and message_type=?'
+'select edifact_messages.key from edifact_messages where basketno=? and message_type=?'
     );
     $sth->execute( $order_id, 'QUOTES' );
     if ( $sth->rows == 0 ) {
@@ -853,17 +869,17 @@ sub get_order_lineitems {
     foreach my $lineitem (@lineitems) {
         my $clean_isbn = Rebus::EDI->cleanisbn( $lineitem->{isbn} );
         my $fleshed_lineitem;
-        $fleshed_lineitem->{binding}  = 'O';
-        $fleshed_lineitem->{currency} = 'GBP';
-        $fleshed_lineitem->{id}       = $lineitem->{ordernumber};
-        $fleshed_lineitem->{qli}      = $lineitem->{supplierreference};
-        $fleshed_lineitem->{rff}    = $order_id . "/" . $fleshed_lineitem->{id};
-        $fleshed_lineitem->{isbn}   = $clean_isbn;
-        $fleshed_lineitem->{title}  = $lineitem->{title};
-        $fleshed_lineitem->{author} = $lineitem->{author};
+        $fleshed_lineitem->{binding}   = 'O';
+        $fleshed_lineitem->{currency}  = 'GBP';
+        $fleshed_lineitem->{id}        = $lineitem->{ordernumber};
+        $fleshed_lineitem->{qli}       = $lineitem->{supplierreference};
+        $fleshed_lineitem->{rff}       = "$order_id/$fleshed_lineitem->{id}";
+        $fleshed_lineitem->{isbn}      = $clean_isbn;
+        $fleshed_lineitem->{title}     = $lineitem->{title};
+        $fleshed_lineitem->{author}    = $lineitem->{author};
         $fleshed_lineitem->{publisher} = $lineitem->{publishercode};
         $fleshed_lineitem->{year}      = $lineitem->{copyrightdate};
-        $fleshed_lineitem->{price}     = sprintf "%.2f", $lineitem->{listprice};
+        $fleshed_lineitem->{price}     = sprintf '%.2f', $lineitem->{listprice};
         $fleshed_lineitem->{quantity} =
           get_order_quantity( $lineitem->{ordernumber} );
 
@@ -877,10 +893,10 @@ sub get_order_lineitems {
         $fleshed_lineitem_detail->{lst}  = $itype;
         $fleshed_lineitem_detail->{lcl}  = $callnumber;
         $fleshed_lineitem_detail->{note} = $lineitem->{notes};
-        push( @lineitem_copies, $fleshed_lineitem_detail );
+        push @lineitem_copies, $fleshed_lineitem_detail;
 
         $fleshed_lineitem->{copies} = \@lineitem_copies;
-        push( @fleshed_lineitems, $fleshed_lineitem );
+        push @fleshed_lineitems, $fleshed_lineitem;
     }
     return @fleshed_lineitems;
 }
@@ -889,12 +905,13 @@ sub get_order_quantity {
     my $ordernumber = shift;
     my @rows;
     my $quantity;
+    my $sql = <<'ENDSEL';
+        SELECT count(*) FROM aqorders_items inner join
+        items on aqorders_items.itemnumber=items.itemnumber WHERE
+        aqorders_items.ordernumber=?
+ENDSEL
     my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare(
-        " SELECT count(*) FROM aqorders_items inner join
-		items on aqorders_items.itemnumber=items.itemnumber WHERE
-		aqorders_items.ordernumber=?"
-    );
+    my $sth = $dbh->prepare($sql);
     $sth->execute($ordernumber);
     while ( @rows = $sth->fetchrow_array() ) {
         $quantity = $rows[0];
@@ -910,15 +927,17 @@ sub get_lineitem_additional_info {
     my $itype;
     my $location;
     my $fund;
-    use Rebus::EDI::Custom::Default;
-    my $local_transform = Rebus::EDI::Custom::Default->new();
-    my $lsq_identifier  = $local_transform->lsq_identifier();
-    my $dbh             = C4::Context->dbh;
-    my $sth             = $dbh->prepare(
-        "select items.homebranch, items.itemcallnumber, items.itype,
-		items.$lsq_identifier from items inner join aqorders_items on
-		aqorders_items.itemnumber=items.itemnumber where aqorders_items.ordernumber=?"
-    );
+
+    #my $local_transform = Rebus::EDI::Custom::Default->new();
+    #    my $lsq_identifier  = $local_transform->lsq_identifier();
+    my $dbh = C4::Context->dbh;
+
+    my $sql = <<'ENDSQL';
+        select items.homebranch, items.itemcallnumber, items.itype,
+        items.location from items inner join aqorders_items on
+        aqorders_items.itemnumber=items.itemnumber where aqorders_items.ordernumber=?
+ENDSQL
+    my $sth = $dbh->prepare($sql);
     $sth->execute($ordernumber);
 
     while ( @rows = $sth->fetchrow_array() ) {
@@ -927,10 +946,11 @@ sub get_lineitem_additional_info {
         $itype      = $rows[2];
         $location   = $rows[3];
     }
-    $sth = $dbh->prepare(
-        "select aqbudgets.budget_code from aqbudgets inner join aqorders on
-		aqorders.budget_id=aqbudgets.budget_id where aqorders.ordernumber=?"
-    );
+    $sql = <<'END1';
+        select aqbudgets.budget_code from aqbudgets inner join aqorders on
+        aqorders.budget_id=aqbudgets.budget_id where aqorders.ordernumber=?
+END1
+    $sth = $dbh->prepare($sql);
     $sth->execute($ordernumber);
     while ( @rows = $sth->fetchrow_array() ) {
         $fund = $rows[0];

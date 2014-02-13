@@ -21,45 +21,6 @@ Version 0.01
 
 our $VERSION = '0.01';
 
-Readonly my @vendors => (
-    {
-        name   => 'Bertrams',
-        san    => '0143731',
-        ean    => '',
-        module => 'Default'
-    },
-    {
-        name   => 'Bertrams',
-        san    => '5013546025078',
-        ean    => '',
-        module => 'Default'
-    },
-    {
-        name   => 'Dawsons',
-        san    => '',
-        ean    => '5013546027856',
-        module => 'Default'
-    },
-    {
-        name   => 'Coutts',
-        san    => '',
-        ean    => '5013546048686',
-        module => 'Default'
-    },
-    {
-        name   => 'Tomlinsons',
-        san    => '',
-        ean    => '5033075063552',
-        module => 'Default'
-    },
-    {
-        name   => 'PTFS Europe',
-        san    => '',
-        ean    => '5011234567890',
-        module => 'Default'
-    },
-);
-
 sub new {
     my $class  = shift;
     my $system = shift;
@@ -71,7 +32,46 @@ sub new {
 }
 
 sub list_vendors {
-    return @vendors;
+    Readonly my @VENDORS => (
+        {
+            name   => 'Bertrams',
+            san    => '0143731',
+            ean    => q{},
+            module => 'Default'
+        },
+        {
+            name   => 'Bertrams',
+            san    => '5013546025078',
+            ean    => q{},
+            module => 'Default'
+        },
+        {
+            name   => 'Dawsons',
+            san    => q{},
+            ean    => '5013546027856',
+            module => 'Default'
+        },
+        {
+            name   => 'Coutts',
+            san    => q{},
+            ean    => '5013546048686',
+            module => 'Default'
+        },
+        {
+            name   => 'Tomlinsons',
+            san    => q{},
+            ean    => '5033075063552',
+            module => 'Default'
+        },
+        {
+            name   => 'PTFS Europe',
+            san    => q{},
+            ean    => '5011234567890',
+            module => 'Default'
+        },
+    );
+
+    return @VENDORS;
 }
 
 sub retrieve_quotes {
@@ -79,8 +79,10 @@ sub retrieve_quotes {
     my @vendor_ftp_accounts = $self->{edi_system}->retrieve_vendor_ftp_accounts;
     my @downloaded_quotes =
       $self->{edi_system}->download_messages( \@vendor_ftp_accounts, 'QUOTE' );
-    my $processed_quotes =
-      $self->{edi_system}->process_quotes( \@downloaded_quotes );
+
+    #    my $processed_quotes =
+    $self->{edi_system}->process_quotes( \@downloaded_quotes );
+    return;
 }
 
 sub retrieve_invoices {
@@ -88,8 +90,10 @@ sub retrieve_invoices {
     my @vendor_ftp_accounts = $self->{edi_system}->retrieve_vendor_ftp_accounts;
     my @downloaded_invoices = $self->{edi_system}
       ->download_messages( \@vendor_ftp_accounts, 'INVOICE' );
-    my $processed_invoices =
-      $self->{edi_system}->process_invoices( \@downloaded_invoices );
+
+    #    my $processed_invoices =
+    $self->{edi_system}->process_invoices( \@downloaded_invoices );
+    return;
 }
 
 sub send_orders {
@@ -109,22 +113,24 @@ sub send_orders {
         my $order_file    = $self->{edi_system}
           ->create_order_file( $order_message, $order->{order_id} );
     }
+    return;
 }
 
 sub string35escape {
     my $string = shift;
+    Readonly my $CHUNKLEN => 35;
     my $colon_string;
     my @sections;
-    if ( length($string) > 35 ) {
-        my ( $chunk, $stringlength ) = ( 35, length($string) );
+    if ( length($string) > $CHUNKLEN ) {
+        my ( $chunk, $stringlength ) = ( $CHUNKLEN, length $string );
         for ( my $counter = 0 ; $counter < $stringlength ; $counter += $chunk )
         {
-            push @sections, substr( $string, $counter, $chunk );
+            push @sections, substr $string, $counter, $chunk;
         }
         foreach my $section (@sections) {
             $colon_string .= "$section:";
         }
-        chop($colon_string);
+        chop $colon_string;
     }
     else {
         $colon_string = $string;
@@ -134,11 +140,11 @@ sub string35escape {
 
 sub escape_reserved {
     my $string = shift;
-    if ( $string ne "" ) {
-        $string =~ s/\?/\?\?/g;
-        $string =~ s/\'/\?\'/g;
-        $string =~ s/\:/\?\:/g;
-        $string =~ s/\+/\?\+/g;
+    if ($string) {
+        $string =~ s/[?]/??/g;
+        $string =~ s/'/?'/g;
+        $string =~ s/:/?:/g;
+        $string =~ s/[+]/?+/g;
         return $string;
     }
     else {
@@ -148,13 +154,13 @@ sub escape_reserved {
 
 sub cleanisbn {
     my $isbn = shift;
-    if ( $isbn ne "" ) {
-        my $i = index( $isbn, '(' );
+    if ($isbn) {
+        my $i = index $isbn, '(';
         if ( $i > 1 ) {
-            $isbn = substr( $isbn, 0, ( $i - 1 ) );
+            $isbn = substr $isbn, 0, ( $i - 1 );
         }
-        if ( index( $isbn, "|" ) != -1 ) {
-            my @isbns = split( /\|/, $isbn );
+        if ( $isbn =~ m/[|]/ ) {
+            my @isbns = split /[|]/, $isbn;
             $isbn = $isbns[0];
         }
 
