@@ -26,7 +26,7 @@ use C4::Output;
 use Koha::EDI::Ean;
 use CGI;
 
-my $eans       = Koha::EDI::Edifact->all();
+my $eans       = Koha::EDI::Ean->all();
 my $query      = CGI->new();
 my $basketno   = $query->param('basketno');
 
