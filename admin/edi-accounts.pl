@@ -22,7 +22,8 @@ use warnings;
 use CGI;
 use C4::Auth;
 use C4::Output;
-use C4::Edifact qw/GetEDIAccounts CreateEDIDetails UpdateEDIDetails /;
+use C4::Edifact
+  qw/GetEDIAccounts CreateEDIDetails UpdateEDIDetails DeleteEDIDetails /;
 
 my $input = CGI->new();
 
@@ -41,7 +42,7 @@ my $op = $input->param('op');
 $template->param( op => $op );
 
 if ( $op eq 'delsubmit' ) {
-    my $del = C4::Edifact::DeleteEDIDetails( $input->param('id') );
+    DeleteEDIDetails( $input->param('id') );
     $template->param( opdelsubmit => 1 );
 }
 
