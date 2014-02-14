@@ -22,7 +22,7 @@ use warnings;
 use CGI;
 use C4::Auth;
 use C4::Output;
-use C4::Edifact qw/GetEDIfactEANs delete_edi_ean create_edi_ean update_edi_ean/;
+use Koha::EDI::Ean;
 
 my $input = CGI->new();
 
@@ -41,25 +41,43 @@ my $op = $input->param('op');
 $template->param( op => $op );
 
 if ( $op eq 'delsubmit' ) {
-    my $del =
-      delete_edi_ean( $input->param('branchcode'), $input->param('ean') );
+    my $ean = Koha::EDI::Ean->new(
+        {
+            branchcode => $input->param('branchcode'),
+            ean        => $input->param('ean')
+        }
+    );
+    $ean->delete();
     $template->param( opdelsubmit => 1 );
 }
 
 if ( $op eq 'addsubmit' ) {
-    create_edi_ean( $input->param('branchcode'), $input->param('ean') );
+    my $ean = Koha::EDI::Ean->new(
+        {
+            branchcode => $input->param('branchcode'),
+            ean        => $input->param('ean')
+        }
+    );
+    $ean->insert();
     $template->param( opaddsubmit => 1 );
 }
 
 if ( $op eq 'editsubmit' ) {
-    update_edi_ean(
-        $input->param('branchcode'),    $input->param('ean'),
-        $input->param('oldbranchcode'), $input->param('oldean')
+    my $ean = Koha::EDI::Ean->new(
+        {
+            branchcode => $input->param('oldbranchcode'),
+            ean        => $input->param('oldean')
+        }
+    );
+    $ean->change(
+        {
+            branchcode => $input->param('branchcode'),
+            ean        => $input->param('ean')
+        }
     );
     $template->param( opeditsubmit => 1 );
 }
 
-my $eans = GetEDIfactEANs();
-$template->param( eans => $eans );
+$template->param( eans => Koha::EDI::Ean->all() );
 
 output_html_with_http_headers( $input, $cookie, $template->output );

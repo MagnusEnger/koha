@@ -29,7 +29,11 @@
                         <table border="0" width="100%" cellpadding="3" cellspacing="0">
                         <th><strong>Branch</strong></th><th><strong>EAN</strong></th><th><strong>Actions</strong></th></tr>
                         [% FOREACH ean IN eans %]
-                            <tr><td>[% ean.branchname %]</td><td>[% ean.ean %]</td><td align="center"><a href="/cgi-bin/koha/admin/edi_ean_edit.pl?op=edit&branchcode=[% ean.branchcode %]&ean=[% ean.ean %]">Edit</a> | <a href="/cgi-bin/koha/admin/edi_ean_edit.pl?op=del&branchcode=[% ean.branchcode %]&ean=[% ean.ean %]">Delete</a></td></tr>
+                            <tr>
+                             <td>[% ean.branchname %]</td>
+                             <td>[% ean.ean %]</td>
+                             <td align="center"><a href="/cgi-bin/koha/admin/edi_ean_edit.pl?op=edit&branchcode=[% ean.branchcode %]&ean=[% ean.ean %]">Edit</a> | <a href="/cgi-bin/koha/admin/edi_ean_edit.pl?op=del&branchcode=[% ean.branchcode %]&ean=[% ean.ean %]">Delete</a></td>
+                             </tr>
                         [% END %]
                         </table>
                 </div>

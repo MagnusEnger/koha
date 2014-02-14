@@ -36,7 +36,7 @@ use C4::Members qw/GetMember/;  #needed for permissions checking for changing ba
 use C4::Items;
 use C4::Suggestions;
 use Date::Calc qw/Add_Delta_Days/;
-use C4::Edifact qw/ CheckVendorFTPAccountExists/;
+use Koha::EDI::Account;
 use Koha::EDI;
 
 =head1 NAME
@@ -87,6 +87,8 @@ my $basket = GetBasket($basketno);
 $booksellerid = $basket->{booksellerid} unless $booksellerid;
 my ($bookseller) = GetBookSellerFromId($booksellerid);
 
+$template->param( ediaccount => Koha::EDI::Account->exists( $booksellerid ));
+
 unless (CanUserManageBasket($loggedinuser, $basket, $userflags)) {
     $template->param(
         cannot_manage_basket => 1,
@@ -103,14 +105,6 @@ unless (CanUserManageBasket($loggedinuser, $basket, $userflags)) {
 # FIXME : the query->param('booksellerid') below is probably useless. The bookseller is always known from the basket
 # if no booksellerid in parameter, get it from basket
 # warn "=>".$basket->{booksellerid};
-
-if (!$booksellerid) {
-    $booksellerid = $basket->{booksellerid};
-}
-
-$template->param( ediaccount => CheckVendorFTPAccountExists( $booksellerid ));
-my ($bookseller) = GetBookSellerFromId($booksellerid);
-
 my $op = $query->param('op');
 if (!defined $op) {
     $op = q{};

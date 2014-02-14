@@ -37,12 +37,6 @@ our @EXPORT_OK = qw(
   GetEDIAccounts
   GetEDIAccountDetails
   GetEDIfactMessageList
-  CheckVendorFTPAccountExists
-  GetEDIfactEANs
-  GetBranchList
-  delete_edi_ean
-  create_edi_ean
-  update_edi_ean
 );
 
 =head1 NAME
@@ -209,81 +203,6 @@ ENDMSGSQL
     return $messagelist;
 }
 
-=head2 CheckVendorFTPAccountExists
-
-CheckVendorFTPAccountExists($booksellerid);
-
-Returns 1 id edi acoounts exist for the passed booksellerid
-0 if not
-
-=cut
-
-sub CheckVendorFTPAccountExists {
-    my $booksellerid = shift;
-    my $dbh          = C4::Context->dbh;
-    my $ary_ref      = $dbh->selectcol_arrayref(
-        'select count(*) from vendor_edi_accounts where provider=?',
-        {}, $booksellerid );
-    if ( $ary_ref->[0] ) {
-        return 1;
-    }
-    else {
-        return 0;
-    }
-}
-
-sub GetEDIfactEANs {
-    my $dbh = C4::Context->dbh;
-    my $sql = <<'ENDSEL';
-select branches.branchname, edifact_ean.ean, edifact_ean.branchcode from
- branches inner join edifact_ean on edifact_ean.branchcode=branches.branchcode
- order by branches.branchname asc'
-ENDSEL
-    my $sth = $dbh->prepare($sql);
-    $sth->execute();
-    my $eans = $sth->fetchall_arrayref( {} );
-    return $eans;
-}
-
-sub GetBranchList {
-    my $dbh = C4::Context->dbh;
-    my $sql = <<'END_SQL';
-      select branches.branchname, branches.branchcode from branches
-      order by branches.branchname asc
-END_SQL
-    my $sth = $dbh->prepare($sql);
-    $sth->execute();
-    my $branches = $sth->fetchall_arrayref( {} );
-    return $branches;
-}
-
-sub delete_edi_ean {
-    my ( $branchcode, $ean ) = @_;
-    my $dbh = C4::Context->dbh;
-    my $sth =
-      $dbh->prepare('delete from edifact_ean where branchcode=? and ean=?');
-    $sth->execute( $branchcode, $ean );
-    return;
-}
-
-sub create_edi_ean {
-    my ( $branchcode, $ean ) = @_;
-    my $dbh = C4::Context->dbh;
-    my $sth =
-      $dbh->prepare('insert into edifact_ean (branchcode,ean) values (?,?)');
-    $sth->execute( $branchcode, $ean );
-    return;
-}
-
-sub update_edi_ean {
-    my ( $branchcode, $ean, $oldbranchcode, $oldean ) = @_;
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare(
-'update edifact_ean set branchcode=?, ean=? where branchcode=? and ean=?'
-    );
-    $sth->execute( $branchcode, $ean, $oldbranchcode, $oldean );
-    return;
-}
 
 1;
 

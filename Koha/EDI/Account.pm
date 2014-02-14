@@ -18,6 +18,23 @@ sub insert {
     my $self = shift;
     # insert in databasej:
 }
+
+# Class methods
+
+sub exists {
+    my ($class, $booksellerid) = @_;
+    my $dbh          = C4::Context->dbh;
+    my $ary_ref      = $dbh->selectcol_arrayref(
+        'select count(*) from vendor_edi_accounts where provider=?',
+        {}, $booksellerid );
+    if ( $ary_ref->[0] ) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
 1;
 __END__
 
@@ -35,6 +52,13 @@ This class handles accounts with vendors with whom the system
 can order electronically using Edifact
 
 =head1 METHODS
+
+=head2 exists
+
+Koha::EDI::Account->exists(booksellerid);
+
+Class method - passed a booksellerid returns 1 if account(s)
+exist otherwise returns zero
 
 =head1 DIAGNOSTICS
 

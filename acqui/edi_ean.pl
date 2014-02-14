@@ -23,17 +23,15 @@ use warnings;
 use C4::Auth;
 use C4::Koha;
 use C4::Output;
+use Koha::EDI::Ean;
 use CGI;
-use C4::Edifact qw/GetEDIfactEANs/;
 
-my $eans       = GetEDIfactEANs();
-my $total_eans = @{$eans};
+my $eans       = Koha::EDI::Edifact->all();
 my $query      = CGI->new();
 my $basketno   = $query->param('basketno');
-my $ean;
 
-if ( $total_eans == 1 ) {
-    $ean = $eans->[0]->{ean};
+if ( @{$eans} == 1 ) {
+    my $ean = $eans->[0]->{ean};
     print $query->redirect(
         "/cgi-bin/koha/acqui/basket.pl?basketno=$basketno&op=ediorder&ean=$ean"
     );
