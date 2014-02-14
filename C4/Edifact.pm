@@ -209,18 +209,26 @@ ENDMSGSQL
     return $messagelist;
 }
 
+=head2 CheckVendorFTPAccountExists
+
+CheckVendorFTPAccountExists($booksellerid);
+
+Returns 1 id edi acoounts exist for the passed booksellerid
+0 if not
+
+=cut
+
 sub CheckVendorFTPAccountExists {
     my $booksellerid = shift;
     my $dbh          = C4::Context->dbh;
-    my $sth;
-    $sth = $dbh->prepare(
-        'select count(id) from vendor_edi_accounts where provider=?');
-    $sth->execute($booksellerid);
-    if ( $sth->rows == 0 ) {
-        return;
+    my $ary_ref      = $dbh->selectcol_arrayref(
+        'select count(*) from vendor_edi_accounts where provider=?',
+        {}, $booksellerid );
+    if ( $ary_ref->[0] ) {
+        return 1;
     }
     else {
-        return 1;
+        return 0;
     }
 }
 
