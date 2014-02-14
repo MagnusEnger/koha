@@ -18,20 +18,20 @@
     <h2>Identify the branch submitting the EDI order</h2>
     <br />
     <p>
-	<form action="/cgi-bin/koha/acqui/basket.pl" method="get">
-                    <p> Ordering branch: <select id="ean" name="ean">
-                        [% FOREACH ean IN eans %]
-                            <option value="[% ean.ean %]">[% ean.branchname %]</option>
-                        [% END %]
-                        </select>
-                        <input type="hidden" id="basketno" value="[% basketno %]" name="basketno" />
-                        <input type="hidden" value="ediorder" name="op" />
-                        <input type="submit" value="Send EDI order" />
-                    </p>
-                </form>
+    <form action="/cgi-bin/koha/acqui/basket.pl" method="get">
+         <p> Ordering branch: <select id="ean" name="ean">
+             [% FOREACH ean IN eans %]
+             <option value="[% ean.ean %]">[% ean.branchname %]</option>
+             [% END %]
+            </select>
+            <input type="hidden" id="basketno" value="[% basketno %]" name="basketno" />
+            <input type="hidden" value="ediorder" name="op" />
+            <input type="submit" value="Send EDI order" />
+         </p>
+    </form>
     </p>
 
-    </div>
+</div>
 </div>
 <div class="yui-b">
 [% INCLUDE 'acquisitions-menu.inc' %]

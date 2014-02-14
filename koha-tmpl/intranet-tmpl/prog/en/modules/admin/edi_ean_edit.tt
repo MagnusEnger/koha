@@ -3,18 +3,18 @@
 [% INCLUDE 'doc-head-close.inc' %]
 <script type="text/javascript" language="javascript">
 $(document).ready(function() {
-	$('#failcheck').hide();
+    $('#failcheck').hide();
 });
 function check_form_ean()
 {
-	if ($('#branchcode').val()!="" && $('#ean').val()!="")
-	{
-		$('#ean_form').submit();
-	}
-	else
-	{
-		$('#failcheck').show('fast');
-	}
+    if ($('#branchcode').val()!="" && $('#ean').val()!="")
+    {
+        $('#ean_form').submit();
+    }
+    else
+    {
+        $('#failcheck').show('fast');
+    }
 
 }
 </script>
@@ -28,14 +28,14 @@ function check_form_ean()
     <div id="bd">
         <div id="yui-main">
             <div class="yui-b">
-		<h1>Branch EDI EANs</h1>
-		<div id="failcheck" class="dialog alert">You must complete all required fields</div>
+        <h1>Branch EDI EANs</h1>
+        <div id="failcheck" class="dialog alert">You must complete all required fields</div>
                 <form name="form" id="ean_form" method="post" action="/cgi-bin/koha/admin/edi_ean_accounts.pl">
                     <input type="hidden" name="op" value="[% opeditsubmit %][% opaddsubmit %][% opdelsubmit %]" />
 
-                [% IF ( opdel ) %]
+                [% IF opdel %]
                     <p>Are you sure you want to delete this account?</p>
-					<p><a href="/cgi-bin/koha/admin/edi_ean_accounts.pl?branchcode=[% branchcode %]&ean=[% ean %]&op=delsubmit">YES</a> | <a href="/cgi-bin/koha/admin/edi_ean_accounts.pl">NO</a></p>
+                    <p><a href="/cgi-bin/koha/admin/edi_ean_accounts.pl?branchcode=[% branchcode %]&ean=[% ean %]&op=delsubmit">YES</a> | <a href="/cgi-bin/koha/admin/edi_ean_accounts.pl">NO</a></p>
                 [% ELSE %]
                 <fieldset class="rows" id="ean_details">
                     <legend>EAN details</legend>

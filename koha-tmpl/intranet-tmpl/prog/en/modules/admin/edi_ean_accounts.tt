@@ -13,16 +13,16 @@
     <div id="bd">
         <div id="yui-main">
             <div class="yui-b"
-				<h3>Branch EDI EANs</h3>
-				[% IF ( eans ) %]
+                <h3>Branch EDI EANs</h3>
+                [% IF eans %]
                 <div id="eans" class="rows">
-                    [% IF ( opdelsubmit ) %]
+                    [% IF opdelsubmit %]
                     <div class="dialog alert">The EAN was successfully deleted</div>
                     [% END %]
-                    [% IF ( opaddsubmit ) %]
+                    [% IF opaddsubmit %]
                     <div class="dialog alert">The EAN was successfully added</div>
                     [% END %]
-                    [% IF ( opeditsubmit ) %]
+                    [% IF opeditsubmit %]
                     <div class="dialog alert">The EAN was successfully updated</div>
                     [% END %]
                         <div><ul class="toolbar"><li><span class="yui-button yui-link-button"><span class="first-child"><a href="/cgi-bin/koha/admin/edi_ean_edit.pl?op=add">Add a new EAN</a></span></span></li></ul></div>
