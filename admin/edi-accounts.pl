@@ -22,8 +22,7 @@ use warnings;
 use CGI;
 use C4::Auth;
 use C4::Output;
-use C4::Edifact
-  qw/GetEDIAccounts CreateEDIDetails UpdateEDIDetails DeleteEDIDetails /;
+use Koha::EDI::Account;
 
 my $input = CGI->new();
 
@@ -42,13 +41,13 @@ my $op = $input->param('op');
 $template->param( op => $op );
 
 if ( $op eq 'delsubmit' ) {
-    DeleteEDIDetails( $input->param('id') );
-    $template->param( opdelsubmit => 1 );
+    my $acct = Koha::EDI::Account->new( { id => $input->param('id') } );
+    $acct->delete();
 }
 
 #FIXME  $inputparm path is not used in Create or Update
 if ( $op eq 'addsubmit' ) {
-    CreateEDIDetails(
+    my $new_acct = Koha::EDI::Account->new(
         {
             description => $input->param('description'),
             host        => $input->param('host'),
@@ -60,13 +59,14 @@ if ( $op eq 'addsubmit' ) {
             san         => $input->param('san'),
         }
     );
+    $new_acct->insert();
     $template->param( opaddsubmit => 1 );
 }
 
 if ( $op eq 'editsubmit' ) {
-    UpdateEDIDetails(
+    my $acct = Koha::EDI::Account->new(
         {
-            editid      => $input->param('editid'),
+            id          => $input->param('editid'),
             description => $input->param('description'),
             host        => $input->param('host'),
             user        => $input->param('user'),
@@ -77,10 +77,11 @@ if ( $op eq 'editsubmit' ) {
             san         => $input->param('san'),
         }
     );
+    $acct->update();
     $template->param( opeditsubmit => 1 );
 }
 
-my $ediaccounts = GetEDIAccounts();
+my $ediaccounts = Koha::EDI::Account->get_all();
 $template->param( ediaccounts => $ediaccounts );
 
 output_html_with_http_headers( $input, $cookie, $template->output );

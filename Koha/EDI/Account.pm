@@ -1,8 +1,7 @@
 package Koha::EDI::Account;
 
-
 sub new {
-    my ($class, $arg_ref) = @_;
+    my ( $class, $arg_ref ) = @_;
 
     my $self = $arg_ref;
 
@@ -11,20 +10,73 @@ sub new {
 }
 
 sub create {
+
     # new + insert
 }
 
 sub insert {
     my $self = shift;
-    # insert in databasej:
+    if ( $self->{provider} ) {
+        my $dbh = C4::Context->dbh;
+        my $sql = <<'END_INSSQL';
+insert into vendor_edi_accounts
+  (description, host, username, password, provider, in_dir, san)
+  values (?,?,?,?,?,?,?)
+END_INSSQL
+        return $dbh->do(
+            $sql, {}, $self->{description},
+            $self->{host},     $self->{user},   $self->{pass},
+            $self->{provider}, $self->{in_dir}, $self->{san}
+        );
+    }
+    return;
+}
+
+sub delete {
+    my $self = shift;
+    if ( $self->{id} ) {
+        my $dbh = C4::Context->dbh;
+        return $dbh->do( 'delete from vendor_edi_accounts where id=?',
+            {}, $self->{id} );
+    }
+    return;
+}
+
+sub update {
+    my $self = shift;
+    if ( $self->{id} ) {
+        my $dbh = C4::Context->dbh;
+        my $sql = <<'END_UPDSQL';
+update vendor_edi_accounts set description=?, host=?,
+username=?, password=?, provider=?, in_dir=?, san=? where id=?
+END_UPDSQL
+        my $sth = $dbh->prepare($sql);
+        $sth->execute( $self->{description}, $self->{host},
+            $self->{user}, $self->{pass}, $self->{provider}, $self->{in_dir},
+            $self->{san}, $self->{id} );
+    }
+    return;
 }
 
 # Class methods
+#TODO this should return an arrayref of classes
+
+sub get_all {
+    my $dbh = C4::Context->dbh;
+    my $sql = <<'ENDACCSQL';
+        select vendor_edi_accounts.id, aqbooksellers.id as providerid,
+        aqbooksellers.name as vendor, vendor_edi_accounts.description,
+        vendor_edi_accounts.last_activity from vendor_edi_accounts inner join
+        aqbooksellers on vendor_edi_accounts.provider = aqbooksellers.id
+        order by aqbooksellers.name asc
+ENDACCSQL
+    return $dbh->selectall_arrayref( $sql, {} );
+}
 
 sub exists {
-    my ($class, $booksellerid) = @_;
-    my $dbh          = C4::Context->dbh;
-    my $ary_ref      = $dbh->selectcol_arrayref(
+    my ( $class, $booksellerid ) = @_;
+    my $dbh     = C4::Context->dbh;
+    my $ary_ref = $dbh->selectcol_arrayref(
         'select count(*) from vendor_edi_accounts where provider=?',
         {}, $booksellerid );
     if ( $ary_ref->[0] ) {

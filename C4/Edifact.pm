@@ -30,9 +30,6 @@ use parent qw(Exporter);
 
 our $VERSION   = 0.02;
 our @EXPORT_OK = qw(
-  DeleteEDIDetails
-  CreateEDIDetails
-  UpdateEDIDetails
   GetEDIAccounts
   GetEDIAccountDetails
   GetEDIfactMessageList
@@ -54,94 +51,6 @@ use C4::Edifact;
 
 This module contains routines for managing EDI account details for vendors
 
-=head2 DeleteEDIDetails
-
-Remove a vendor's FTP account
-
-=cut
-
-sub DeleteEDIDetails {
-    my $id  = shift;
-    my $dbh = C4::Context->dbh;
-    my $sth;
-    if ($id) {
-        $sth = $dbh->prepare('delete from vendor_edi_accounts where id=?');
-        $sth->execute($id);
-    }
-    return;
-}
-
-=head2 CreateEDIDetails
-
-Inserts a new EDI vendor FTP account
-
-=cut
-
-sub CreateEDIDetails {
-    my ($arg_ref) = @_;
-    if ( $arg_ref->{provider} ) {
-        my $dbh = C4::Context->dbh;
-        my $sql = <<'END_INSSQL';
-insert into vendor_edi_accounts
-  (description, host, username, password, provider, in_dir, san)
-  values (?,?,?,?,?,?,?)
-END_INSSQL
-        my $sth = $dbh->prepare($sql);
-        $sth->execute(
-            $arg_ref->{description}, $arg_ref->{host},
-            $arg_ref->{user},        $arg_ref->{pass},
-            $arg_ref->{provider},    $arg_ref->{in_dir},
-            $arg_ref->{san}
-        );
-    }
-    return;
-}
-
-=head2 UpdateEDIDetails
-
-Update a vendor's FTP account
-
-=cut
-
-sub UpdateEDIDetails {
-    my ($arg_ref) = @_;
-    if ( $arg_ref->{editid} ) {
-        my $dbh = C4::Context->dbh;
-        my $sql = <<'END_UPDSQL';
-update vendor_edi_accounts set description=?, host=?,
-username=?, password=?, provider=?, in_dir=?, san=? where id=?
-END_UPDSQL
-        my $sth = $dbh->prepare($sql);
-        $sth->execute(
-            $arg_ref->{description}, $arg_ref->{host},
-            $arg_ref->{user},        $arg_ref->{pass},
-            $arg_ref->{provider},    $arg_ref->{in_dir},
-            $arg_ref->{san},         $arg_ref->{editid}
-        );
-    }
-    return;
-}
-
-=head2 GetEDIAccounts
-
-Returns all vendor FTP accounts
-
-=cut
-
-sub GetEDIAccounts {
-    my $dbh = C4::Context->dbh;
-    my $sql = <<'ENDACCSQL';
-        select vendor_edi_accounts.id, aqbooksellers.id as providerid,
-        aqbooksellers.name as vendor, vendor_edi_accounts.description,
-        vendor_edi_accounts.last_activity from vendor_edi_accounts inner join
-        aqbooksellers on vendor_edi_accounts.provider = aqbooksellers.id
-        order by aqbooksellers.name asc
-ENDACCSQL
-    my $sth = $dbh->prepare($sql);
-    $sth->execute();
-    my $ediaccounts = $sth->fetchall_arrayref( {} );
-    return $ediaccounts;
-}
 
 =head2 GetEDIAccountDetails
 
