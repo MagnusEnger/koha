@@ -37,7 +37,7 @@ use C4::Items;
 use C4::Suggestions;
 use Date::Calc qw/Add_Delta_Days/;
 use C4::Edifact qw/ CheckVendorFTPAccountExists/;
-use Rebus::EDI;
+use Koha::EDI;
 
 =head1 NAME
 
@@ -108,8 +108,7 @@ if (!$booksellerid) {
     $booksellerid = $basket->{booksellerid};
 }
 
-my $ediaccount = CheckVendorFTPAccountExists($booksellerid);
-$template->param(ediaccount=>$ediaccount);
+$template->param( ediaccount => CheckVendorFTPAccountExists( $booksellerid ));
 my ($bookseller) = GetBookSellerFromId($booksellerid);
 
 my $op = $query->param('op');
@@ -118,22 +117,13 @@ if (!defined $op) {
 }
 
 if ( $op eq 'ediorder') {
-	my $edi=Rebus::EDI->new();
+	my $edi=Koha::EDI->new();
 	$edi->send_orders($basketno,$ean);
 	$template->param(edifile => 1);
 }
 
 my $confirm_pref= C4::Context->preference("BasketConfirmations") || '1';
 $template->param( skip_confirm_reopen => 1) if $confirm_pref eq '2';
-#if ( $op eq 'ediorder') {
-#	my $edifile=CreateEDIOrder($basketno,$booksellerid);
-#	$template->param(edifile => $edifile);
-#}
-# FIXME SendEDIOrder no longer exists
-#if ( $op eq 'edisend') {
-#	my $edisend=SendEDIOrder($basketno,$booksellerid);
-#	$template->param(edisend => $edisend);
-#}
 
 if ( $op eq 'delete_confirm' ) {
     my $basketno = $query->param('basketno');

@@ -1,4 +1,4 @@
-package Rebus::EDI::System::Koha;
+package Koha::EDI::System::Koha;
 
 # Copyright 2012 Mark Gavillet
 
@@ -8,7 +8,7 @@ use English qw( -no_match_vars);
 
 =head1 NAME
 
-Rebus::EDI::System::Koha
+Koha::EDI::System::Koha
 
 =head1 VERSION
 
@@ -16,9 +16,9 @@ Version 0.01
 
 =cut
 
-use Rebus::EDI::Custom::Default;
-use Rebus::EDI::Vendor::Default;
-use Rebus::EDI;
+use Koha::EDI::Custom::Default;
+use Koha::EDI::Vendor::Default;
+use Koha::EDI;
 use Carp;
 use Business::ISBN;
 use Readonly;
@@ -359,7 +359,7 @@ sub process_invoices {
         my $vendor_san = get_vendor_san( $invoice->{account_id} );
 
         #my $module     = get_vendor_module($vendor_san);
-        my $module         = 'Rebus::EDI::Vendor::Default';
+        my $module         = 'Koha::EDI::Vendor::Default';
         my $vendor_module  = $module->new();
         my $parsed_invoice = $vendor_module->parse_invoice($invoice);
 
@@ -401,7 +401,7 @@ sub process_quotes {
         my $vendor_san = get_vendor_san( $quote->{account_id} );
         my $module     = get_vendor_module($vendor_san);
         $module or return;
-        $module = "Rebus::EDI::Vendor::Default";
+        $module = "Koha::EDI::Vendor::Default";
         my $vendor_module = $module->new();
         my @parsed_quote  = $vendor_module->parse_quote($quote);
         my $order_id =
@@ -427,7 +427,7 @@ sub process_quotes {
                     publisher => $item->{publisher},
                     year      => $item->{year},
                 };
-                my $local_transform = Rebus::EDI::Custom::Default->new();
+                my $local_transform = Koha::EDI::Custom::Default->new();
                 my $koha_copy =
                   $local_transform->transform_local_quote_copy($quote_copy);
 
@@ -590,7 +590,7 @@ sub get_vendor_san {
 sub get_vendor_module {
     my $san = shift;
     my $module;
-    my @vendor_list = Rebus::EDI->list_vendors();
+    my @vendor_list = Koha::EDI->list_vendors();
     foreach my $vendor (@vendor_list) {
         if ( $san eq $vendor->{san} || $san eq $vendor->{ean} ) {
             $module = $vendor->{module};
@@ -618,7 +618,7 @@ sub check_order_item_exists {
         return $biblionumber, $bibitemnumber;
     }
     else {
-        my $edi = Rebus::EDI->new();
+        my $edi = Koha::EDI->new();
         $isbn = $edi->cleanisbn($isbn);
         if ( length($isbn) == 10 ) {
             $isbn = Business::ISBN->new($isbn);
@@ -867,7 +867,7 @@ sub get_order_lineitems {
     my @lineitems = GetOrders($order_id);
     my @fleshed_lineitems;
     foreach my $lineitem (@lineitems) {
-        my $clean_isbn = Rebus::EDI->cleanisbn( $lineitem->{isbn} );
+        my $clean_isbn = Koha::EDI->cleanisbn( $lineitem->{isbn} );
         my $fleshed_lineitem;
         $fleshed_lineitem->{binding}   = 'O';
         $fleshed_lineitem->{currency}  = 'GBP';
@@ -928,7 +928,7 @@ sub get_lineitem_additional_info {
     my $location;
     my $fund;
 
-    #my $local_transform = Rebus::EDI::Custom::Default->new();
+    #my $local_transform = Koha::EDI::Custom::Default->new();
     #    my $lsq_identifier  = $local_transform->lsq_identifier();
     my $dbh = C4::Context->dbh;
 

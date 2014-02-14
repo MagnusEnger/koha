@@ -1,4 +1,4 @@
-package Rebus::EDI::Vendor::Default;
+package Koha::EDI::Vendor::Default;
 
 # Copyright 2012 Mark Gavillet
 
@@ -9,7 +9,7 @@ use DateTime;
 use Business::ISBN;
 use Net::FTP::File;
 use C4::Context;
-use Rebus::EDI;
+use Koha::EDI;
 use Carp;
 
 ### Evergreen
@@ -19,7 +19,7 @@ use Carp;
 
 =head1 NAME
 
-Rebus::EDI::Vendor::Default
+Koha::EDI::Vendor::Default
 
 =head1 VERSION
 
@@ -75,7 +75,7 @@ sub parse_invoice {
                       ->{amount}->[0]->{value};
                 }
             }
-            $shippingfund = Rebus::EDI::System::Koha::get_budget_id(
+            $shippingfund = Koha::EDI::System::Koha::get_budget_id(
                 C4::Context->preference('EDIInvoicesShippingBudget') );
         }
 
@@ -304,7 +304,7 @@ sub create_order_message {
             || $lineitem->{isbn} =~ m/^978/
             || $lineitem->{isbn} !~ m/[|]/ )
         {
-            $isbn = Rebus::EDI->cleanisbn( $lineitem->{isbn} );
+            $isbn = Koha::EDI->cleanisbn( $lineitem->{isbn} );
             $isbn = Business::ISBN->new($isbn);
             if ($isbn) {
                 if ( $isbn->is_valid ) {
@@ -335,40 +335,40 @@ sub create_order_message {
         ### title
         $order_message .=
           'IMD+L+050+:::'
-          . Rebus::EDI->string35escape(
-            Rebus::EDI->escape_reserved( $lineitem->{title} ) )
+          . Koha::EDI->string35escape(
+            Koha::EDI->escape_reserved( $lineitem->{title} ) )
           . q{'};
         $segment++;
 
         ### author
         $order_message .=
           'IMD+L+009+:::'
-          . Rebus::EDI->string35escape(
-            Rebus::EDI->escape_reserved( $lineitem->{author} ) )
+          . Koha::EDI->string35escape(
+            Koha::EDI->escape_reserved( $lineitem->{author} ) )
           . q{'};
         $segment++;
 
         ### publisher
         $order_message .=
           'IMD+L+109+:::'
-          . Rebus::EDI->string35escape(
-            Rebus::EDI->escape_reserved( $lineitem->{publisher} ) )
+          . Koha::EDI->string35escape(
+            Koha::EDI->escape_reserved( $lineitem->{publisher} ) )
           . q{'};
         $segment++;
 
         ### date of publication
         $order_message .= 'IMD+L+170+:::'
-          . Rebus::EDI->escape_reserved( $lineitem->{year} ) . q{'};
+          . Koha::EDI->escape_reserved( $lineitem->{year} ) . q{'};
         $segment++;
 
         ### binding
         $order_message .= 'IMD+L+220+:::'
-          . Rebus::EDI->escape_reserved( $lineitem->{binding} ) . q{'};
+          . Koha::EDI->escape_reserved( $lineitem->{binding} ) . q{'};
         $segment++;
 
         ### quantity
         $order_message .= 'QTY+21:'
-          . Rebus::EDI->escape_reserved( $lineitem->{quantity} ) . q{'};
+          . Koha::EDI->escape_reserved( $lineitem->{quantity} ) . q{'};
         $segment++;
 
         ### copies
@@ -383,7 +383,7 @@ sub create_order_message {
 
             ### quantity
             $order_message .= q{+}
-              . Rebus::EDI->escape_reserved( $lineitem->{quantity} ) . ':LQT';
+              . Koha::EDI->escape_reserved( $lineitem->{quantity} ) . ':LQT';
             $gir_cnt++;
 
             ### Library branchcode
@@ -403,8 +403,8 @@ sub create_order_message {
             ### copy location
             if ( $copy->{lsq} ) {
                 $order_message .= q{+}
-                  . Rebus::EDI->string35escape(
-                    Rebus::EDI->escape_reserved( $copy->{lsq} ) )
+                  . Koha::EDI->string35escape(
+                    Koha::EDI->escape_reserved( $copy->{lsq} ) )
                   . ":LSQ";
                 $gir_cnt++;
             }

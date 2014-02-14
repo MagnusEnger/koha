@@ -1,4 +1,4 @@
-package Rebus::EDI;
+package Koha::EDI;
 
 # Copyright 2012 Mark Gavillet
 
@@ -6,12 +6,12 @@ use strict;
 use warnings;
 use Readonly;
 
-use Rebus::EDI::System::Koha;
-use Rebus::EDI::Vendor::Default;
+use Koha::EDI::System::Koha;
+use Koha::EDI::Vendor::Default;
 
 =head1 NAME
 
-Rebus::EDI
+Koha::EDI
 
 =head1 VERSION
 
@@ -26,7 +26,7 @@ sub new {
     my $system = shift;
     my $self   = {};
     $self->{system}     = 'koha';
-    $self->{edi_system} = Rebus::EDI::System::Koha->new();
+    $self->{edi_system} = Koha::EDI::System::Koha->new();
     bless $self, $class;
     return $self;
 }
@@ -104,10 +104,10 @@ sub send_orders {
     foreach my $order ( @{$order_details} ) {
 
         #        my $module = $order->{module};
-        #        require "Rebus/EDI/Vendor/$module.pm";
-        #        $module = "Rebus::EDI::Vendor::$module";
+        #        require "Koha/EDI/Vendor/$module.pm";
+        #        $module = "Koha::EDI::Vendor::$module";
         #        import $module;
-        my $module        = 'Rebus::EDI::Vendor::Default';
+        my $module        = 'Koha::EDI::Vendor::Default';
         my $vendor_module = $module->new();
         my $order_message = $vendor_module->create_order_message($order);
         my $order_file    = $self->{edi_system}

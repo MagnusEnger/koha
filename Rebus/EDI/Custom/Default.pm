@@ -1,4 +1,4 @@
-package Rebus::EDI::Custom::Default;
+package Koha::EDI::Custom::Default;
 
 # Copyright 2012 Mark Gavillet
 
@@ -9,7 +9,7 @@ use parent qw(Exporter);
 
 =head1 NAME
 
-Rebus::EDI::Custom::Default
+Koha::EDI::Custom::Default
 
 =head1 VERSION
 

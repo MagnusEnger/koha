@@ -7,7 +7,7 @@ use Carp;
 use Net::FTP;
 use Net::FTP::File;
 use C4::Context;
-use Rebus::EDI;
+use Koha::EDI;
 
 my $idir       = C4::Context->config('intranetdir');
 my $edidir     = "$idir/misc/edi_files/";
