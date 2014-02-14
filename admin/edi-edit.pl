@@ -22,7 +22,9 @@ use warnings;
 use CGI;
 use C4::Auth;
 use C4::Output;
-use C4::Edifact qw/GetEDIAccountDetails GetVendorList/;
+use C4::Edifact qw/GetEDIAccountDetails /;
+
+use C4::Bookseller qw/GetVendorList/;
 
 my $input = CGI->new();
 

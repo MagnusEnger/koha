@@ -30,6 +30,7 @@ our @EXPORT_OK = qw(
   ModBookseller
   DelBookseller
   AddBookseller
+  GetVendorList
 );
 
 =head1 NAME
@@ -278,8 +279,20 @@ sub DelBookseller {
     return $sth->execute($id);
 }
 
-1;
+=head2 GetVendorList
 
+Returns a list of vendors from aqbooksellers to populate drop down select menu
+
+=cut
+
+sub GetVendorList {
+    my $dbh = C4::Context->dbh;
+    return $dbh->selectall_arrayref(
+        'select id, name from aqbooksellers order by name asc',
+        { Slice => } );
+}
+
+1;
 __END__
 
 =head1 AUTHOR

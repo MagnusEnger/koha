@@ -30,7 +30,6 @@ use parent qw(Exporter);
 
 our $VERSION   = 0.02;
 our @EXPORT_OK = qw(
-  GetVendorList
   DeleteEDIDetails
   CreateEDIDetails
   UpdateEDIDetails
@@ -54,22 +53,6 @@ use C4::Edifact;
 =head1 DESCRIPTION
 
 This module contains routines for managing EDI account details for vendors
-
-=head2 GetVendorList
-
-Returns a list of vendors from aqbooksellers to populate drop down select menu
-
-=cut
-
-sub GetVendorList {
-    my $dbh = C4::Context->dbh;
-    my $sth;
-    $sth =
-      $dbh->prepare('select id, name from aqbooksellers order by name asc');
-    $sth->execute();
-    my $vendorlist = $sth->fetchall_arrayref( {} );
-    return $vendorlist;
-}
 
 =head2 DeleteEDIDetails
 
