@@ -1,4 +1,22 @@
 #!/usr/bin/perl
+#
+# Copyright 2013,2014 PTFS Europe Ltd
+#
+# This file is part of Koha.
+#
+# Koha is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# Koha is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with Koha; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
 
 use warnings;
 use strict;
@@ -13,7 +31,7 @@ my $idir       = C4::Context->config('intranetdir');
 my $edidir     = "$idir/misc/edi_files/";
 my $ftplogfile = "$edidir/edi_ftp.log";
 
-my @bertrams_ftp_accounts = (
+my $vendor_ftp_accounts = [
     {
         server  => 'ftp.server.com',
         vendor  => 'Test vendor',
@@ -23,10 +41,10 @@ my @bertrams_ftp_accounts = (
     },
 );
 
-# construct an array of hash_ref containing Bertrams FTP details (server, vendor, ftpuser, ftppass, ftpdir)
+# construct an array of hash_ref containing Vendor FTP details (server, vendor, ftpuser, ftppass, ftpdir)
 
 # downloads files and returns an array of hashes containing each message details (filename, message_content, ftp_account)
-my @downloaded_messages = download_messages( \@bertrams_ftp_accounts );
+my @downloaded_messages = download_messages( $vendor_ftp_accounts );
 
 # returns an array of hashes for files to be written to disk then transferred to Bertrams server (filename, message_content)
 my @split_messages = split_messages( \@downloaded_messages );
