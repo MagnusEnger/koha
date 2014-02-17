@@ -16,7 +16,6 @@ Version 0.01
 
 =cut
 
-use Koha::EDI::Custom::Default;
 use Koha::EDI::Vendor::Default;
 use Koha::EDI;
 use Carp;
@@ -427,11 +426,7 @@ sub process_quotes {
                     publisher => $item->{publisher},
                     year      => $item->{year},
                 };
-                my $local_transform = Koha::EDI::Custom::Default->new();
-                my $koha_copy =
-                  $local_transform->transform_local_quote_copy($quote_copy);
-
-                my $lsq_identifier = $local_transform->lsq_identifier();
+                my $koha_copy = $self->custom_copy($quote_copy);
 
                 # create biblio record
                 my $marcrecord = TransformKohaToMarc(
@@ -456,7 +451,7 @@ sub process_quotes {
                         'biblioitems.cn_source'  => 'ddc',
                         'items.cn_source'        => 'ddc',
                         'items.notforloan'       => -1,
-                        "items.$lsq_identifier"  => $koha_copy->{lsq},
+                        "items.$self->lsq_field" => $koha_copy->{lsq},
                         'items.homebranch'       => $koha_copy->{llo},
                         'items.holdingbranch'    => $koha_copy->{llo},
                         'items.booksellerid'     => $quote->{account_id},
@@ -928,8 +923,6 @@ sub get_lineitem_additional_info {
     my $location;
     my $fund;
 
-    #my $local_transform = Koha::EDI::Custom::Default->new();
-    #    my $lsq_identifier  = $local_transform->lsq_identifier();
     my $dbh = C4::Context->dbh;
 
     my $sql = <<'ENDSQL';
@@ -956,6 +949,22 @@ END1
         $fund = $rows[0];
     }
     return $homebranch, $callnumber, $itype, $location, $fund;
+}
+
+sub custom_copy {
+    my ( $self, $item ) = @_;
+
+    # local custom transformations go here
+    return $item;
+}
+
+#FIXME paramaterize this properly
+sub lsq_field {
+    my $self = shift;
+
+    # map lsq to either ccode or location
+    # return 'ccode'
+    return 'location';
 }
 
 1;
