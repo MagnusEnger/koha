@@ -16,8 +16,8 @@ Version 0.01
 
 =cut
 
-use Koha::EDI::Vendor::Default;
 use Koha::EDI;
+use Koha::EDI::Parser qw/parse_invoice parse_quote/;
 use Carp;
 use Business::ISBN;
 use Readonly;
@@ -355,12 +355,8 @@ sub update_item_order {
 sub process_invoices {
     my ( $self, $invoices ) = @_;
     foreach my $invoice ( @{$invoices} ) {
-        my $vendor_san = get_vendor_san( $invoice->{account_id} );
 
-        #my $module     = get_vendor_module($vendor_san);
-        my $module         = 'Koha::EDI::Vendor::Default';
-        my $vendor_module  = $module->new();
-        my $parsed_invoice = $vendor_module->parse_invoice($invoice);
+        my $parsed_invoice = parse_invoice($invoice);
 
         foreach my $inv ( @{$parsed_invoice} ) {
             my $invoiceid = AddInvoice(
@@ -387,7 +383,7 @@ sub process_invoices {
             ### manipulate quote file on remote server
             my $vendor_ftp_account =
               get_vendor_ftp_account( $invoice->{edi_account_id} );
-            $vendor_module->post_process_message_file( $invoice->{filename},
+            post_process_message_file( $invoice->{filename},
                 $vendor_ftp_account, 'invoice' );
         }
     }
@@ -397,12 +393,7 @@ sub process_invoices {
 sub process_quotes {
     my ( $self, $quotes ) = @_;
     foreach my $quote ( @{$quotes} ) {
-        my $vendor_san = get_vendor_san( $quote->{account_id} );
-        my $module     = get_vendor_module($vendor_san);
-        $module or return;
-        $module = "Koha::EDI::Vendor::Default";
-        my $vendor_module = $module->new();
-        my @parsed_quote  = $vendor_module->parse_quote($quote);
+        my @parsed_quote = parse_quote($quote);
         my $order_id =
           NewBasket( $quote->{account_id}, 0, $quote->{filename}, q{}, q{},
             q{} );
@@ -510,7 +501,7 @@ sub process_quotes {
         ### manipulate quote file on remote server
         my $vendor_ftp_account =
           get_vendor_ftp_account( $quote->{edi_account_id} );
-        $vendor_module->post_process_message_file( $quote->{filename},
+        post_process_message_file( $quote->{filename},
             $vendor_ftp_account, 'quote' );
         return 1;
 
@@ -556,43 +547,10 @@ sub get_discounted_price {
 sub get_budget_id {
     my $fundcode = shift;
     my $dbh      = C4::Context->dbh;
-    my @funds;
-    my $ecost;
-    my $budget_id;
-    my $sth =
-      $dbh->prepare('select budget_id from aqbudgets where budget_code=?');
-    $sth->execute($fundcode);
-    while ( @funds = $sth->fetchrow_array() ) {
-        $budget_id = $funds[0];
-    }
-    return $budget_id;
-}
-
-sub get_vendor_san {
-    my $vendor_id = shift;
-    my $dbh       = C4::Context->dbh;
-    my $sth =
-      $dbh->prepare('select san from vendor_edi_accounts where provider=?');
-    $sth->execute($vendor_id);
-    my @result;
-    my $san;
-    while ( @result = $sth->fetchrow_array() ) {
-        $san = $result[0];
-    }
-    return $san;
-}
-
-sub get_vendor_module {
-    my $san = shift;
-    my $module;
-    my @vendor_list = Koha::EDI->list_vendors();
-    foreach my $vendor (@vendor_list) {
-        if ( $san eq $vendor->{san} || $san eq $vendor->{ean} ) {
-            $module = $vendor->{module};
-            last;
-        }
-    }
-    return $module;
+    my $arr_ref  = $dbh->selectcol_arrayref(
+        'select budget_id from aqbudgets where budget_code=?',
+        {}, $fundcode );
+    return $arr_ref->[0];
 }
 
 sub check_order_item_exists {
@@ -965,6 +923,36 @@ sub lsq_field {
     # map lsq to either ccode or location
     # return 'ccode'
     return 'location';
+}
+
+sub post_process_message_file {
+    my ( $remote_file, $ftp_account, $message_type ) = @_;
+    my $rext;
+    my $qext;
+
+    if ( $message_type eq 'quote' ) {
+        $rext = '.EEQ';
+        $qext = '.CEQ';
+    }
+    if ( $message_type eq 'invoice' ) {
+        $rext = '.EEI';
+        $qext = '.CEI';
+    }
+
+    ### connect to vendor ftp account
+    my $filename = substr $remote_file, rindex( $remote_file, q{/} ) + 1;
+    my $ftp = Net::FTP->new( $ftp_account->{host}, Timeout => 10 )
+      or croak 'Couldn\'t connect';
+    $ftp->login( $ftp_account->{username}, $ftp_account->{password} )
+      or croak 'Couldn\'t log in';
+    $ftp->cwd( $ftp_account->{in_dir} ) or croak 'Couldn\'t change directory';
+
+    ### rename file
+    $filename =~ s/$qext/$rext/g;
+    $ftp->rename( $remote_file, $filename )
+      or croak 'Couldn\'t rename remote file';
+    $ftp->quit();
+    return;
 }
 
 1;
