@@ -47,7 +47,7 @@ if ( $op eq 'delsubmit' ) {
             ean        => $input->param('ean')
         }
     );
-    $ean->delete();
+    $ean->del();
     $template->param( opdelsubmit => 1 );
 }
 

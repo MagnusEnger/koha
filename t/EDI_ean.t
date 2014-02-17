@@ -11,7 +11,7 @@ BEGIN {
 
 my $class = 'Koha::EDI::Ean';
 
-my $obj = $class->new({});
+my $obj = $class->new({ branchcode => 'TEST', ean => 'testean' });
 
 isa_ok($obj,$class);
 

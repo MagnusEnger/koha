@@ -42,7 +42,7 @@ $template->param( op => $op );
 
 if ( $op eq 'delsubmit' ) {
     my $acct = Koha::EDI::Account->new( { id => $input->param('id') } );
-    $acct->delete();
+    $acct->del();
 }
 
 #FIXME  $inputparm path is not used in Create or Update

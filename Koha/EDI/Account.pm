@@ -1,4 +1,7 @@
 package Koha::EDI::Account;
+use strict;
+use warnings;
+use C4::Context;
 
 sub new {
     my ( $class, $arg_ref ) = @_;
@@ -10,8 +13,14 @@ sub new {
 }
 
 sub create {
+    my ( $class, $arg_ref ) = @_;
+    my $obj = $class->new($arg_ref);
 
-    # new + insert
+    if ($obj) {
+        $obj->insert();
+        return $obj;
+    }
+    return;
 }
 
 sub insert {
@@ -32,7 +41,7 @@ END_INSSQL
     return;
 }
 
-sub delete {
+sub del {
     my $self = shift;
     if ( $self->{id} ) {
         my $dbh = C4::Context->dbh;
@@ -73,7 +82,7 @@ ENDACCSQL
     return $dbh->selectall_arrayref( $sql, {} );
 }
 
-sub exists {
+sub exist {
     my ( $class, $booksellerid ) = @_;
     my $dbh     = C4::Context->dbh;
     my $ary_ref = $dbh->selectcol_arrayref(
@@ -105,9 +114,9 @@ can order electronically using Edifact
 
 =head1 METHODS
 
-=head2 exists
+=head2 exist
 
-Koha::EDI::Account->exists(booksellerid);
+Koha::EDI::Account->exist(booksellerid);
 
 Class method - passed a booksellerid returns 1 if account(s)
 exist otherwise returns zero

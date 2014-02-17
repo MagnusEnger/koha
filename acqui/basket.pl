@@ -87,7 +87,7 @@ my $basket = GetBasket($basketno);
 $booksellerid = $basket->{booksellerid} unless $booksellerid;
 my ($bookseller) = GetBookSellerFromId($booksellerid);
 
-$template->param( ediaccount => Koha::EDI::Account->exists( $booksellerid ));
+$template->param( ediaccount => Koha::EDI::Account->exist( $booksellerid ));
 
 unless (CanUserManageBasket($loggedinuser, $basket, $userflags)) {
     $template->param(

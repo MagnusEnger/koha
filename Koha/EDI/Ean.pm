@@ -60,7 +60,7 @@ sub change {
 
 }
 
-sub delete {
+sub del {
     my $self = shift;
     my $dbh  = C4::Context->dbh;
     return $dbh->do( 'delete from edifact_ean where branchcode=? and ean=?',
@@ -79,7 +79,7 @@ sub branchcode {
 
 sub branchname {
     my $self = shift;
-    unless ( $self->{branchname} ) {
+    if ( !exists $self->{branchname} ) {
         $self->{branchname} = GetBranchName( $self->{branchcode} );
     }
     return $self->{branchname};
