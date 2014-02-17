@@ -115,11 +115,8 @@ sub parse_quote {
             my $quantity = $item->{quantity};
             my $copies;
             for ( my $i = 0 ; $i < $item->{quantity} ; $i++ ) {
-                my $llo       = $item->{related_numbers}->[$i]->{LLO}->[0];
-                my $lfn       = $item->{related_numbers}->[$i]->{LFN}->[0];
-                my $lsq       = $item->{related_numbers}->[$i]->{LSQ}->[0];
-                my $lst       = $item->{related_numbers}->[$i]->{LST}->[0];
-                my $shelfmark = $item->shelfmark;
+
+                #FIXME logic opaque here
                 my $ftxlin;
                 my $ftxlno;
                 if ( $item->{free_text}->{qualifier} eq 'LIN' ) {
@@ -135,15 +132,14 @@ sub parse_quote {
                 if ($ftxlno) {
                     $note = $ftxlno;
                 }
-                my $parsed_copy = {
-                    llo       => $llo,
-                    lfn       => $lfn,
-                    lsq       => $lsq,
-                    lst       => $lst,
-                    shelfmark => $shelfmark,
-                    note      => $note,
+                push @{$copies}, {
+                    llo       => $item->{related_numbers}->[$i]->{LLO}->[0],
+                    lfn       => $item->{related_numbers}->[$i]->{LFN}->[0],
+                    lsq       => $item->{related_numbers}->[$i]->{LSQ}->[0],
+                    lst       => $item->{related_numbers}->[$i]->{LST}->[0],
+                    shelfmark => $item->shelfmark;
+                      note    => $note,
                 };
-                push @{$copies}, $parsed_copy;
             }
             $parsed_item->{copies} = $copies;
             push @parsed_quote, $parsed_item;
