@@ -3,6 +3,9 @@ use strict;
 use warnings;
 
 use DateTime;
+use Readonly;
+use Business::ISBN;
+use Koha::EDI::Util qw( cleanisbn );
 use parent qw/Exporter/;
 
 our @EXPORT_OK = qw( create_order_message );
@@ -97,7 +100,7 @@ sub create_order_message {
             || $lineitem->{isbn} =~ m/^978/
             || $lineitem->{isbn} !~ m/[|]/ )
         {
-            $isbn = Koha::EDI->cleanisbn( $lineitem->{isbn} );
+            $isbn = cleanisbn( $lineitem->{isbn} );
             $isbn = Business::ISBN->new($isbn);
             if ($isbn) {
                 if ( $isbn->is_valid ) {
@@ -127,41 +130,32 @@ sub create_order_message {
 
         ### title
         $order_message .=
-          'IMD+L+050+:::'
-          . Koha::EDI->string35escape(
-            Koha::EDI->escape_reserved( $lineitem->{title} ) )
-          . q{'};
+          'IMD+L+050+:::' . _string35escape( $lineitem->{title} ) . q{'};
         $segment++;
 
         ### author
         $order_message .=
-          'IMD+L+009+:::'
-          . Koha::EDI->string35escape(
-            Koha::EDI->escape_reserved( $lineitem->{author} ) )
-          . q{'};
+          'IMD+L+009+:::' . _string35escape( $lineitem->{author} ) . q{'};
         $segment++;
 
         ### publisher
         $order_message .=
-          'IMD+L+109+:::'
-          . Koha::EDI->string35escape(
-            Koha::EDI->escape_reserved( $lineitem->{publisher} ) )
-          . q{'};
+          'IMD+L+109+:::' . _string35escape( $lineitem->{publisher} ) . q{'};
         $segment++;
 
         ### date of publication
-        $order_message .= 'IMD+L+170+:::'
-          . Koha::EDI->escape_reserved( $lineitem->{year} ) . q{'};
+        $order_message .=
+          'IMD+L+170+:::' . _escape_reserved( $lineitem->{year} ) . q{'};
         $segment++;
 
         ### binding
-        $order_message .= 'IMD+L+220+:::'
-          . Koha::EDI->escape_reserved( $lineitem->{binding} ) . q{'};
+        $order_message .=
+          'IMD+L+220+:::' . _escape_reserved( $lineitem->{binding} ) . q{'};
         $segment++;
 
         ### quantity
-        $order_message .= 'QTY+21:'
-          . Koha::EDI->escape_reserved( $lineitem->{quantity} ) . q{'};
+        $order_message .=
+          'QTY+21:' . _escape_reserved( $lineitem->{quantity} ) . q{'};
         $segment++;
 
         ### copies
@@ -175,8 +169,8 @@ sub create_order_message {
             $order_message .= sprintf 'GIR+%03d', $copyno;
 
             ### quantity
-            $order_message .= q{+}
-              . Koha::EDI->escape_reserved( $lineitem->{quantity} ) . ':LQT';
+            $order_message .=
+              q{+} . _escape_reserved( $lineitem->{quantity} ) . ':LQT';
             $gir_cnt++;
 
             ### Library branchcode
@@ -195,10 +189,8 @@ sub create_order_message {
 
             ### copy location
             if ( $copy->{lsq} ) {
-                $order_message .= q{+}
-                  . Koha::EDI->string35escape(
-                    Koha::EDI->escape_reserved( $copy->{lsq} ) )
-                  . ':LSQ';
+                $order_message .=
+                  q{+} . _string35escape( $copy->{lsq} ) . ':LSQ';
                 $gir_cnt++;
             }
 
@@ -258,5 +250,42 @@ sub create_order_message {
     ### Exchange reference number from UNB segment
     $order_message .= "UNZ+1+$exchange'";
     return $order_message;
+}
+
+sub _string35escape {
+    my $string = shift;
+    $string = _escape_reserved($string);
+    Readonly my $CHUNKLEN => 35;
+    my $colon_string;
+    my @sections;
+    if ( length($string) > $CHUNKLEN ) {
+        my ( $chunk, $stringlength ) = ( $CHUNKLEN, length $string );
+        for ( my $counter = 0 ; $counter < $stringlength ; $counter += $chunk )
+        {
+            push @sections, substr $string, $counter, $chunk;
+        }
+        foreach my $section (@sections) {
+            $colon_string .= "$section:";
+        }
+        chop $colon_string;
+    }
+    else {
+        $colon_string = $string;
+    }
+    return $colon_string;
+}
+
+sub _escape_reserved {
+    my $string = shift;
+    if ($string) {
+        $string =~ s/[?]/??/g;
+        $string =~ s/'/?'/g;
+        $string =~ s/:/?:/g;
+        $string =~ s/[+]/?+/g;
+        return $string;
+    }
+    else {
+        return;
+    }
 }
 1;

@@ -4,7 +4,6 @@ package Koha::EDI;
 
 use strict;
 use warnings;
-use Readonly;
 
 use Koha::EDI::System::Koha;
 
@@ -30,48 +29,6 @@ sub new {
     return $self;
 }
 
-sub list_vendors {
-    Readonly my @VENDORS => (
-        {
-            name   => 'Bertrams',
-            san    => '0143731',
-            ean    => q{},
-            module => 'Default'
-        },
-        {
-            name   => 'Bertrams',
-            san    => '5013546025078',
-            ean    => q{},
-            module => 'Default'
-        },
-        {
-            name   => 'Dawsons',
-            san    => q{},
-            ean    => '5013546027856',
-            module => 'Default'
-        },
-        {
-            name   => 'Coutts',
-            san    => q{},
-            ean    => '5013546048686',
-            module => 'Default'
-        },
-        {
-            name   => 'Tomlinsons',
-            san    => q{},
-            ean    => '5033075063552',
-            module => 'Default'
-        },
-        {
-            name   => 'PTFS Europe',
-            san    => q{},
-            ean    => '5011234567890',
-            module => 'Default'
-        },
-    );
-
-    return @VENDORS;
-}
 
 sub retrieve_quotes {
     my $self                = shift;
@@ -115,61 +72,5 @@ sub send_orders {
     return;
 }
 
-sub string35escape {
-    my $string = shift;
-    Readonly my $CHUNKLEN => 35;
-    my $colon_string;
-    my @sections;
-    if ( length($string) > $CHUNKLEN ) {
-        my ( $chunk, $stringlength ) = ( $CHUNKLEN, length $string );
-        for ( my $counter = 0 ; $counter < $stringlength ; $counter += $chunk )
-        {
-            push @sections, substr $string, $counter, $chunk;
-        }
-        foreach my $section (@sections) {
-            $colon_string .= "$section:";
-        }
-        chop $colon_string;
-    }
-    else {
-        $colon_string = $string;
-    }
-    return $colon_string;
-}
-
-sub escape_reserved {
-    my $string = shift;
-    if ($string) {
-        $string =~ s/[?]/??/g;
-        $string =~ s/'/?'/g;
-        $string =~ s/:/?:/g;
-        $string =~ s/[+]/?+/g;
-        return $string;
-    }
-    else {
-        return;
-    }
-}
-
-sub cleanisbn {
-    my $isbn = shift;
-    if ($isbn) {
-        my $i = index $isbn, '(';
-        if ( $i > 1 ) {
-            $isbn = substr $isbn, 0, ( $i - 1 );
-        }
-        if ( $isbn =~ m/[|]/ ) {
-            my @isbns = split /[|]/, $isbn;
-            $isbn = $isbns[0];
-        }
-
-        $isbn =~ s/^\s+//;
-        $isbn =~ s/\s+$//;
-        return $isbn;
-    }
-    else {
-        return;
-    }
-}
 
 1;

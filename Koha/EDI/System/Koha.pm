@@ -18,6 +18,7 @@ Version 0.01
 
 use Koha::EDI;
 use Koha::EDI::Parser qw/parse_invoice parse_quote/;
+use Koha::EDI::Util qw( cleanisbn );
 use Carp;
 use Business::ISBN;
 use Readonly;
@@ -335,14 +336,14 @@ sub record_activity {
     return $provider;
 }
 
-    # prepare update handle once
-sub _get_update_handle  {
-    my $sql=<<'END_SQL';
+# prepare update handle once
+sub _get_update_handle {
+    my $sql = <<'END_SQL';
 update aqorders set datereceived=?, gstrate=?, quantityreceived=?,
  unitprice=?, invoiceid=? where ordernumber=?
 END_SQL
     my $dbh = C4::Context->dbh;
-    return $dbh->prepare( $sql);
+    return $dbh->prepare($sql);
 }
 
 sub process_invoices {
@@ -369,14 +370,9 @@ sub process_invoices {
                     if ( !$update_handle ) {
                         $update_handle = _get_update_handle();
                     }
-                    $update_handle->execute(
-                        $item->{datereceived},
-                        $item->{gstrate},
-                        $item->{quantity},
-                        $item->{unit_price},
-                        $invoiceid,
-                        $ordernumber
-                    );
+                    $update_handle->execute( $item->{datereceived},
+                        $item->{gstrate}, $item->{quantity},
+                        $item->{unit_price}, $invoiceid, $ordernumber );
                 }
             }
 
@@ -573,8 +569,7 @@ sub check_order_item_exists {
         return $biblionumber, $bibitemnumber;
     }
     else {
-        my $edi = Koha::EDI->new();
-        $isbn = $edi->cleanisbn($isbn);
+        $isbn = cleanisbn($isbn);
         if ( length($isbn) == 10 ) {
             $isbn = Business::ISBN->new($isbn);
             if ($isbn) {
@@ -822,7 +817,7 @@ sub get_order_lineitems {
     my @lineitems = GetOrders($order_id);
     my @fleshed_lineitems;
     foreach my $lineitem (@lineitems) {
-        my $clean_isbn = Koha::EDI->cleanisbn( $lineitem->{isbn} );
+        my $clean_isbn = cleanisbn( $lineitem->{isbn} );
         my $fleshed_lineitem;
         $fleshed_lineitem->{binding}   = 'O';
         $fleshed_lineitem->{currency}  = 'GBP';
