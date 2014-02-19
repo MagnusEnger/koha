@@ -198,7 +198,7 @@ sub create_order_message {
                 $order_message .= q{+}
                   . Koha::EDI->string35escape(
                     Koha::EDI->escape_reserved( $copy->{lsq} ) )
-                  . ":LSQ";
+                  . ':LSQ';
                 $gir_cnt++;
             }
 
@@ -225,7 +225,7 @@ sub create_order_message {
 
         ### price
         if ( $lineitem->{price} ) {
-            $order_message .= "PRI+AAB:$lineitem->{price}" . q{'};
+            $order_message .= "PRI+AAB:$lineitem->{price}'";
             $segment++;
         }
 
@@ -234,7 +234,7 @@ sub create_order_message {
         $segment++;
 
         ### Local order number
-        $order_message .= "RFF+LI:$lineitem->{rff}" . q{'};
+        $order_message .= "RFF+LI:$lineitem->{rff}'";
         $segment++;
 
         ### Quote reference (if in response to quote)
@@ -253,10 +253,10 @@ sub create_order_message {
 
     ### number of segments in the message (+1 to include the UNT segment itself) and reference number from UNH segment
     $segment++;
-    $order_message .= "UNT+$segment+$ref" . q{'};
+    $order_message .= "UNT+$segment+$ref'";
 
     ### Exchange reference number from UNB segment
-    $order_message .= "UNZ+1+$exchange" . q{'};
+    $order_message .= "UNZ+1+$exchange'";
     return $order_message;
 }
 1;
