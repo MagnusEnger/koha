@@ -35,8 +35,7 @@ sub parse_invoice {
                       $aoc->{amount}->[0]->{value};
                 }
             }
-            $shippingfund = Koha::EDI::System::Koha::get_budget_id(
-                C4::Context->preference('EDIInvoicesShippingBudget') );
+            $shippingfund = _get_shipping_fund_id();
         }
 
         my $parsed_items = [];
@@ -148,4 +147,18 @@ sub parse_quote {
     }
     return @parsed_quote;
 }
+
+# logic here needs looking at does not look like joined up thinking
+sub _get_shipping_fund_id {
+    my $fundcode = C4::Context->preference('EDIInvoicesShippingBudget');
+    if ($fundcode) {
+        my $dbh     = C4::Context->dbh;
+        my $arr_ref = $dbh->selectcol_arrayref(
+            'select budget_id from aqbudgets where budget_code=?',
+            {}, $fundcode );
+        return $arr_ref->[0];
+    }
+    return;
+}
+
 1;
