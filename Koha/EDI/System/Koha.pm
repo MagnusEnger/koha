@@ -16,7 +16,6 @@ Version 0.01
 
 =cut
 
-use Koha::EDI;
 use Koha::EDI::Parser qw/parse_invoice parse_quote/;
 use Koha::EDI::Util qw( cleanisbn );
 use Carp;
