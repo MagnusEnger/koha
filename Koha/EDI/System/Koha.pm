@@ -335,21 +335,14 @@ sub record_activity {
     return $provider;
 }
 
-# FIXME pass a ref_arg
-sub update_item_order {
-    my (
-        $ordernumber, $datereceived, $gstrate,
-        $quantity,    $unitprice,    $invoiceid
-    ) = @_;
+    # prepare update handle once
+sub _get_update_handle  {
+    my $sql=<<'END_SQL';
+update aqorders set datereceived=?, gstrate=?, quantityreceived=?,
+ unitprice=?, invoiceid=? where ordernumber=?
+END_SQL
     my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare(
-'update aqorders set datereceived=?, gstrate=?, quantityreceived=?, unitprice=?, invoiceid=? where ordernumber=?'
-    );
-    $sth->execute(
-        $datereceived, $gstrate,   $quantity,
-        $unitprice,    $invoiceid, $ordernumber
-    );
-    return;
+    return $dbh->prepare( $sql);
 }
 
 sub process_invoices {
@@ -358,6 +351,7 @@ sub process_invoices {
 
         my $parsed_invoice = parse_invoice($invoice);
 
+        my $update_handle;
         foreach my $inv ( @{$parsed_invoice} ) {
             my $invoiceid = AddInvoice(
                 invoicenumber         => $inv->{ref_num},
@@ -372,9 +366,17 @@ sub process_invoices {
                 my $ordernumber =
                   get_ordernumber_from_supplier_ref( $item->{supplier_ref} );
                 if ($ordernumber) {
-                    update_item_order( $ordernumber, $item->{datereceived},
-                        $item->{gstrate}, $item->{quantity},
-                        $item->{unit_price}, $invoiceid );
+                    if ( !$update_handle ) {
+                        $update_handle = _get_update_handle();
+                    }
+                    $update_handle->execute(
+                        $item->{datereceived},
+                        $item->{gstrate},
+                        $item->{quantity},
+                        $item->{unit_price},
+                        $invoiceid,
+                        $ordernumber
+                    );
                 }
             }
 

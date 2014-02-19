@@ -7,7 +7,6 @@ use warnings;
 use Readonly;
 
 use Koha::EDI::System::Koha;
-use Koha::EDI::Vendor::Default;
 
 =head1 NAME
 
