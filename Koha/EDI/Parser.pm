@@ -132,14 +132,15 @@ sub parse_quote {
                 if ($ftxlno) {
                     $note = $ftxlno;
                 }
-                push @{$copies}, {
+                push @{$copies},
+                  {
                     llo       => $item->{related_numbers}->[$i]->{LLO}->[0],
                     lfn       => $item->{related_numbers}->[$i]->{LFN}->[0],
                     lsq       => $item->{related_numbers}->[$i]->{LSQ}->[0],
                     lst       => $item->{related_numbers}->[$i]->{LST}->[0],
-                    shelfmark => $item->shelfmark;
-                      note    => $note,
-                };
+                    shelfmark => $item->shelfmark,
+                    note      => $note,
+                  };
             }
             $parsed_item->{copies} = $copies;
             push @parsed_quote, $parsed_item;
