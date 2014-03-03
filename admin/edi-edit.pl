@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 # Copyright 2011 Mark Gavillet & PTFS Europe Ltd
+# Copyright 2014 PTFS Europe Ltd
 #
 # This file is part of Koha.
 #
@@ -38,6 +39,7 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
         debug           => ( $ENV{DEBUG} ) ? 1 : 0,
     }
 );
+
 my $vendorlist = GetVendorList();
 
 my $op = $input->param('op');
@@ -45,14 +47,16 @@ $template->param( op => $op );
 
 if ( $op eq 'add' ) {
     $template->param( opaddsubmit => 'addsubmit' );
+
 }
 if ( $op eq 'edit' ) {
     $template->param( opeditsubmit => 'editsubmit' );
     my $edi_details      = GetEDIAccountDetails( $input->param('id') );
     my $selectedprovider = $edi_details->{provider};
-    foreach my $prov ( @{$vendorlist} ) {
-        $prov->{selected} = 'selected'
-          if $prov->{id} == $selectedprovider;
+    foreach my $vendor ( @{$vendorlist} ) {
+        if ( $vendor->{id} == $selectedprovider ) {
+            $vendor->{selected} = 'selected';
+        }
     }
     $template->param(
         editid      => $edi_details->{id},
@@ -66,9 +70,11 @@ if ( $op eq 'edit' ) {
     );
 }
 if ( $op eq 'del' ) {
-    $template->param( opdelsubmit => 'delsubmit' );
-    $template->param( opdel       => 1 );
-    $template->param( id          => $input->param('id') );
+    $template->param(
+        opdelsubmit => 'delsubmit',
+        opdel       => 1,
+        id          => $input->param('id')
+    );
 }
 
 $template->param( vendorlist => $vendorlist );
