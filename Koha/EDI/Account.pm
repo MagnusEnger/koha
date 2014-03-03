@@ -67,6 +67,38 @@ END_UPDSQL
     return;
 }
 
+sub download {
+    my ($self, $notice_type) = @_;
+
+    my @downloaded_files;
+    my $ftp = Net::FTP->new(
+        %self->{host},
+        Timeout => 10,
+        Passive => 1
+    ) or return _abort_download(undef, "Cannot connect to $self->{host}: $@");
+    $ftp->login( $self->{username}, $self->{password} )
+        or _abort_download($ftp, "Cannot login: $ftp->message()");
+    $ftp->cwd( $self->{in_dir} )
+        or _abort_download($ftp, "Cannot change remote dir : $ftp->message()");
+    my $file_list = $ftp->ls()
+        or _abort_download($ftp, "cannot get file list from server");
+    foreach my $filename (@{$file_list}) {
+        if ($self->is_file_new($filename)) {
+            $ftp->get(__REMOTE_FILE__, __LOCAL_FILE__);
+            push @downloaded_files, $filename;
+        }
+    }
+    $ftp->quit;
+
+    return @downloaded_files;
+}
+
+_abort_download {
+    # log info if ftp open close it
+    #returns undef i.e. an empty array
+    return;
+}
+
 # Class methods
 #TODO this should return an arrayref of classes
 
@@ -95,6 +127,18 @@ sub exist {
         return 0;
     }
 }
+
+sub ftp_accounts {
+    my $dbh = C4::Context->dbh;
+    my $sql = <<'ENDFTPSQL';
+        select vendor_edi_accounts.id,
+        aqbooksellers.id as providerid,
+        aqbooksellers.name as vendor,
+        vendor_edi_accounts.description,
+        vendor_edi_accounts.last_activity from vendor_edi_accounts
+        inner join aqbooksellers on vendor_edi_accounts.provider = aqbooksellers.id
+ENDFTPSQL
+    my $arr_ref = $dbh->selectall_arrayref( $sql, { Slice => {}} );
 
 1;
 __END__

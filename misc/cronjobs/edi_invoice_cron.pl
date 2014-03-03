@@ -20,8 +20,6 @@
 use warnings;
 use strict;
 
-use Koha::EDI;
+use Koha::EDI qw( retrieve_invoices );
 
-my $edi = Koha::EDI->new();
-
-my $result = $edi->retrieve_invoices;
+retrieve_invoices();

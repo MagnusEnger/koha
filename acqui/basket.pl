@@ -37,7 +37,7 @@ use C4::Items;
 use C4::Suggestions;
 use Date::Calc qw/Add_Delta_Days/;
 use Koha::EDI::Account;
-use Koha::EDI;
+use Koha::EDI qw( send_orders);
 
 =head1 NAME
 
@@ -111,8 +111,7 @@ if (!defined $op) {
 }
 
 if ( $op eq 'ediorder') {
-	my $edi=Koha::EDI->new();
-	$edi->send_orders($basketno,$ean);
+	send_orders($basketno,$ean);
 	$template->param(edifile => 1);
 }
 
