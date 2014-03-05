@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# Copyright 2012 Mark Gavillet & PTFS Europe Ltd
+# Copyright 2012,2014 Mark Gavillet & PTFS Europe Ltd
 #
 # This file is part of Koha.
 #
@@ -59,7 +59,6 @@ if ( $op eq 'del' ) {
     $template->param( branchcode  => $input->param('branchcode') );
 }
 
-my $branchlist = GetBranches();
-$template->param( branchlist => $branchlist );
+$template->param( branchlist => GetBranches() );
 
 output_html_with_http_headers( $input, $cookie, $template->output );

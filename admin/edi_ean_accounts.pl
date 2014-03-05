@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# Copyright 2012 Mark Gavillet & PTFS Europe Ltd
+# Copyright 2012, 2014 Mark Gavillet & PTFS Europe Ltd
 #
 # This file is part of Koha.
 #
@@ -24,6 +24,12 @@ use C4::Auth;
 use C4::Output;
 use Koha::EDI::Ean;
 
+my $op_routine = {
+    delsubmit  => \&delsubmit,
+    addsubmit  => \&addsubmit,
+    editsubmit => \&editsubmit,
+};
+
 my $input = CGI->new();
 
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
@@ -40,7 +46,14 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
 my $op = $input->param('op');
 $template->param( op => $op );
 
-if ( $op eq 'delsubmit' ) {
+if ( exists $op_routine->{$op} ) {
+    $op_routine->{$op}->();
+}
+$template->param( eans => Koha::EDI::Ean->all() );
+
+output_html_with_http_headers( $input, $cookie, $template->output );
+
+sub delsubmit {
     my $ean = Koha::EDI::Ean->new(
         {
             branchcode => $input->param('branchcode'),
@@ -49,9 +62,10 @@ if ( $op eq 'delsubmit' ) {
     );
     $ean->del();
     $template->param( opdelsubmit => 1 );
+    return;
 }
 
-if ( $op eq 'addsubmit' ) {
+sub addsubmit {
     my $ean = Koha::EDI::Ean->new(
         {
             branchcode => $input->param('branchcode'),
@@ -60,9 +74,10 @@ if ( $op eq 'addsubmit' ) {
     );
     $ean->insert();
     $template->param( opaddsubmit => 1 );
+    return;
 }
 
-if ( $op eq 'editsubmit' ) {
+sub editsubmit {
     my $ean = Koha::EDI::Ean->new(
         {
             branchcode => $input->param('oldbranchcode'),
@@ -76,8 +91,6 @@ if ( $op eq 'editsubmit' ) {
         }
     );
     $template->param( opeditsubmit => 1 );
+    return;
 }
 
-$template->param( eans => Koha::EDI::Ean->all() );
-
-output_html_with_http_headers( $input, $cookie, $template->output );
