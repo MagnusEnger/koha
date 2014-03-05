@@ -72,7 +72,7 @@ sub download {
 
     my @downloaded_files;
     my $ftp = Net::FTP->new(
-        %self->{host},
+        $self->{host},
         Timeout => 10,
         Passive => 1
     ) or return _abort_download(undef, "Cannot connect to $self->{host}: $@");
@@ -84,7 +84,7 @@ sub download {
         or _abort_download($ftp, "cannot get file list from server");
     foreach my $filename (@{$file_list}) {
         if ($self->is_file_new($filename)) {
-            $ftp->get(__REMOTE_FILE__, __LOCAL_FILE__);
+            #$ftp->get(__REMOTE_FILE__, __LOCAL_FILE__);
             push @downloaded_files, $filename;
         }
     }
@@ -93,7 +93,7 @@ sub download {
     return @downloaded_files;
 }
 
-_abort_download {
+sub _abort_download {
     # log info if ftp open close it
     #returns undef i.e. an empty array
     return;
@@ -103,6 +103,7 @@ _abort_download {
 #TODO this should return an arrayref of classes
 
 sub get_all {
+    my $class = shift;
     my $dbh = C4::Context->dbh;
     my $sql = <<'ENDACCSQL';
         select vendor_edi_accounts.id, aqbooksellers.id as providerid,
@@ -139,6 +140,7 @@ sub ftp_accounts {
         inner join aqbooksellers on vendor_edi_accounts.provider = aqbooksellers.id
 ENDFTPSQL
     my $arr_ref = $dbh->selectall_arrayref( $sql, { Slice => {}} );
+}
 
 1;
 __END__
