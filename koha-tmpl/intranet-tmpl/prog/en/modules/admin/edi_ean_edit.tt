@@ -35,23 +35,22 @@ function check_form_ean()
                     <input type="hidden" name="op" value="[% opeditsubmit %][% opaddsubmit %][% opdelsubmit %]" />
 
                 [% IF opdel %]
-                    <p>Are you sure you want to delete this account?</p>
+                    <p>Are you sure you want to delete this ean?</p>
                     <p><a href="/cgi-bin/koha/admin/edi_ean_accounts.pl?branchcode=[% branchcode %]&ean=[% ean %]&op=delsubmit">YES</a> | <a href="/cgi-bin/koha/admin/edi_ean_accounts.pl">NO</a></p>
                 [% ELSE %]
                 <fieldset class="rows" id="ean_details">
                     <legend>EAN details</legend>
                     <ol>
                         <li>
-                            <label for="branchcode" class="required">Branch:*</label>
+                            <label for="branchcode" class="required">Branch:</label>
                             <select id="branchcode" name="branchcode">
-                                <option value="">Select a branch</option>
                                 [% FOREACH branch IN branchlist %]
                                     <option value="[% branch.branchcode %]" [% 'SELECTED' IF branch.branchcode==selectedbranch %]>[% branch.branchname %]</option>
                                 [% END %]
                             </select>
                         </li>
                         <li>
-                            <label for="ean" class="required">EAN:* </label>
+                            <label for="ean" class="required">EAN: </label>
                             <input type="text" id="ean" name="ean" size="40" value="[% ean %]" />
                         </li>
                         <input type="hidden" name="oldbranchcode" value="[% branchcode %]" />

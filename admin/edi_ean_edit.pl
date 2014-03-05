@@ -22,7 +22,7 @@ use warnings;
 use CGI;
 use C4::Auth;
 use C4::Output;
-use C4::Branch qw/ GetBranches /;
+use C4::Branch qw/ GetBranchesLoop /;
 
 my $input = CGI->new();
 
@@ -59,6 +59,6 @@ if ( $op eq 'del' ) {
     $template->param( branchcode  => $input->param('branchcode') );
 }
 
-$template->param( branchlist => GetBranches() );
+$template->param( branchlist => GetBranchesLoop() );
 
 output_html_with_http_headers( $input, $cookie, $template->output );

@@ -42,7 +42,10 @@ sub insert {
 sub change {
     my ( $self, $newval ) = @_;
     my $dbh = C4::Context->dbh;
-    my $old = $self;
+    my $old = {
+        branchcode => $self->{branchcode},
+        ean        => $self->{ean},
+    };
     if ( $newval->{branchcode} ) {
         $self->{branchcode} = $newval->{branchcode};
     }
@@ -90,10 +93,11 @@ sub all {
     my $sql = <<'ENDSEL';
 select branches.branchname, edifact_ean.ean, edifact_ean.branchcode from
  branches inner join edifact_ean on edifact_ean.branchcode=branches.branchcode
- order by branches.branchname asc'
+ order by branches.branchname asc
 ENDSEL
     my $tuples = $dbh->selectall_arrayref( $sql, { Slice => {} } );
-    my $eans = map { Koha::EDI::Ean->new($_); } @{$tuples};
+    my $eans = [];
+    @{$eans} = map { Koha::EDI::Ean->new($_); } @{$tuples};
     return $eans;
 }
 
