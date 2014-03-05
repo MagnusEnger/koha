@@ -25,20 +25,32 @@
                     [% IF opeditsubmit %]
                     <div class="dialog alert">The EAN was successfully updated</div>
                     [% END %]
-                        <div><ul class="toolbar"><li><span class="yui-button yui-link-button"><span class="first-child"><a href="/cgi-bin/koha/admin/edi_ean_edit.pl?op=add">Add a new EAN</a></span></span></li></ul></div>
+                        <div><ul class="toolbar">
+                       <li>
+                       <span class="yui-button yui-link-button">
+                       <span class="first-child">
+                       <a href="/cgi-bin/koha/admin/edi_ean_edit.pl?op=add">Add a new EAN</a>
+                       </span></span>
+                       </li></ul></div>
                         <table border="0" width="100%" cellpadding="3" cellspacing="0">
-                        <th><strong>Branch</strong></th><th><strong>EAN</strong></th><th><strong>Actions</strong></th></tr>
+                        <tr>
+                        <th><strong>Branch</strong></th>
+                        <th><strong>EAN</strong></th>
+                        <th><strong>Actions</strong></th>
+                        </tr>
                         [% FOREACH ean IN eans %]
-                            <tr>
+                           <tr>
                              <td>[% ean.branchname %]</td>
                              <td>[% ean.ean %]</td>
                              <td align="center"><a href="/cgi-bin/koha/admin/edi_ean_edit.pl?op=edit&branchcode=[% ean.branchcode %]&ean=[% ean.ean %]">Edit</a> | <a href="/cgi-bin/koha/admin/edi_ean_edit.pl?op=del&branchcode=[% ean.branchcode %]&ean=[% ean.ean %]">Delete</a></td>
-                             </tr>
+                           </tr>
                         [% END %]
                         </table>
                 </div>
                 [% ELSE %]
-                <p>You currently do not have any EANs. To add a new EAN <a href="/cgi-bin/koha/admin/edi_ean_edit.pl?op=add">click here</a>.</p>
+                <p>
+You currently do not have any EANs. To add a new EAN <a href="/cgi-bin/koha/admin/edi_ean_edit.pl?op=add">click here</a>.
+                </p>
                 [% END %]
             </div>
         </div>
