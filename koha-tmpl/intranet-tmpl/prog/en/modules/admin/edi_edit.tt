@@ -52,20 +52,19 @@ function cancelInstance()
                     <legend>EDI Account details</legend>
                     <ol>
                         <li>
-                            <label for="provider" class="required">Vendor:*</label>
+                            <label for="provider" class="required">Vendor:</label>
                             <select id="provider" name="provider">
-                                <option value="">Select a vendor</option>
                                 [% FOREACH vendor IN vendorlist %]
                                     <option value="[% vendor.id %]" [% vendor.selected %]>[% vendor.name %]</option>
                                 [% END %]
                             </select>
                         </li>
                         <li>
-                            <label for="description" class="required">Description:* </label>
+                            <label for="description" class="required">Description: </label>
                             <input type="text" id="description" name="description" size="40" value="[% description %]" />
                         </li>
                         <li>
-                            <label for="host" class="required">Server hostname:*</label>
+                            <label for="host" class="required">Server hostname:</label>
                             <input type="text" id="host" name="host" size="40" value="[% host %]" />
                         </li>
                         <li>
