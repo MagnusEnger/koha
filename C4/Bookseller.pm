@@ -289,7 +289,7 @@ sub GetVendorList {
     my $dbh = C4::Context->dbh;
     return $dbh->selectall_arrayref(
         'select id, name from aqbooksellers order by name asc',
-        { Slice => } );
+        { Slice => {} } );
 }
 
 1;
