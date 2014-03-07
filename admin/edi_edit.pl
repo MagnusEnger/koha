@@ -21,9 +21,10 @@
 use strict;
 use warnings;
 use CGI;
+use Carp;
 use C4::Auth;
 use C4::Output;
-use C4::Edifact qw/GetEDIAccountDetails /;
+use Koha::EDI::Account;
 
 use C4::Bookseller qw/GetVendorList/;
 
@@ -51,23 +52,21 @@ if ( $op eq 'add' ) {
 }
 if ( $op eq 'edit' ) {
     $template->param( opeditsubmit => 'editsubmit' );
-    my $edi_details      = GetEDIAccountDetails( $input->param('id') );
-    my $selectedprovider = $edi_details->{provider};
+    my $account      = Koha::EDI::Account->new( $input->param('id') );
+    if ($account->retrieve()) {
     foreach my $vendor ( @{$vendorlist} ) {
-        if ( $vendor->{id} == $selectedprovider ) {
+        if ( $vendor->{id} == $account->id() ) {
             $vendor->{selected} = 'selected';
         }
     }
     $template->param(
-        editid      => $edi_details->{id},
-        description => $edi_details->{description},
-        host        => $edi_details->{host},
-        user        => $edi_details->{username},
-        pass        => $edi_details->{password},
-        provider    => $edi_details->{provider},
-        in_dir      => $edi_details->{in_dir},
-        san         => $edi_details->{san},
+        account     => $account,
     );
+}
+else {
+    carp "Cannot retrieve EDI Account : $account->id()";
+    #FIXME Proper Error Handling
+
 }
 if ( $op eq 'del' ) {
     $template->param(

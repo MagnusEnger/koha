@@ -1,6 +1,8 @@
 #!/usr/bin/perl
+#FIXME these does not belong in tools should integrate into acq
 
 # Copyright 2011 Mark Gavillet & PTFS Europe Ltd
+# Copyright 2014 PTFS Europe Ltd
 #
 # This file is part of Koha.
 #
@@ -22,7 +24,7 @@ use warnings;
 use CGI;
 use C4::Auth;
 use C4::Output;
-use C4::Edifact qw/GetEDIfactMessageList/;
+use Koha::EDI::Message;
 
 my $input = CGI->new();
 
@@ -37,8 +39,8 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     }
 );
 
-my $messagelist = GetEDIfactMessageList();
 
-$template->param( messagelist => $messagelist );
+# FIXME this is going to get very inefficient
+$template->param( messagelist => Koha::EDI::Message->get_all() );
 
 output_html_with_http_headers( $input, $cookie, $template->output );

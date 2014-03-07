@@ -7,7 +7,7 @@ $(document).ready(function() {
 });
 function check_form_edi()
 {
-    if ($('#provider').val()!="" && $('#description').val()!="" && $('#host').val()!="")
+    if ($('#vendor_id').val()!="" && $('#description').val()!="" && $('#host').val()!="")
     {
         $('#edi_form').submit();
     }
@@ -52,8 +52,8 @@ function cancelInstance()
                     <legend>EDI Account details</legend>
                     <ol>
                         <li>
-                            <label for="provider" class="required">Vendor:</label>
-                            <select id="provider" name="provider">
+                            <label for="vendor_id" class="required">Vendor:</label>
+                            <select id="vendor_id" name="vendor_id">
                                 [% FOREACH vendor IN vendorlist %]
                                     <option value="[% vendor.id %]" [% vendor.selected %]>[% vendor.name %]</option>
                                 [% END %]

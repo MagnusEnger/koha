@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS vendor_edi_accounts (
   username text,
   password text,
   last_activity date,
-  provider integer,
+  vendor_id int(11) references aqbooksellers( id ),
   in_dir text,
   san varchar(20),
   PRIMARY KEY  (id)
@@ -15,11 +15,12 @@ CREATE TABLE IF NOT EXISTS edifact_messages (
   id serial,
   message_type text NOT NULL,
   date_sent date,
-  provider integer,
+  vendor_id int(11) references aqbooksellers( id ),
   status text,
   basketno int(11) references aqbasket( basketno),
   edi text,
   remote_file text,
+  invoiceid int(11),l
   PRIMARY KEY  (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

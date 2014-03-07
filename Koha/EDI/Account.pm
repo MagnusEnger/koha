@@ -23,19 +23,36 @@ sub create {
     return;
 }
 
+sub retrieve {
+    my $self = shift;
+    if ($self->{id} ) {
+        my $dbh = C4::Context->dbh;
+        my $arr_ref = $dbh->selectall_arrayref(
+            'select * from vendor_edi_accounts where id = ?',
+            { slice => {} },
+            $self->{id}
+        );
+        if ( @{$arr_ref} ) {
+            $self = $arr_ref->[0];
+            return 1; # OK
+        }
+    }
+    return;
+}
+
 sub insert {
     my $self = shift;
-    if ( $self->{provider} ) {
+    if ( $self->{vendor_id} ) {
         my $dbh = C4::Context->dbh;
         my $sql = <<'END_INSSQL';
 insert into vendor_edi_accounts
-  (description, host, username, password, provider, in_dir, san)
+  (description, host, username, password, vendor_id, in_dir, san)
   values (?,?,?,?,?,?,?)
 END_INSSQL
         return $dbh->do(
             $sql, {}, $self->{description},
             $self->{host},     $self->{user},   $self->{pass},
-            $self->{provider}, $self->{in_dir}, $self->{san}
+            $self->{vendor_id}, $self->{in_dir}, $self->{san}
         );
     }
     return;
@@ -57,11 +74,11 @@ sub update {
         my $dbh = C4::Context->dbh;
         my $sql = <<'END_UPDSQL';
 update vendor_edi_accounts set description=?, host=?,
-username=?, password=?, provider=?, in_dir=?, san=? where id=?
+username=?, password=?, vendor_id=?, in_dir=?, san=? where id=?
 END_UPDSQL
         my $sth = $dbh->prepare($sql);
         $sth->execute( $self->{description}, $self->{host},
-            $self->{user}, $self->{pass}, $self->{provider}, $self->{in_dir},
+            $self->{user}, $self->{pass}, $self->{vendor_id}, $self->{in_dir},
             $self->{san}, $self->{id} );
     }
     return;
@@ -99,6 +116,13 @@ sub _abort_download {
     return;
 }
 
+# getters & setters
+
+sub id {
+    my $self = shift;
+    return $self->{id};
+}
+
 # Class methods
 #TODO this should return an arrayref of classes
 
@@ -106,10 +130,10 @@ sub get_all {
     my $class = shift;
     my $dbh = C4::Context->dbh;
     my $sql = <<'ENDACCSQL';
-        select vendor_edi_accounts.id, aqbooksellers.id as providerid,
+        select vendor_edi_accounts.id
         aqbooksellers.name as vendor, vendor_edi_accounts.description,
         vendor_edi_accounts.last_activity from vendor_edi_accounts inner join
-        aqbooksellers on vendor_edi_accounts.provider = aqbooksellers.id
+        aqbooksellers on vendor_edi_accounts.vendor_id = aqbooksellers.id
         order by aqbooksellers.name asc
 ENDACCSQL
     return $dbh->selectall_arrayref( $sql, {} );
@@ -119,7 +143,7 @@ sub exist {
     my ( $class, $booksellerid ) = @_;
     my $dbh     = C4::Context->dbh;
     my $ary_ref = $dbh->selectcol_arrayref(
-        'select count(*) from vendor_edi_accounts where provider=?',
+        'select count(*) from vendor_edi_accounts where vendor_id=?',
         {}, $booksellerid );
     if ( $ary_ref->[0] ) {
         return 1;
@@ -133,11 +157,10 @@ sub ftp_accounts {
     my $dbh = C4::Context->dbh;
     my $sql = <<'ENDFTPSQL';
         select vendor_edi_accounts.id,
-        aqbooksellers.id as providerid,
         aqbooksellers.name as vendor,
         vendor_edi_accounts.description,
         vendor_edi_accounts.last_activity from vendor_edi_accounts
-        inner join aqbooksellers on vendor_edi_accounts.provider = aqbooksellers.id
+        inner join aqbooksellers on vendor_edi_accounts.vendor_id = aqbooksellers.id
 ENDFTPSQL
     my $arr_ref = $dbh->selectall_arrayref( $sql, { Slice => {}} );
 }
