@@ -6070,8 +6070,6 @@ if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
    SetVersion ($DBversion);
 }
 
-#ALTER TABLE contacts ADD email VARCHAR(60) AFTER name;
-
 $DBversion = "3.10.00.00";
 if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
    print "Upgrade to $DBversion done (release tag)\n";
