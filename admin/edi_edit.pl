@@ -45,6 +45,7 @@ my $vendorlist = GetVendorList();
 
 my $op = $input->param('op');
 $template->param( op => $op );
+my $id = $input->param('id');
 
 if ( $op eq 'add' ) {
     $template->param( opaddsubmit => 'addsubmit' );
@@ -52,19 +53,19 @@ if ( $op eq 'add' ) {
 }
 if ( $op eq 'edit' ) {
     $template->param( opeditsubmit => 'editsubmit' );
-    my $account      = Koha::EDI::Account->new( $input->param('id') );
-    if ($account->retrieve()) {
-    foreach my $vendor ( @{$vendorlist} ) {
-        if ( $vendor->{id} == $account->id() ) {
-            $vendor->{selected} = 'selected';
+    my $account = Koha::EDI::Account->new($id);
+    if ( $account->retrieve() ) {
+        foreach my $vendor ( @{$vendorlist} ) {
+            if ( $vendor->{id} == $account->id() ) {
+                $vendor->{selected} = 'selected';
+            }
         }
+        $template->param( account => $account );
     }
-    $template->param(
-        account     => $account,
-    );
 }
 else {
-    carp "Cannot retrieve EDI Account : $account->id()";
+    carp "Cannot retrieve EDI Account : $id";
+
     #FIXME Proper Error Handling
 
 }
@@ -72,7 +73,7 @@ if ( $op eq 'del' ) {
     $template->param(
         opdelsubmit => 'delsubmit',
         opdel       => 1,
-        id          => $input->param('id')
+        id          => $id,
     );
 }
 
