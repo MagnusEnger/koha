@@ -130,7 +130,7 @@ sub get_all {
     my $class = shift;
     my $dbh = C4::Context->dbh;
     my $sql = <<'ENDACCSQL';
-        select vendor_edi_accounts.id
+        select vendor_edi_accounts.id,
         aqbooksellers.name as vendor, vendor_edi_accounts.description,
         vendor_edi_accounts.last_activity from vendor_edi_accounts inner join
         aqbooksellers on vendor_edi_accounts.vendor_id = aqbooksellers.id
