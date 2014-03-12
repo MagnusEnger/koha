@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS vendor_edi_accounts (
   password text,
   last_activity date,
   vendor_id int(11) references aqbooksellers( id ),
-  in_dir text,
+  remote_directory text,
   san varchar(20),
   PRIMARY KEY  (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

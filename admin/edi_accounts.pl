@@ -49,14 +49,14 @@ if ( $op eq 'delsubmit' ) {
 if ( $op eq 'addsubmit' ) {
     my $new_acct = Koha::EDI::Account->new(
         {
-            description => $input->param('description'),
-            host        => $input->param('host'),
-            user        => $input->param('user'),
-            pass        => $input->param('pass'),
-            vendor_id   => $input->param('vendor_id'),
-            path        => $input->param('path'),
-            in_dir      => $input->param('in_dir'),
-            san         => $input->param('san'),
+            description      => $input->param('description'),
+            host             => $input->param('host'),
+            user             => $input->param('user'),
+            pass             => $input->param('pass'),
+            vendor_id        => $input->param('vendor_id'),
+            path             => $input->param('path'),
+            remote_directory => $input->param('remote_directory'),
+            san              => $input->param('san'),
         }
     );
     $new_acct->insert();

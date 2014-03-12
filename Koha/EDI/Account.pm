@@ -3,15 +3,6 @@ use strict;
 use warnings;
 use C4::Context;
 
-# id
-# description
-# host
-# username
-# password
-# last_activity
-# vendor_id
-# in_dir
-# san
 sub new {
     my ( $class, $arg_ref ) = @_;
 
@@ -55,13 +46,13 @@ sub insert {
         my $dbh = C4::Context->dbh;
         my $sql = <<'END_INSSQL';
 insert into vendor_edi_accounts
-  (description, host, username, password, vendor_id, in_dir, san)
+  (description, host, username, password, vendor_id, remote_directory, san)
   values (?,?,?,?,?,?,?)
 END_INSSQL
         return $dbh->do(
             $sql, {}, $self->{description},
             $self->{host},      $self->{user},   $self->{pass},
-            $self->{vendor_id}, $self->{in_dir}, $self->{san}
+            $self->{vendor_id}, $self->{remote_directory}, $self->{san}
         );
     }
     return;
@@ -83,11 +74,11 @@ sub update {
         my $dbh = C4::Context->dbh;
         my $sql = <<'END_UPDSQL';
 update vendor_edi_accounts set description=?, host=?,
-username=?, password=?, vendor_id=?, in_dir=?, san=? where id=?
+username=?, password=?, vendor_id=?, remote_directory=?, san=? where id=?
 END_UPDSQL
         my $sth = $dbh->prepare($sql);
         $sth->execute( $self->{description}, $self->{host},
-            $self->{user}, $self->{pass}, $self->{vendor_id}, $self->{in_dir},
+            $self->{user}, $self->{pass}, $self->{vendor_id}, $self->{remote_directory},
             $self->{san}, $self->{id} );
     }
     return;
@@ -117,7 +108,7 @@ sub download {
       or return _abort_download( undef, "Cannot connect to $self->{host}: $@" );
     $ftp->login( $self->{username}, $self->{password} )
       or _abort_download( $ftp, "Cannot login: $ftp->message()" );
-    $ftp->cwd( $self->{in_dir} )
+    $ftp->cwd( $self->{remote_directory} )
       or _abort_download( $ftp, "Cannot change remote dir : $ftp->message()" );
     my $file_list = $ftp->ls()
       or _abort_download( $ftp, "cannot get file list from server" );

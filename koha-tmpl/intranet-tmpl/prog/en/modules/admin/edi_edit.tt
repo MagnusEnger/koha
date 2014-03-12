@@ -76,8 +76,8 @@ function cancelInstance()
                             <input type="text" id="pass" name="pass" size="40" value="[% pass %]" />
                         </li>
                         <li>
-                            <label for="in_dir">Server remote directory:</label>
-                            <input type="text" id="in_dir" name="in_dir" size="40" value="[% in_dir %]" />
+                            <label for="remote_directory">Server remote directory:</label>
+                            <input type="text" id="remote_directory" name="remote_directory" size="40" value="[% remote_directory %]" />
                         </li>
                         <li>
                             <label for="san">Vendor SAN/EAN:</label>
