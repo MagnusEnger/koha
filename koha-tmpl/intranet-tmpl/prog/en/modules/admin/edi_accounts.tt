@@ -1,9 +1,17 @@
 [% INCLUDE 'doc-head-open.inc' %]
-<title>Koha &rsaquo; Administration - EDI Accounts</title>
+<title>Koha &rsaquo; Administration &rsaquo; EDI accounts
+[% IF add_acct %]
+  [% IF editid %]
+     &rsquo; Modify account
+  [% ELSE %]
+     &rsquo; Add new account
+  [% END %]
+[% END %]
+</title>
 [% INCLUDE 'doc-head-close.inc' %]
 
 </head>
-<body>
+<body id="admin_edi_acct" class="admin">
 [% INCLUDE 'header.inc' %]
 [% INCLUDE 'cat-search.inc' %]
 
@@ -11,15 +19,49 @@
 <a href="/cgi-bin/koha/mainpage.pl">Home</a>
  &rsaquo; <a href="/cgi-bin/koha/admin/admin-home.pl">Administration</a>
  &rsaquo; <a href="/cgi-bin/koha/admin/edi_accounts.pl">EDI Accounts</a>
+[% IF add_acct %]
+  [% IF editid %]
+     &rsquo; Modify account
+  [% ELSE %]
+     &rsquo; Add new account
+  [% END %]
+[% END %]
 </div>
 
 <div id="doc3" class="yui-t2">
+
     <div id="bd">
         <div id="yui-main">
             <div class="yui-b"
-                <h1>Vendor EDI Accounts</h1>
-                [% IF ediaccounts %]
-                <div id="ediaccounts" class="rows">
+            [% IF display %]
+             <div id="toolbar" class="btn-toolbar">
+                  <a class="btn btn-small" id="newediacct" href="[% script_name %]?op=add_form"><i class="icon_plus"><i/> New account</a>
+            </div>
+            [% END %]
+[% IF add_acct %]
+<form action="[% script_name %]" name="Actform" method="post">
+  <input type="hidden" name="op" value="save" />
+  <fieldset class="rows>
+  <legend>
+  [% IF editid %]
+     Modify account
+  [% ELSE %]
+    Add account
+  [% END %]
+  </legend>
+  <ol>
+  <li>
+     <label for="description">Description: </label>
+     <input type="text" name="description" id="description" size="20" maxlength="90" value="[% description %]" />
+  </li>
+  </ol>
+  </fieldset>
+</form>
+[% END %]
+
+<!-- messages
+                <h2>Vendor EDI Accounts</h2>
+                <div id="ediaccounts">
                     [% IF opdelsubmit %]
                 <div class="dialog alert">The account was successfully deleted</div>
                     [% END %]
@@ -29,28 +71,23 @@
                     [% IF opeditsubmit %]
                 <div class="dialog alert">The account was successfully updated</div>
                     [% END %]
-                        <div>
-                        <ul class="toolbar">
-                          <li>
-                            <span class="yui-button yui-link-button">
-                            <span class="first-child">
-                            <a href="/cgi-bin/koha/admin/edi_edit.pl?op=add">Add a new account</a>
-                            </span></span>
-                          </li>
-                       </ul>
-                       </div>
-            <table border="0" width="100%" cellpadding="3" cellspacing="0">
+-->
+
+[% IF display %]
+            <table>
             <tr>
-            <th>
-                <strong>ID</strong>
-            </th>
-            <th><strong>Vendor</strong></th>
-            <th><strong>Description</strong></th>
-            <th><strong>Last activity</strong></th>
-            <th><strong>Actions</strong></th>
+            <th>ID</th>
+            <th>Vendor</th>
+            <th>Description</th>
+            <th>Last activity</th>
+            <th>Actions</th>
             </tr>
             [% FOREACH account IN ediaccounts %]
-            <tr>
+            [% IF loop.even %]
+               <tr>
+            [% ELSE %]
+               <tr class="highlight">
+            [% END %]
             <td>[% account.id %]</td>
             <td><a href="/cgi-bin/koha/acqui/supplier.pl?supplierid=[% account.providerid %]">[% account.vendor %]</a></td>
             <td>[% account.description %]</td>
@@ -60,11 +97,6 @@
             [% END %]
             </table>
             </div>
-                [% ELSE %]
-                <p>
-You currently do not have any Vendor EDI Accounts. To add a new account <a href="/cgi-bin/koha/admin/edi_edit.pl?op=add">click here</a>.
-                </p>
-                [% END %]
             </div>
         </div>
         <div class="yui-b">

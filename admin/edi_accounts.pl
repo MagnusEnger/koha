@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# Copyright 2011 Mark Gavillet & PTFS Europe Ltd
+# Copyright 2011,2014 Mark Gavillet & PTFS Europe Ltd
 #
 # This file is part of Koha.
 #
@@ -32,56 +32,61 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
         query           => $input,
         type            => 'intranet',
         authnotrequired => 0,
-        flagsrequired   => { borrowers => 1 },
-        debug           => ( $ENV{DEBUG} ) ? 1 : 0,
+        flagsrequired   => { acquisition => 'edi_manage' },
     }
 );
 
 my $op = $input->param('op');
-$template->param( op => $op );
+$op ||= 'display';
 
-if ( $op eq 'delsubmit' ) {
+#TBD dispatch table
+if ( $op eq 'acct_form' ) {
+    dsp_form('id_if_we_have_one');
+}
+elsif ( $op eq 'save' ) {
+
+    # validate & display
+    my $id = $input->param('editid');
+    my $fields = {
+                description => $input->param('description'),
+                host        => $input->param('host'),
+                user        => $input->param('user'),
+                pass        => $input->param('pass'),
+                vendor_id   => $input->param('vendor_id'),
+                path        => $input->param('path'),
+                in_dir      => $input->param('in_dir'),
+                san         => $input->param('san'),
+            };
+    if ($id) {
+        $fields->{id} = $id;
+        my $acct = Koha::EDI::Account->new(
+            $fields
+        );
+        $acct->update();
+    }
+    else {    # new record
+        my $new_acct = Koha::EDI::Account->new(
+            $fields
+        );
+        $new_acct->insert();
+    }
+    # should insert/update be one method ???
+}
+elsif ( $op eq 'delete_confirm' ) {
+    #
+}
+elsif ( $op eq 'delete_confirmed' ) {    # was delsubmit
     my $acct = Koha::EDI::Account->new( { id => $input->param('id') } );
     $acct->del();
 }
 
-#FIXME  $inputparm path is not used in Create or Update
-if ( $op eq 'addsubmit' ) {
-    my $new_acct = Koha::EDI::Account->new(
-        {
-            description      => $input->param('description'),
-            host             => $input->param('host'),
-            user             => $input->param('user'),
-            pass             => $input->param('pass'),
-            vendor_id        => $input->param('vendor_id'),
-            path             => $input->param('path'),
-            remote_directory => $input->param('remote_directory'),
-            san              => $input->param('san'),
-        }
-    );
-    $new_acct->insert();
-    $template->param( opaddsubmit => 1 );
-}
-
-if ( $op eq 'editsubmit' ) {
-    my $acct = Koha::EDI::Account->new(
-        {
-            id          => $input->param('editid'),
-            description => $input->param('description'),
-            host        => $input->param('host'),
-            user        => $input->param('user'),
-            pass        => $input->param('pass'),
-            vendor_id   => $input->param('vendor_id'),
-            path        => $input->param('path'),
-            in_dir      => $input->param('in_dir'),
-            san         => $input->param('san'),
-        }
-    );
-    $acct->update();
-    $template->param( opeditsubmit => 1 );
-}
+# default display
 
 my $ediaccounts = Koha::EDI::Account->get_all();
 $template->param( ediaccounts => $ediaccounts );
 
 output_html_with_http_headers( $input, $cookie, $template->output );
+
+sub dsp_form {
+    return;
+}
