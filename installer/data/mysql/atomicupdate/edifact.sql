@@ -20,12 +20,13 @@ CREATE TABLE IF NOT EXISTS edifact_messages (
   basketno int(11) references aqbasket( basketno),
   edi text,
   remote_file text,
-  invoiceid int(11),l
+  invoiceid int(11),
   PRIMARY KEY  (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- insert into permissions (module_bit, code, description) values (13, 'edi_manage', 'Manage EDIFACT transmissions');
 
+insert into permissions (module_bit, code, description) values (11, 'edi_manage', 'Manage EDIFACT transmissions');
 
 CREATE TABLE IF NOT EXISTS edifact_ean (
   branchcode varchar(10) PRIMARY KEY,
