@@ -50,9 +50,11 @@ insert into vendor_edi_accounts
   values (?,?,?,?,?,?,?)
 END_INSSQL
         return $dbh->do(
-            $sql, {}, $self->{description},
-            $self->{host},      $self->{user},   $self->{pass},
-            $self->{vendor_id}, $self->{remote_directory}, $self->{san}
+            $sql, {},
+            $self->{description}, $self->{host},
+            $self->{user},        $self->{pass},
+            $self->{vendor_id},   $self->{remote_directory},
+            $self->{san}
         );
     }
     return;
@@ -77,9 +79,12 @@ update vendor_edi_accounts set description=?, host=?,
 username=?, password=?, vendor_id=?, remote_directory=?, san=? where id=?
 END_UPDSQL
         my $sth = $dbh->prepare($sql);
-        $sth->execute( $self->{description}, $self->{host},
-            $self->{user}, $self->{pass}, $self->{vendor_id}, $self->{remote_directory},
-            $self->{san}, $self->{id} );
+        $sth->execute(
+            $self->{description}, $self->{host},
+            $self->{user},        $self->{pass},
+            $self->{vendor_id},   $self->{remote_directory},
+            $self->{san},         $self->{id}
+        );
     }
     return;
 }
@@ -111,7 +116,7 @@ sub download {
     $ftp->cwd( $self->{remote_directory} )
       or _abort_download( $ftp, "Cannot change remote dir : $ftp->message()" );
     my $file_list = $ftp->ls()
-      or _abort_download( $ftp, "cannot get file list from server" );
+      or _abort_download( $ftp, 'cannot get file list from server' );
     foreach my $filename ( @{$file_list} ) {
         if ( $self->is_file_new($filename) ) {
 
@@ -139,19 +144,20 @@ sub id {
 }
 
 # Class methods
-#TODO this should return an arrayref of classes
 
 sub get_all {
     my $class = shift;
     my $dbh   = C4::Context->dbh;
     my $sql   = <<'ENDACCSQL';
-        select vendor_edi_accounts.id,
-        aqbooksellers.name as vendor, vendor_edi_accounts.description,
-        vendor_edi_accounts.last_activity from vendor_edi_accounts inner join
+        select vendor_edi_accounts.*,
+        aqbooksellers.name as vendor
+        from vendor_edi_accounts left join
         aqbooksellers on vendor_edi_accounts.vendor_id = aqbooksellers.id
         order by aqbooksellers.name asc
 ENDACCSQL
-    return $dbh->selectall_arrayref( $sql, {} );
+    my $tuples = $dbh->selectall_arrayref( $sql, { Slice => {} } );
+    my @accts = map { $class->new($_) } @{$tuples};
+    return \@accts;
 }
 
 sub exist {
@@ -166,18 +172,6 @@ sub exist {
     else {
         return 0;
     }
-}
-
-sub ftp_accounts {
-    my $dbh = C4::Context->dbh;
-    my $sql = <<'ENDFTPSQL';
-        select vendor_edi_accounts.id,
-        aqbooksellers.name as vendor,
-        vendor_edi_accounts.description,
-        vendor_edi_accounts.last_activity from vendor_edi_accounts
-        inner join aqbooksellers on vendor_edi_accounts.vendor_id = aqbooksellers.id
-ENDFTPSQL
-    my $arr_ref = $dbh->selectall_arrayref( $sql, { Slice => {} } );
 }
 
 1;
