@@ -3,6 +3,15 @@ use strict;
 use warnings;
 use C4::Context;
 
+# id
+# description
+# host
+# username
+# password
+# last_activity
+# vendor_id
+# in_dir
+# san
 sub new {
     my ( $class, $arg_ref ) = @_;
 
@@ -25,8 +34,8 @@ sub create {
 
 sub retrieve {
     my $self = shift;
-    if ($self->{id} ) {
-        my $dbh = C4::Context->dbh;
+    if ( $self->{id} ) {
+        my $dbh     = C4::Context->dbh;
         my $arr_ref = $dbh->selectall_arrayref(
             'select * from vendor_edi_accounts where id = ?',
             { slice => {} },
@@ -34,7 +43,7 @@ sub retrieve {
         );
         if ( @{$arr_ref} ) {
             $self = $arr_ref->[0];
-            return 1; # OK
+            return 1;    # OK
         }
     }
     return;
@@ -51,7 +60,7 @@ insert into vendor_edi_accounts
 END_INSSQL
         return $dbh->do(
             $sql, {}, $self->{description},
-            $self->{host},     $self->{user},   $self->{pass},
+            $self->{host},      $self->{user},   $self->{pass},
             $self->{vendor_id}, $self->{in_dir}, $self->{san}
         );
     }
@@ -84,23 +93,37 @@ END_UPDSQL
     return;
 }
 
+sub log_last_activity {
+    my $self = shift;
+    if ( $self->{id} ) {
+        my $dbh = C4::Context->dbh;
+        return $dbh->do(
+'update vendor_edi_accounts set last_activity = curdate() where id = ?',
+            {}, $self->{id}
+        );
+    }
+    return;
+}
+
 sub download {
-    my ($self, $notice_type) = @_;
+    my ( $self, $notice_type ) = @_;
 
     my @downloaded_files;
     my $ftp = Net::FTP->new(
         $self->{host},
         Timeout => 10,
         Passive => 1
-    ) or return _abort_download(undef, "Cannot connect to $self->{host}: $@");
+      )
+      or return _abort_download( undef, "Cannot connect to $self->{host}: $@" );
     $ftp->login( $self->{username}, $self->{password} )
-        or _abort_download($ftp, "Cannot login: $ftp->message()");
+      or _abort_download( $ftp, "Cannot login: $ftp->message()" );
     $ftp->cwd( $self->{in_dir} )
-        or _abort_download($ftp, "Cannot change remote dir : $ftp->message()");
+      or _abort_download( $ftp, "Cannot change remote dir : $ftp->message()" );
     my $file_list = $ftp->ls()
-        or _abort_download($ftp, "cannot get file list from server");
-    foreach my $filename (@{$file_list}) {
-        if ($self->is_file_new($filename)) {
+      or _abort_download( $ftp, "cannot get file list from server" );
+    foreach my $filename ( @{$file_list} ) {
+        if ( $self->is_file_new($filename) ) {
+
             #$ftp->get(__REMOTE_FILE__, __LOCAL_FILE__);
             push @downloaded_files, $filename;
         }
@@ -111,6 +134,7 @@ sub download {
 }
 
 sub _abort_download {
+
     # log info if ftp open close it
     #returns undef i.e. an empty array
     return;
@@ -128,8 +152,8 @@ sub id {
 
 sub get_all {
     my $class = shift;
-    my $dbh = C4::Context->dbh;
-    my $sql = <<'ENDACCSQL';
+    my $dbh   = C4::Context->dbh;
+    my $sql   = <<'ENDACCSQL';
         select vendor_edi_accounts.id,
         aqbooksellers.name as vendor, vendor_edi_accounts.description,
         vendor_edi_accounts.last_activity from vendor_edi_accounts inner join
@@ -162,7 +186,7 @@ sub ftp_accounts {
         vendor_edi_accounts.last_activity from vendor_edi_accounts
         inner join aqbooksellers on vendor_edi_accounts.vendor_id = aqbooksellers.id
 ENDFTPSQL
-    my $arr_ref = $dbh->selectall_arrayref( $sql, { Slice => {}} );
+    my $arr_ref = $dbh->selectall_arrayref( $sql, { Slice => {} } );
 }
 
 1;
