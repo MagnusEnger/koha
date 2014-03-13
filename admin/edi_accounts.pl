@@ -23,6 +23,7 @@ use CGI;
 use C4::Auth;
 use C4::Output;
 use Koha::EDI::Account;
+use C4::Bookseller qw( GetVendorList );
 
 my $input = CGI->new();
 
@@ -39,54 +40,75 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
 my $op = $input->param('op');
 $op ||= 'display';
 
-#TBD dispatch table
 if ( $op eq 'acct_form' ) {
-    dsp_form('id_if_we_have_one');
+    my $acct_id = $input->param('id');
+    if ($acct_id) {
+        my $acc = get_account($acct_id);
+        if ($acc) {
+            $template->param( account => $acc );
+        }
+    }
+    $template->param( acct_form => 1 );
+    my $vendors = GetVendorList();
+    $template->param( vendors => $vendors );
 }
 else {
-    $template->param( display => 1 );
-}
-if ( $op eq 'save' ) {
+    if ( $op eq 'save' ) {
 
-    # validate & display
-    my $id     = $input->param('editid');
-    my $fields = {
-        description => $input->param('description'),
-        host        => $input->param('host'),
-        user        => $input->param('user'),
-        pass        => $input->param('pass'),
-        vendor_id   => $input->param('vendor_id'),
-        path        => $input->param('path'),
-        in_dir      => $input->param('in_dir'),
-        san         => $input->param('san'),
-    };
-    if ($id) {
-        $fields->{id} = $id;
-        my $acct = Koha::EDI::Account->new( $fields );
-        $acct->update();
-    }
-    else {    # new record
-        my $new_acct = Koha::EDI::Account->new( $fields );
-        $new_acct->insert();
+        # validate & display
+        my $id     = $input->param('id');
+        my $fields = {
+            description => $input->param('description'),
+            host        => $input->param('host'),
+            user        => $input->param('username'),
+            pass        => $input->param('password'),
+            vendor_id   => $input->param('vendor_id'),
+            directory   => $input->param('directory'),
+            san         => $input->param('san'),
+        };
+        if ($id) {
+            $fields->{id} = $id;
+            my $acct = Koha::EDI::Account->new($fields);
+            $acct->update();
+        }
+        else {    # new record
+            my $new_acct = Koha::EDI::Account->new($fields);
+            $new_acct->insert();
+        }
+
+        # should insert/update be one method ???
     }
 
-    # should insert/update be one method ???
-}
-elsif ( $op eq 'delete_confirm' ) {
+    #elsif ( $op eq 'delete_confirm' ) {
     #
-}
-elsif ( $op eq 'delete_confirmed' ) {    # was delsubmit
-    my $acct = Koha::EDI::Account->new( { id => $input->param('id') } );
-    $acct->del();
+    #}
+    elsif ( $op eq 'delete_confirmed' ) {    # was delsubmit
+        my $acct = Koha::EDI::Account->new( { id => $input->param('id') } );
+        $acct->del();
+    }
+
+    # we do a default dispaly after deletes and saves
+    # as well as when thats all you want
+    $template->param( display => 1 );
+    my $ediaccounts = Koha::EDI::Account->get_all();
+    $template->param( ediaccounts => $ediaccounts );
 }
 
 # default display
 
-my $ediaccounts = Koha::EDI::Account->get_all();
-$template->param( ediaccounts => $ediaccounts );
+#my $ediaccounts = Koha::EDI::Account->get_all();
+#$template->param( ediaccounts => $ediaccounts );
 
 output_html_with_http_headers( $input, $cookie, $template->output );
 
-sub dsp_form {
+sub get_account {
+    my $id = shift;
+
+    my $account = Koha::EDI::Account->new( { id => $id } );
+    if ( $account->retrieve() ) {
+        return $account;
+    }
+
+    # passing undef will default to add
     return;
 }
