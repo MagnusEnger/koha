@@ -43,33 +43,33 @@ $op ||= 'display';
 if ( $op eq 'acct_form' ) {
     dsp_form('id_if_we_have_one');
 }
-elsif ( $op eq 'save' ) {
+else {
+    $template->param( display => 1 );
+}
+if ( $op eq 'save' ) {
 
     # validate & display
-    my $id = $input->param('editid');
+    my $id     = $input->param('editid');
     my $fields = {
-                description => $input->param('description'),
-                host        => $input->param('host'),
-                user        => $input->param('user'),
-                pass        => $input->param('pass'),
-                vendor_id   => $input->param('vendor_id'),
-                path        => $input->param('path'),
-                in_dir      => $input->param('in_dir'),
-                san         => $input->param('san'),
-            };
+        description => $input->param('description'),
+        host        => $input->param('host'),
+        user        => $input->param('user'),
+        pass        => $input->param('pass'),
+        vendor_id   => $input->param('vendor_id'),
+        path        => $input->param('path'),
+        in_dir      => $input->param('in_dir'),
+        san         => $input->param('san'),
+    };
     if ($id) {
         $fields->{id} = $id;
-        my $acct = Koha::EDI::Account->new(
-            $fields
-        );
+        my $acct = Koha::EDI::Account->new( $fields );
         $acct->update();
     }
     else {    # new record
-        my $new_acct = Koha::EDI::Account->new(
-            $fields
-        );
+        my $new_acct = Koha::EDI::Account->new( $fields );
         $new_acct->insert();
     }
+
     # should insert/update be one method ???
 }
 elsif ( $op eq 'delete_confirm' ) {

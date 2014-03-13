@@ -1,12 +1,5 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Administration &rsaquo; EDI accounts
-[% IF add_acct %]
-  [% IF editid %]
-     &rsquo; Modify account
-  [% ELSE %]
-     &rsquo; Add new account
-  [% END %]
-[% END %]
 </title>
 [% INCLUDE 'doc-head-close.inc' %]
 
@@ -19,89 +12,50 @@
 <a href="/cgi-bin/koha/mainpage.pl">Home</a>
  &rsaquo; <a href="/cgi-bin/koha/admin/admin-home.pl">Administration</a>
  &rsaquo; <a href="/cgi-bin/koha/admin/edi_accounts.pl">EDI Accounts</a>
-[% IF add_acct %]
-  [% IF editid %]
-     &rsquo; Modify account
-  [% ELSE %]
-     &rsquo; Add new account
-  [% END %]
-[% END %]
 </div>
 
 <div id="doc3" class="yui-t2">
 
-    <div id="bd">
-        <div id="yui-main">
-            <div class="yui-b"
-            [% IF display %]
-             <div id="toolbar" class="btn-toolbar">
-                  <a class="btn btn-small" id="newediacct" href="[% script_name %]?op=add_form"><i class="icon_plus"><i/> New account</a>
-            </div>
-            [% END %]
-[% IF add_acct %]
-<form action="[% script_name %]" name="Actform" method="post">
-  <input type="hidden" name="op" value="save" />
-  <fieldset class="rows>
-  <legend>
-  [% IF editid %]
-     Modify account
-  [% ELSE %]
-    Add account
-  [% END %]
-  </legend>
-  <ol>
-  <li>
-     <label for="description">Description: </label>
-     <input type="text" name="description" id="description" size="20" maxlength="90" value="[% description %]" />
-  </li>
-  </ol>
-  </fieldset>
-</form>
+<div id="bd">
+<div id="yui-main">
+<div class="yui-b">
+[% IF display %]
+    <div id="toolbar" class="btn-toolbar">
+    <a class="btn btn-small" id="newediacct" href="/cgi-bin/koha/admin/edi_accounts.pl?op=acct_form"> New account</a>
+    </div>
 [% END %]
 
-<!-- messages
-                <h2>Vendor EDI Accounts</h2>
-                <div id="ediaccounts">
-                    [% IF opdelsubmit %]
-                <div class="dialog alert">The account was successfully deleted</div>
-                    [% END %]
-                    [% IF opaddsubmit %]
-                <div class="dialog alert">The account was successfully added</div>
-                    [% END %]
-                    [% IF opeditsubmit %]
-                <div class="dialog alert">The account was successfully updated</div>
-                    [% END %]
--->
-
 [% IF display %]
-            <table>
-            <tr>
-            <th>ID</th>
-            <th>Vendor</th>
-            <th>Description</th>
-            <th>Last activity</th>
-            <th>Actions</th>
-            </tr>
-            [% FOREACH account IN ediaccounts %]
-            [% IF loop.even %]
-               <tr>
-            [% ELSE %]
-               <tr class="highlight">
-            [% END %]
-            <td>[% account.id %]</td>
-            <td><a href="/cgi-bin/koha/acqui/supplier.pl?supplierid=[% account.providerid %]">[% account.vendor %]</a></td>
-            <td>[% account.description %]</td>
-            <td>[% account.last_activity %]</td>
-            <td align="center"><a href="/cgi-bin/koha/admin/edi_edit.pl?op=edit&id=[% account.id %]&providerid=[% account.providerid %]">Edit</a> | <a href="/cgi-bin/koha/admin/edi_edit.pl?op=del&id=[% account.id %]">Delete</a></td>
-            </tr>
-            [% END %]
-            </table>
-            </div>
-            </div>
-        </div>
-        <div class="yui-b">
-            [% INCLUDE 'admin-menu.inc' %]
-        </div>
-    </div>
+<h2>Vendor EDI Accounts</h2>
+
+    <table>
+    <tr>
+       <th>ID</th>
+       <th>Vendor</th>
+       <th>Description</th>
+       <th>Last activity</th>
+       <th>Actions</th>
+    </tr>
+    [% FOREACH account IN ediaccounts %]
+    [% IF loop.even %]<tr>
+    [% ELSE %]<tr class="highlight">
+    [% END %]
+      <td>[% account.id %]</td>
+      <td><a href="/cgi-bin/koha/acqui/supplier.pl?supplierid=[% account.vendor_id %]">[% account.vendor %]</a></td>
+      <td>[% account.description %]</td>
+      <td>[% account.last_activity %]</td>
+      <td align="center">
+          <a href="/cgi-bin/koha/admin/edi_accounts.pl?op=acct_form&id=[% account.id %]">Edit</a> | <a href="/cgi-bin/koha/admin/edi_accounts.pl?op=delete&id=[% account.id %]">Delete</a>
+      </td>
+    </tr>
+    [% END %]
+    </table>
+[% END %]
+
+</div>
+</div>
+<div class="yui-b">
+    [% INCLUDE 'admin-menu.inc' %]
+</div>
 </div>
 [% INCLUDE 'intranet-bottom.inc' %]
