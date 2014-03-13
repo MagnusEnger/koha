@@ -26,14 +26,18 @@ sub create {
 sub retrieve {
     my $self = shift;
     if ( $self->{id} ) {
-        my $dbh     = C4::Context->dbh;
-        my $arr_ref = $dbh->selectall_arrayref(
-            'select * from vendor_edi_accounts where id = ?',
-            { slice => {} },
-            $self->{id}
-        );
+        my $sql = <<"ENDRET";
+        select vendor_edi_accounts.*,
+        aqbooksellers.name as vendor
+        from vendor_edi_accounts left join aqbooksellers
+        on vendor_edi_accounts.vendor_id = aqbooksellers.id
+        where vendor_edi_accounts.id = ?
+ENDRET
+        my $dbh = C4::Context->dbh;
+        my $arr_ref =
+          $dbh->selectall_arrayref( $sql, { Slice => {} }, $self->{id} );
         if ( @{$arr_ref} ) {
-            $self = $arr_ref->[0];
+            %{$self} = %{ $arr_ref->[0] };
             return 1;    # OK
         }
     }
