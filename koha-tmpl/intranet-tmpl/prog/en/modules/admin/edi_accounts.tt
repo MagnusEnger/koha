@@ -76,8 +76,15 @@ function Check(f) {
   <ol>
   <li>
      <label for="vendor_id">Vendor: </label>
-     <!-- Need a vendor_id selecting widget -->
-     <input type="text" name="vendor_id" id="vendor_id" value="[% account.vendor %]"/>
+     <select name="vendor_id" id="vendor_id">
+     [% FOREACH vendor IN vendors %]
+       [% IF account.vendor_id == vendor.id %]
+          <option value="[% vendor.id %]" selected="selected">[% vendor.name %]</option>
+       [% ELSE %]
+          <option value="[% vendor.id %]">[% vendor.name %]</option>
+       [% END %]
+     [% END %]
+     </select>
   </li>
   <li>
      <label for="description">Description: </label>
