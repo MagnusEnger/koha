@@ -14,7 +14,7 @@ function Check(f) {
    var _alertString="";
 
    if (_alertString.length == 0) {
-      document.Actform.submit();
+      document.Eanform.submit();
    } else {
       outputStr = _("Form not submitted because of the following problem(s)");
       outputStr += _alertString;
@@ -76,8 +76,18 @@ function Check(f) {
   <ol>
   <li>
      <label for="branchcode">Branchcode: </label>
-     <!-- Need a branchcode selecting widget -->
+     <!-- Need a branchcode selecting widget
      <input type="text" name="branchcode" id="branchcode" value="[% ean.branchcode %]"/>
+     -->
+     <select name="branchcode" id="branchcode">
+        [% FOREACH branch IN branches %]
+            [% IF branch.value == ean.branchcode %]
+               <option value="[% branch.value %]" selected="selected">[% branch.branchname %]</option>
+            [% ELSE %]
+               <option value="[% branch.value %]">[% branch.branchname %]</option>
+            [% END %]
+        [% END %]
+      </select>
   </li>
   <li>
      <label for="ean">EAN: </label>
@@ -87,7 +97,7 @@ function Check(f) {
   </fieldset>
 
   <fieldset class="action">
-    <input typr="submit" value="Submit" onclick="Check(this.form); return false;" />
+    <input type="submit" value="Submit" onclick="Check(this.form); return false;" />
     <a href="/cgi-bin/koha/admin/edi_ean_accounts.pl" class="cancel">Cancel</a>
   </fieldset>
 </form>
