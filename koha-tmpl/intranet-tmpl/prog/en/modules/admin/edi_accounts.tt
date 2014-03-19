@@ -12,21 +12,6 @@
 [% END %]
 </title>
 [% INCLUDE 'doc-head-close.inc' %]
-<script type=$text/javascript">
-function Check(f) {
-// validators go here
-   var _alertString="";
-
-   if (_alertString.length == 0) {
-      document.Actform.submit();
-   } else {
-      outputStr = _("Form not submitted because of the following problem(s)");
-      outputStr += _alertString;
-      alert(outputStr);
-   }
-}
-</script>
-
 </head>
 <body id="admin_edi_acct" class="admin">
 [% INCLUDE 'header.inc' %]
@@ -119,7 +104,7 @@ function Check(f) {
   </fieldset>
 
   <fieldset class="action">
-    <input type="submit" value="Submit" onclick="Check(this.form); return false;" />
+    <input type="submit" value="Submit" />
     <a href="/cgi-bin/koha/admin/edi_accounts.pl" class="cancel">Cancel</a>
   </fieldset>
 </form>
