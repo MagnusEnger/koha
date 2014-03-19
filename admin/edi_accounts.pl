@@ -75,14 +75,9 @@ else {
             my $new_acct = Koha::EDI::Account->new($fields);
             $new_acct->insert();
         }
-
-        # should insert/update be one method ???
     }
+    elsif ( $op eq 'delete_confirm' ) {
 
-    #elsif ( $op eq 'delete_confirm' ) {
-    #
-    #}
-    elsif ( $op eq 'delete_confirmed' ) {    # was delsubmit
         my $acct = Koha::EDI::Account->new( { id => $input->param('id') } );
         $acct->del();
     }
