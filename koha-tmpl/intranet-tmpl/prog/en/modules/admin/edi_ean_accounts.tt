@@ -76,9 +76,6 @@ function Check(f) {
   <ol>
   <li>
      <label for="branchcode">Branchcode: </label>
-     <!-- Need a branchcode selecting widget
-     <input type="text" name="branchcode" id="branchcode" value="[% ean.branchcode %]"/>
-     -->
      <select name="branchcode" id="branchcode">
         [% FOREACH branch IN branches %]
             [% IF branch.value == ean.branchcode %]
