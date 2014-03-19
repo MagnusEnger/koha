@@ -30,12 +30,11 @@ my $input = CGI->new();
 
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     {
-        template_name   => 'tools/edi.tmpl',
+        template_name   => 'tools/edi.tt',
         query           => $input,
         type            => 'intranet',
         authnotrequired => 0,
-        flagsrequired   => { borrowers => 1 },
-        debug           => ( $ENV{DEBUG} ) ? 1 : 0,
+        flagsrequired   => { acquisition => 'edi_manage' },
     }
 );
 
