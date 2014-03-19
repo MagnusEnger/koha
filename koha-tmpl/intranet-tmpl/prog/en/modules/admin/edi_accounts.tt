@@ -107,7 +107,7 @@ function Check(f) {
   </fieldset>
 
   <fieldset class="action">
-    <input typr="submit" value="Submit" onclick="Check(this.form); return false;" />
+    <input type="submit" value="Submit" onclick="Check(this.form); return false;" />
     <a href="/cgi-bin/koha/admin/edi_accounts.pl" class="cancel">Cancel</a>
   </fieldset>
 </form>
