@@ -1,62 +1,124 @@
 [% INCLUDE 'doc-head-open.inc' %]
-<title>Koha &rsaquo; Administration - EDI EANs</title>
+<title>Koha &rsaquo; Administration &rsaquo; EDI EANs</title>
+[% IF ean_form %]
+  [% IF ean %]
+     &rsquo; Modify branch EAN
+  [% ELSE %]
+     &rsquo; Add new branch EAN
+  [% END %]
+[% END %]
 [% INCLUDE 'doc-head-close.inc' %]
+<script type=$text/javascript">
+function Check(f) {
+// validators go here
+   var _alertString="";
+
+   if (_alertString.length == 0) {
+      document.Actform.submit();
+   } else {
+      outputStr = _("Form not submitted because of the following problem(s)");
+      outputStr += _alertString;
+      alert(outputStr);
+   }
+}
+</script>
 
 </head>
-<body>
+<body id="admin_edi_ean" class="admin">
 [% INCLUDE 'header.inc' %]
 [% INCLUDE 'cat-search.inc' %]
 
-<div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; <a href="/cgi-bin/koha/admin/admin-home.pl">Administration</a> &rsaquo; <a href="/cgi-bin/koha/admin/edi_ean_accounts.pl">EDI EANs</a></div>
+<div id="breadcrumbs">
+<a href="/cgi-bin/koha/mainpage.pl">Home</a>
+ &rsaquo; <a href="/cgi-bin/koha/admin/admin-home.pl">Administration</a>
+ &rsaquo; <a href="/cgi-bin/koha/admin/edi_ean_accounts.pl">EDI EANs</a>
+[% IF ean_form %]
+  [% IF ean %]
+     &rsaquo; Modify branch EAN
+  [% ELSE %]
+     &rsaquo; Add new branch EAN
+  [% END %]
+[% ELSE %]
+     &rsaquo; Branch EANs
+[% END %]
+</div>
 
 <div id="doc3" class="yui-t2">
-    <div id="bd">
-        <div id="yui-main">
-            <div class="yui-b"
-                <h3>Branch EDI EANs</h3>
-                [% IF eans %]
-                <div id="eans" class="rows">
-                    [% IF opdelsubmit %]
-                    <div class="dialog alert">The EAN was successfully deleted</div>
-                    [% END %]
-                    [% IF opaddsubmit %]
-                    <div class="dialog alert">The EAN was successfully added</div>
-                    [% END %]
-                    [% IF opeditsubmit %]
-                    <div class="dialog alert">The EAN was successfully updated</div>
-                    [% END %]
-                        <div><ul class="toolbar">
-                       <li>
-                       <span class="yui-button yui-link-button">
-                       <span class="first-child">
-                       <a href="/cgi-bin/koha/admin/edi_ean_edit.pl?op=add">Add a new EAN</a>
-                       </span></span>
-                       </li></ul></div>
-                        <table border="0" width="100%" cellpadding="3" cellspacing="0">
-                        <tr>
-                        <th><strong>Branch</strong></th>
-                        <th><strong>EAN</strong></th>
-                        <th><strong>Actions</strong></th>
-                        </tr>
-                        [% FOREACH ean IN eans %]
-                           <tr>
-                             <td>[% ean.branchname %]</td>
-                             <td>[% ean.ean %]</td>
-                             <td align="center"><a href="/cgi-bin/koha/admin/edi_ean_edit.pl?op=edit&branchcode=[% ean.branchcode %]&ean=[% ean.ean %]">Edit</a> | <a href="/cgi-bin/koha/admin/edi_ean_edit.pl?op=del&branchcode=[% ean.branchcode %]&ean=[% ean.ean %]">Delete</a></td>
-                           </tr>
-                        [% END %]
-                        </table>
-                </div>
-                [% ELSE %]
-                <p>
-You currently do not have any EANs. To add a new EAN <a href="/cgi-bin/koha/admin/edi_ean_edit.pl?op=add">click here</a>.
-                </p>
-                [% END %]
-            </div>
-        </div>
-        <div class="yui-b">
-            [% INCLUDE 'admin-menu.inc' %]
-        </div>
+
+<div id="bd">
+<div id="yui-main">
+<div class="yui-b">
+[% IF display %]
+    <div id="toolbar" class="btn-toolbar">
+    <a class="btn btn-small" id="newediean" href="/cgi-bin/koha/admin/edi_ean_accounts.pl?op=ean_form">
+         <i class="icon-plus"></i>
+         New EAN
+    </a>
     </div>
+[% END %]
+
+[% IF ean_form %]
+<form action="/cgi-bin/koha/admin/edi_ean_accounts.pl" name="Eanform" method="post">
+  <input type="hidden" name="op" value="save" />
+  [% IF ean %]
+  <input type="hidden" name="oldbranchcode" value="[% ean.branchcode %]" />
+  <input type="hidden" name="oldean" value="[% ean.ean %]" />
+  [% END %]
+  <fieldset class="rows">
+  <legend>
+  [% IF ean %]
+     Modify EAN
+  [% ELSE %]
+    New EAN
+  [% END %]
+  </legend>
+
+  <ol>
+  <li>
+     <label for="branchcode">Branchcode: </label>
+     <!-- Need a branchcode selecting widget -->
+     <input type="text" name="branchcode" id="branchcode" value="[% ean.branchcode %]"/>
+  </li>
+  <li>
+     <label for="ean">EAN: </label>
+     <input type="text" name="ean" id="ean`" size="20" maxlength="90" value="[% ean.ean %]" />
+  </li>
+  </ol>
+  </fieldset>
+
+  <fieldset class="action">
+    <input typr="submit" value="Submit" onclick="Check(this.form); return false;" />
+    <a href="/cgi-bin/koha/admin/edi_ean_accounts.pl" class="cancel">Cancel</a>
+  </fieldset>
+</form>
+
+[% END %]
+
+[% IF display %]
+<h2>Branch EANs</h2>
+   <table>
+   <tr>
+      <th>Branch</th>
+      <th>EAN</th>
+      <th>Actions</th>
+   </tr>
+   [% FOREACH ean IN eans %]
+   [% IF loop.even %]<tr>
+   [% ELSE %]<tr class="highlight">
+   [% END %]
+      <td>[% ean.branchname %]</td>
+      <td>[% ean.ean %]</td>
+      <td align="center">
+           <a href="/cgi-bin/koha/admin/edi_ean_accounts.pl?op=ean_form&branchcode=[% ean.branchcode %]&ean=[% ean.ean %]">Edit</a> | <a href="/cgi-bin/koha/admin/edi_ean_accounts.pl?op=delete_confirm&branchcode=[% ean.branchcode %]&ean=[% ean.ean %]">Delete</a></td>
+   </tr>
+   [% END %]
+    </table>
+[% END %]
+
+</div>
+</div>
+<div class="yui-b">
+    [% INCLUDE 'admin-menu.inc' %]
+</div>
 </div>
 [% INCLUDE 'intranet-bottom.inc' %]

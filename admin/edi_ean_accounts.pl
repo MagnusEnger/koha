@@ -23,6 +23,7 @@ use CGI;
 use C4::Auth;
 use C4::Output;
 use Koha::EDI::Ean;
+use C4::Branch qw( GetBranchesLoop );
 
 my $op_routine = {
     delsubmit  => \&delsubmit,
@@ -43,10 +44,27 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
 );
 
 my $op = $input->param('op');
+$op ||= 'display';
+if ( $op eq 'ean_form' ) {
+    my $branchcode = $input->param('branchcode');
+    my $ean = $input->param('ean');
+    if ( $branchcode && $ean) {
+        my $e = Koha::EDI::Ean->new( { ean => $ean, branchcode => $branchcode });
+        $template->param( ean => $e );
+    }
+    $template->param( ean_form => 1);
+    my $branches = GetBranchesLoop();
+    $template->param( branches => $branches );
+
+}
+else {
 $template->param( op => $op );
 
 if ( exists $op_routine->{$op} ) {
     $op_routine->{$op}->();
+}
+
+$template->param( display => 1 );
 }
 $template->param( eans => Koha::EDI::Ean->all() );
 

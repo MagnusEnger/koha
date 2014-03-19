@@ -94,11 +94,6 @@ else {
     $template->param( ediaccounts => $ediaccounts );
 }
 
-# default display
-
-#my $ediaccounts = Koha::EDI::Account->get_all();
-#$template->param( ediaccounts => $ediaccounts );
-
 output_html_with_http_headers( $input, $cookie, $template->output );
 
 sub get_account {
