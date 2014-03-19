@@ -7,6 +7,9 @@
      &rsquo; Add new account
   [% END %]
 [% END %]
+[% IF delete_confirm %]
+     &rsquo; Confirm deletion of account
+[% END %]
 </title>
 [% INCLUDE 'doc-head-close.inc' %]
 <script type=$text/javascript">
@@ -32,13 +35,15 @@ function Check(f) {
 <div id="breadcrumbs">
 <a href="/cgi-bin/koha/mainpage.pl">Home</a>
  &rsaquo; <a href="/cgi-bin/koha/admin/admin-home.pl">Administration</a>
- &rsaquo; <a href="/cgi-bin/koha/admin/edi_accounts.pl">EDI Accounts</a>
+ &rsaquo; <a href="/cgi-bin/koha/admin/edi_accounts.pl">EDI accounts</a>
 [% IF acct_form %]
   [% IF account %]
      &rsaquo; Modify account
   [% ELSE %]
      &rsaquo; Add new account
   [% END %]
+[% ELSIF delete_confirm %]
+     &rsaquo; Confirm deletion of account
 [% ELSE %]
      &rsaquo; Accounts
 [% END %]
@@ -120,9 +125,40 @@ function Check(f) {
 </form>
 
 [% END %]
-
+[% IF delete_confirm %]
+<div class="dialog alert">
+<h3>Delete this account?</h3>
+<table>
+    <tr>
+    <th>Vendor</th>
+    <td>[% account.vendor %]</td>
+    </tr>
+    <tr>
+    <th>Description</th>
+    <td>[% account.description %]</td>
+    </tr>
+    <tr>
+    <th>SAN</th>
+    <td>[% account.san %]</td>
+    </tr>
+    <tr>
+    <th>Last activity</th>
+    <td>[% account.last_activity %]</td>
+    </tr>
+</table>
+<form action="/cgi-bin/koha/admin/edi_accounts.pl" method="post">
+    <table>
+    </table>
+    <input type="hidden" name="op" value="delete_confirmed" />
+    <input type="hidden" name="id" value="[% account.id %]" />
+    <input type="submit" class="approve" value="Yes, Delete" />
+</form>
+<form action="/cgi-bin/koha/admin/edi_accounts.pl" method="get">
+    <input type="submit" class="deny" value="No, do not Delete" />
+</form>
+[% END %]
 [% IF display %]
-<h2>Vendor EDI Accounts</h2>
+<h2>Vendor EDI accounts</h2>
 
     <table>
     <tr>

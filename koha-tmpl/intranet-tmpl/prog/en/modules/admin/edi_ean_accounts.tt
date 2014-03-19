@@ -7,6 +7,10 @@
      &rsquo; Add new branch EAN
   [% END %]
 [% END %]
+[% IF delete_confirm %]
+     &rsquo; Confirm deletion of EAN
+[% END %]
+</title>
 [% INCLUDE 'doc-head-close.inc' %]
 <script type=$text/javascript">
 function Check(f) {
@@ -38,6 +42,8 @@ function Check(f) {
   [% ELSE %]
      &rsaquo; Add new branch EAN
   [% END %]
+[% ELSIF delete_confirm %]
+     &rsaquo; Confirm deletion of Ean
 [% ELSE %]
      &rsaquo; Branch EANs
 [% END %]
@@ -100,7 +106,20 @@ function Check(f) {
 </form>
 
 [% END %]
-
+[% IF delete_confirm %]
+<div class="dialog alert">
+<h3>Delete EAN [% ean.ean %] for branch [% ean.branchname %]?</h3>
+<form action="/cgi-bin/koha/admin/edi_ean_accounts.pl" method="post">
+    <input type="hidden" name="op" value="delete_confirmed" />
+    <input type="hidden" name="branchcode" value="[% ean.branchcode %]" />
+    <input type="hidden" name="ean" value="[% ean.ean %]" />
+    <input type="submit" class="approve" value="Yes, Delete" />
+</form>
+<form action="/cgi-bin/koha/admin/edi_ean_accounts.pl" method="get">
+    <input type="submit" class="deny" value="No, do not Delete" />
+</form>
+</div>
+[% END %]
 [% IF display %]
 <h2>Branch EANs</h2>
    <table>

@@ -41,17 +41,15 @@ my $op = $input->param('op');
 $op ||= 'display';
 
 if ( $op eq 'ean_form' ) {
-    my $branchcode = $input->param('branchcode');
-    my $ean        = $input->param('ean');
-    if ( $branchcode && $ean ) {
-        my $e =
-          Koha::EDI::Ean->new( { ean => $ean, branchcode => $branchcode } );
-        $template->param( ean => $e );
-    }
+    show_ean();
     $template->param( ean_form => 1 );
     my $branches = GetBranchesLoop();
     $template->param( branches => $branches );
 
+}
+elsif ( $op eq 'delete_confirm' ) {
+    show_ean();
+    $template->param( delete_confirm => 1 );
 }
 else {
     if ( $op eq 'save' ) {
@@ -63,7 +61,7 @@ else {
             addsubmit();
         }
     }
-    elsif ( $op eq 'delete_confirm' ) {
+    elsif ( $op eq 'delete_confirmed' ) {
         delsubmit();
     }
     $template->param( display => 1 );
@@ -107,5 +105,16 @@ sub editsubmit {
             ean        => $input->param('ean')
         }
     );
+    return;
+}
+
+sub show_ean {
+    my $branchcode = $input->param('branchcode');
+    my $ean        = $input->param('ean');
+    if ( $branchcode && $ean ) {
+        my $e =
+          Koha::EDI::Ean->new( { ean => $ean, branchcode => $branchcode } );
+        $template->param( ean => $e );
+    }
     return;
 }

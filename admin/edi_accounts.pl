@@ -41,16 +41,14 @@ my $op = $input->param('op');
 $op ||= 'display';
 
 if ( $op eq 'acct_form' ) {
-    my $acct_id = $input->param('id');
-    if ($acct_id) {
-        my $acc = get_account($acct_id);
-        if ($acc) {
-            $template->param( account => $acc );
-        }
-    }
+    show_account();
     $template->param( acct_form => 1 );
     my $vendors = GetVendorList();
     $template->param( vendors => $vendors );
+}
+elsif ( $op eq 'delete_confirm' ) {
+    show_account();
+    $template->param( delete_confirm => 1 );
 }
 else {
     if ( $op eq 'save' ) {
@@ -76,7 +74,7 @@ else {
             $new_acct->insert();
         }
     }
-    elsif ( $op eq 'delete_confirm' ) {
+    elsif ( $op eq 'delete_confirmed' ) {
 
         my $acct = Koha::EDI::Account->new( { id => $input->param('id') } );
         $acct->del();
@@ -100,5 +98,16 @@ sub get_account {
     }
 
     # passing undef will default to add
+    return;
+}
+
+sub show_account {
+    my $acct_id = $input->param('id');
+    if ($acct_id) {
+        my $acc = get_account($acct_id);
+        if ($acc) {
+            $template->param( account => $acc );
+        }
+    }
     return;
 }
