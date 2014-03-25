@@ -61,7 +61,7 @@ $(document).ready(function() {
 			<td><span title="[% message.date_sent %]">[% message.date_sent | $KohaDates %]</span></td>
                     <td>[% message.message_type %]</td>
                      <td>
-                     <a href="/cgi-bin/koha/acqui/supplier.pl?supplierid=[% message.vendor_id %]">[% message.vendorname %]</a>
+                     <a href="/cgi-bin/koha/acqui/supplier.pl?supplierid=[% message.provider %]">[% message.providername %]</a>
                      </td>
 		     <td>[% message.status %][% IF (message.status == 'Failed') %] - <a href="/cgi-bin/koha/acqui/basket.pl?op=edisend&basketno=[% message.basketno %]&booksellerid=[% message.provider %]">Re-send</a>[% END %]</td>
                      <td>
