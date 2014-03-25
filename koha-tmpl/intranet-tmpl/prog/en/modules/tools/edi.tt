@@ -2,14 +2,27 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Tools &rsaquo; EDIfact messages</title>
 [% INCLUDE 'doc-head-close.inc' %]
-<script type="text/javascript" language="javascript">
-function check_sent(status,key,basketno,vendor_id)
-{
-    if (status == 'Failed' && basketno !=0)
-    {
-        document.write(' - (<a href="/cgi-bin/koha/acqui/basket.pl?op=edisend&basketno='+basketno+'&booksellerid='+vendor_id+'">Re-send</a>)');
-    }
-}
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/en/css/datatables.css" />
+<script type="text/javascript" src="[% interface %]/[% theme %]/en/lib/jquery/plugins/jquery.dataTables.min.js"></script>
+[% INCLUDE 'datatables-strings.inc' %]
+<script type="text/javascript" src="[% interface %]/[% theme %]/en/js/datatables.js"></script>
+<script type="text/javascript">
+	//<![CDATA[
+$(document).ready(function() {
+  $("#edimessages").dataTable($.extend(true, {}, dataTablesDefaults, {
+    "sPaginationType": "four_button",
+    "iDisplayLength": 25,
+    "aoColumnDefs": [
+        { "bSortable": false, "aTargets": [ "nosort" ] },
+	{ "sType": "title-string", "aTargets" : [ "title-string" ] }
+    ],
+    "aaSorting": [[ 1, "asc" ]],
+    "bPaginate": true
+    // dataTablesDefaults contain default options and strings defined in datables-strings.inc
+    // You can put your specific datatables options here
+  }));
+});
+//]]>
 </script>
 </head>
 <body>
@@ -34,20 +47,23 @@ function check_sent(status,key,basketno,vendor_id)
                     [% IF opeditsubmit %]
                     <div class="dialog alert">The message was successfully updated</div>
                     [% END %]
-                        <table border="0" width="100%" cellpadding="3" cellspacing="0">
-                        <th><strong>Date</strong></th>
-                        <th><strong>Message type</strong></th>
-                        <th><strong>Provider</strong></th>
-                        <th><strong>Status</strong></th>
-                        <th>Details</th>
+		    <table id="edimessages" border="0" width="100%" cellpadding="3" cellspacing="0">
+			    <thead>
+                        <th class="title-string">Date</th>
+                        <th>Message type</th>
+                        <th class="nosort">Provider</th>
+                        <th class="nosort">Status</th>
+			<th class="nosort">Details</th>
+		</thead>
+		<tbody>
                         [% FOREACH message IN messagelist %]
                 <tr>
-                    <td>[% message.date_sent | $KohaDates %]</td>
+			<td><span title="[% message.date_sent %]">[% message.date_sent | $KohaDates %]</span></td>
                     <td>[% message.message_type %]</td>
                      <td>
                      <a href="/cgi-bin/koha/acqui/supplier.pl?supplierid=[% message.vendor_id %]">[% message.vendorname %]</a>
                      </td>
-                     <td>[% message.status %]<script type="text/javascript" language="javascript">check_sent('[% message.status %]',[% message.key %],[% message.basketno %],[% message.vendor_id %]);</script></td>
+		     <td>[% message.status %][% IF (message.status == 'Failed') %] - <a href="/cgi-bin/koha/acqui/basket.pl?op=edisend&basketno=[% message.basketno %]&booksellerid=[% message.provider %]">Re-send</a>[% END %]</td>
                      <td>
                      [% IF message.basketno %]
                         <a href="/cgi-bin/koha/acqui/basket.pl?basketno=[% message.basketno %]">View basket</a>
@@ -57,7 +73,8 @@ function check_sent(status,key,basketno,vendor_id)
                      [% END %]
                      </td>
                  </tr>
-                        [% END %]
+		 [% END %]
+	 </tbody>
                         </table>
                 </div>
 
