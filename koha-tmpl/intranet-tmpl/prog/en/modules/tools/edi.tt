@@ -34,8 +34,8 @@ $(document).ready(function() {
 <div id="doc3" class="yui-t2">
     <div id="bd">
         <div id="yui-main">
-            <div class="yui-b"
-                <h1>EDIfact messages</h1>
+	   <div class="yui-b">
+             <h1>EDIfact messages</h1>
                 [% IF messagelist %]
                 <div id="messagelist" class="rows">
                     [% IF opdelsubmit %]
