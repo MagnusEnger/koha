@@ -37,16 +37,16 @@ sub get_all {
     my $dbh   = C4::Context->dbh;
     my $sql   = <<'ENDMSGSQL';
     select edifact_messages.id, edifact_messages.message_type,
-    edifact_messages.date_sent, edifact_messages.provider,
+    edifact_messages.date_sent, edifact_messages.vendor_id,
     edifact_messages.status, edifact_messages.basketno,
-    edifact_messages.invoicenumber, 
+    edifact_messages.invoiceid
+    aqinvoices.invoicenumber,
     aqbooksellers.name as providername
     from edifact_messages 
-    left outer join aqbooksellers on edifact_messages.provider = aqbooksellers.id
+    left outer join aqbooksellers on edifact_messages.vendor_id` = aqbooksellers.id
+    left outer join aqinvoices on edifact_messages.invoiceid` = aqinvoices.invoiceid
     order by edifact_messages.date_sent desc, edifact_messages.id desc
 ENDMSGSQL
-
-    # edifact_messages.invoicenumber from edifact_messages
     return $dbh->selectall_arrayref( $sql, { Slice => {} } );
 }
 1;

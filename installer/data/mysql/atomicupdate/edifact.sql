@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS edifact_messages (
   basketno int(11) references aqbasket( basketno),
   edi text,
   remote_file text,
-  invoiceid int(11),
+  invoiceid int(11) references aqinvoices( invoiceid ),
   PRIMARY KEY  (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
