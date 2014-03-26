@@ -39,6 +39,7 @@ sub get_all {
     select edifact_messages.id, edifact_messages.message_type,
     edifact_messages.date_sent, edifact_messages.provider,
     edifact_messages.status, edifact_messages.basketno,
+    edifact_messages.invoicenumber, 
     aqbooksellers.name as providername
     from edifact_messages 
     left outer join aqbooksellers on edifact_messages.provider = aqbooksellers.id

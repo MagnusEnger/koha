@@ -18,8 +18,6 @@ $(document).ready(function() {
     ],
     "aaSorting": [[ 0, "desc" ]],
     "bPaginate": true
-    // dataTablesDefaults contain default options and strings defined in datables-strings.inc
-    // You can put your specific datatables options here
   }));
 });
 //]]>
