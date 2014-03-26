@@ -49,7 +49,7 @@ $(document).ready(function() {
 			    <thead>
                         <th class="title-string">Date</th>
                         <th>Message type</th>
-                        <th class="nosort">Provider</th>
+                        <th class="nosort">Vendor</th>
                         <th class="nosort">Status</th>
 			<th class="nosort">Details</th>
 		</thead>
@@ -59,9 +59,9 @@ $(document).ready(function() {
 			<td><span title="[% message.date_sent %]">[% message.date_sent | $KohaDates %]</span></td>
                     <td>[% message.message_type %]</td>
                      <td>
-                     <a href="/cgi-bin/koha/acqui/supplier.pl?supplierid=[% message.provider %]">[% message.providername %]</a>
+                     <a href="/cgi-bin/koha/acqui/supplier.pl?supplierid=[% message.vendor_id %]">[% message.providername %]</a>
                      </td>
-		     <td>[% message.status %][% IF (message.status == 'Failed') %] - <a href="/cgi-bin/koha/acqui/basket.pl?op=edisend&basketno=[% message.basketno %]&booksellerid=[% message.provider %]">Re-send</a>[% END %]</td>
+		     <td>[% message.status %][% IF (message.status == 'Failed') %] - <a href="/cgi-bin/koha/acqui/basket.pl?op=edisend&basketno=[% message.basketno %]&booksellerid=[% message.vendor_id %]">Re-send</a>[% END %]</td>
                      <td>
                      [% IF message.basketno %]
                         <a href="/cgi-bin/koha/acqui/basket.pl?basketno=[% message.basketno %]">View basket</a>

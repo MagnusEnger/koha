@@ -39,12 +39,12 @@ sub get_all {
     select edifact_messages.id, edifact_messages.message_type,
     edifact_messages.date_sent, edifact_messages.vendor_id,
     edifact_messages.status, edifact_messages.basketno,
-    edifact_messages.invoiceid
+    edifact_messages.invoiceid,
     aqinvoices.invoicenumber,
     aqbooksellers.name as providername
     from edifact_messages 
-    left outer join aqbooksellers on edifact_messages.vendor_id` = aqbooksellers.id
-    left outer join aqinvoices on edifact_messages.invoiceid` = aqinvoices.invoiceid
+    left outer join aqbooksellers on edifact_messages.vendor_id = aqbooksellers.id
+    left outer join aqinvoices on edifact_messages.invoiceid = aqinvoices.invoiceid
     order by edifact_messages.date_sent desc, edifact_messages.id desc
 ENDMSGSQL
     return $dbh->selectall_arrayref( $sql, { Slice => {} } );
