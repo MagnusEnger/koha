@@ -9,14 +9,15 @@
   <script type="text/javascript">
   //<![CDATA[
   $(document).ready(function() {
+  var thIndex = $(this).find("th.psort").index();
   $("#edimessages").dataTable($.extend(true, {}, dataTablesDefaults, {
     "sPaginationType": "four_button",
     "iDisplayLength": 25,
     "aoColumnDefs": [
         { "bSortable": false, "aTargets": [ "nosort" ] },
-        { "sType": "title-string", "aTargets" : [ "title-string" ] }
+        { "sType": "title-string", "aTargets" : [ "title-string" ] },
     ],
-    "aaSorting": [[ 0, "desc" ]],
+    "aaSorting" : [[ thIndex, "desc" ]],
     "bPaginate": true
   }));
   });
@@ -58,7 +59,7 @@
             <table id="edimessages" border="0" width="100%" cellpadding="3" cellspacing="0">
               <thead>
                 <tr>
-                  <th class="title-string">Date</th>
+                  <th class="title-string psort">Date</th>
                   <th>Message type</th>
                   <th class="nosort">Vendor</th>
                   <th class="nosort">Status</th>
