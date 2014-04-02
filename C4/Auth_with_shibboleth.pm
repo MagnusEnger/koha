@@ -1,4 +1,4 @@
-package C4::Auth_with_Shibboleth;
+package C4::Auth_with_shibboleth;
 
 # Copyright 2011 BibLibre
 #

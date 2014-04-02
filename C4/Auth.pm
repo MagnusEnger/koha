@@ -58,13 +58,13 @@ BEGIN {
     $shib        = C4::Context->config('useshibboleth') || 0;
     $caslogout   = C4::Context->preference('casLogout');
     require C4::Auth_with_cas;             # no import
-    require C4::Auth_with_Shibboleth;
+    require C4::Auth_with_shibboleth;
     if ($ldap) {
     require C4::Auth_with_ldap;
     import C4::Auth_with_ldap qw(checkpw_ldap);
     }
     if ($shib) {
-        import C4::Auth_with_Shibboleth
+        import C4::Auth_with_shibboleth
           qw(checkpw_shib logout_shib login_shib_url get_login_shib);
 
         # Get shibboleth login attribute
@@ -1622,7 +1622,7 @@ sub checkpw {
 
         # Then, we check if it matches a valid koha user
         if ($shib_login) {
-            my ( $retval, $retcard, $retuserid ) = C4::Auth_with_Shibboleth::checkpw_shib( $dbh, $shib_login );    # EXTERNAL AUTH
+            my ( $retval, $retcard, $retuserid ) = C4::Auth_with_shibboleth::checkpw_shib( $dbh, $shib_login );    # EXTERNAL AUTH
             ($retval) and return ( $retval, $retcard, $retuserid );
             return 0;
         }
