@@ -2,6 +2,9 @@ package Koha::EDI::Account;
 use strict;
 use warnings;
 use C4::Context;
+use DBI;
+use Net::FTP;
+use Net::SFTP::Foreign;
 
 sub new {
     my ( $class, $arg_ref ) = @_;
@@ -53,13 +56,16 @@ insert into vendor_edi_accounts
   (description, host, username, password, vendor_id, remote_directory, san)
   values (?,?,?,?,?,?,?)
 END_INSSQL
-        return $dbh->do(
+        my $rv = $dbh->do(
             $sql, {},
             $self->{description}, $self->{host},
             $self->{user},        $self->{pass},
             $self->{vendor_id},   $self->{remote_directory},
             $self->{san}
         );
+        $self->{id} = $dbh->{mysql_insertid};
+        return $rv;
+
     }
     return;
 }
@@ -83,7 +89,7 @@ update vendor_edi_accounts set description=?, host=?,
 username=?, password=?, vendor_id=?, remote_directory=?, san=? where id=?
 END_UPDSQL
         my $sth = $dbh->prepare($sql);
-        $sth->execute(
+        return $sth->execute(
             $self->{description}, $self->{host},
             $self->{user},        $self->{pass},
             $self->{vendor_id},   $self->{remote_directory},
@@ -108,6 +114,9 @@ sub log_last_activity {
 sub download {
     my ( $self, $notice_type ) = @_;
 
+    #TBD add a transport so that SFTP can be used and
+    #have separate routines using either Net::FTP
+    #or Net::SFTP::Foreign
     my @downloaded_files;
     my $ftp = Net::FTP->new(
         $self->{host},
@@ -195,6 +204,69 @@ This class handles accounts with vendors with whom the system
 can order electronically using Edifact
 
 =head1 METHODS
+
+=head2 new
+
+my $acc = Koha::EDI::Account->new( { id => 1, attr1 => value } );
+
+Constructor returns an EDI::Account object with attributes as specified
+in the passed hash_ref
+
+=head2 create
+
+my $acc = Koha::EDI::Account->create( { attr1 => value attr2 => value  );
+
+Convenience constructor calls new and and inserts the object in the database
+before returning it
+
+=head2 retrieve
+
+$ret = $obj->retrieve()
+
+retrieves the data fields for Account with object's id attribute from
+the database returns 1 on a succesful read undef otherwise
+
+=head2 insert
+
+$ret = $obj->insert();
+
+Inserts the object into permanent store as a new row
+Returns the return value of the insert and sets the object's id attribute
+to the approprate value
+
+=head2 del
+
+$ret = $obj->del()
+
+Deletes the row corresponding to the object's id attribute from permanent 
+store. Returns the deletes return value or undef if no id attribute is set
+
+=head2 update
+
+$ret = $object->update()
+
+Update the database with the values in the current object, requiews that id
+was set either on creation or by a previous retrieve
+Returns the return value from the update or undef if the id attribute was not
+present.
+
+=head2 log_last_activity
+
+Update Account last activity date 
+This can only be done by this method call it is not updated by update
+
+=head2 download
+
+Download new edi files from this account
+
+-head2 id
+
+Return the id of this account or undef if none assigned
+=head2 get_all
+
+my $accts = Koha::EDI::Account->get_all()
+
+Class method returns an array of all vendor EDI accounts
 
 =head2 exist
 
