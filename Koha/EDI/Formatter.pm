@@ -5,7 +5,6 @@ use warnings;
 use DateTime;
 use Readonly;
 use Business::ISBN;
-use Koha::EDI::Util qw( cleanisbn );
 use parent qw/Exporter/;
 
 our @EXPORT_OK = qw( create_order_message );
@@ -100,7 +99,7 @@ sub create_order_message {
             || $lineitem->{isbn} =~ m/^978/
             || $lineitem->{isbn} !~ m/[|]/ )
         {
-            $isbn = cleanisbn( $lineitem->{isbn} );
+            $isbn = _cleanisbn( $lineitem->{isbn} );
             $isbn = Business::ISBN->new($isbn);
             if ($isbn) {
                 if ( $isbn->is_valid ) {
@@ -288,4 +287,17 @@ sub _escape_reserved {
         return;
     }
 }
+
+sub _cleanisbn {
+    my $isbn = shift;
+    if ($isbn) {
+        $isbn =~ s/\(.*$//;     # remove qualification e.g. (pbk)
+        $isbn =~ s/[|].*$//;    # only take first isbn
+        $isbn =~ s/^\s+//;
+        $isbn =~ s/\s+$//;
+        return $isbn;
+    }
+    return;
+}
+
 1;

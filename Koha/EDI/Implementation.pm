@@ -20,7 +20,6 @@ use C4::Biblio;
 use C4::Items;
 
 use Koha::EDI::Parser qw/parse_invoice parse_quote/;
-use Koha::EDI::Util qw( cleanisbn );
 our @EXPORT_OK = qw(
   retrieve_vendor_ftp_accounts
   download_messages
