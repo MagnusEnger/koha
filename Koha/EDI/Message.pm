@@ -113,29 +113,14 @@ sub del {
 sub update {
     my ( $self, $arg_ref ) = @_;
     if ( $self->{id} ) {
-        if ( exists $arg_ref->{message_type} ) {
-            $self->{message_type} = $arg_ref->{message_type};
-        }
-        if ( exists $arg_ref->{edi} ) {
-            $self->{edi} = $arg_ref->{edi};
-        }
-        if ( exists $arg_ref->{date_sent} ) {
-            $self->{date_sent} = $arg_ref->{date_sent};
-        }
-        if ( exists $arg_ref->{vendor_id} ) {
-            $self->{vendor_id} = $arg_ref->{vendor_id};
-        }
-        if ( exists $arg_ref->{status} ) {
-            $self->{status} = $arg_ref->{status};
-        }
-        if ( exists $arg_ref->{basketno} ) {
-            $self->{basketno} = $arg_ref->{basketno};
-        }
-        if ( exists $arg_ref->{invoiceid} ) {
-            $self->{invoiceid} = $arg_ref->{invoiceid};
-        }
-        if ( exists $arg_ref->{remote_file} ) {
-            $self->{remote_file} = $arg_ref->{remote_file};
+        my @updateable_attributes =
+          (
+            qw( message_type edi date_sent vendor_id status basketno invoiceid remote_file)
+          );
+        for my $a (@updateable_attributes) {
+            if ( exists $arg_ref->{$a} ) {
+                $self->{$a} = $arg_ref->{$a};
+            }
         }
     }
     return;
