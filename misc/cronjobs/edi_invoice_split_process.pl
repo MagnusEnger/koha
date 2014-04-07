@@ -28,8 +28,9 @@ use C4::Context;
 use Koha::EDI;
 
 my $idir       = C4::Context->config('intranetdir');
+my $logdir       = C4::Context->config('logdir');
 my $edidir     = "$idir/misc/edi_files/";
-my $ftplogfile = "$edidir/edi_ftp.log";
+my $ftplogfile = "$logdir/edi_ftp.log";
 
 my $vendor_ftp_accounts = [
     {

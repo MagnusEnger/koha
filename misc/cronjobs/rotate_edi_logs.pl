@@ -3,22 +3,18 @@
 use strict;
 use warnings;
 use C4::Context;
+use POSIX qw/strftime/;
 
-my $idir   = C4::Context->config('intranetdir');
-my $edidir = "$idir/misc/edi_files/";              # koha
+my $logdir = C4::Context->config('logdir');
 
-#my $edidir="/tmp/";								# evergreen
+my @logfiles = ( "$logdir/edi_ftp.log", "$logdir/edi_quote_error.log" );
+my $rotate_size = 10485760;    # 10MB
 
-my @logfiles = ( '$edidir/edi_ftp.log', '$edidir/edi_quote_error.log' );
-my $rotate_size = 10485760;                        # 10MB
-
-my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime(time);
-my $currdate = sprintf "%4d%02d%02d", $year + 1900, $mon + 1, $mday;
+my $currdate = strftime( '%Y%m%d', localtime );
 
 foreach my $file (@logfiles) {
-    my $current_size = -s $file;
-    print "$current_size\n";
-    if ( $current_size > $rotate_size ) {
-        rename $file, $file . "." . $currdate;
+    if ( $rotate_size < -s $file ) {
+        my $newname = "$file.$currdate";
+        rename $file, $newname;
     }
 }
