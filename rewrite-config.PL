@@ -117,6 +117,7 @@ $prefix = $ENV{'INSTALL_BASE'} || "/usr";
   '__SCRIPT_DIR__' => "$prefix/bin",
   '__MAN_DIR__' => "$prefix/man",
   '__DOC_DIR__' => "$prefix/doc",
+  '__EDI_DIR__' => "$prefix/var/edi_files",
   '__ZEBRA_LOCK_DIR__' => "$prefix/var/lock/zebradb",
   '__ZEBRA_DATA_DIR__' => "$prefix/var/lib/zebradb",
   '__ZEBRA_RUN_DIR__' => "$prefix/var/run/zebradb",
