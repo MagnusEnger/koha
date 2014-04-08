@@ -6,13 +6,23 @@ use parent qw/Exporter/;
 use DateTime;
 use Business::Edifact::Interchange;
 
-our @EXPORT_OK = qw( parse_invoice parse_quote);
+sub new {
+    my $class = shift;
+    my $self  = {};
+    $self->{edi} = Business::Edifact::Interchange->new();
+
+    # Should we be doing this
+    $self->{edidir} = '/tmp';    # fudged for testing
+
+    bless $self, $class;
+    return $self;
+}
 
 sub parse_invoice {
     my ( $self, $invoice ) = @_;
     my $parsed_invoice;
-    my $datereceived => DateTime->now->strftime('%Y-%m-%d');
-    my $edi = Business::Edifact::Interchange->new();
+    my $datereceived => DateTime->now;
+    my $edi = $self->{edi};
     $edi->parse_file("$self->{edidir}$invoice->{filename}");
     foreach my $m ( $edi->messages() ) {
 
@@ -72,7 +82,7 @@ sub parse_invoice {
               {
                 unit_price   => $unit_price,
                 quantity     => $item->{quantity_invoiced},
-                datereceived => $datereceived,
+                datereceived => $datereceived->ymd(),
                 gstrate      => $item_tax_rate,
                 supplier_ref => $item->{item_reference}[0][1],
               };
@@ -96,7 +106,7 @@ sub parse_invoice {
 sub parse_quote {
     my ( $self, $quote ) = @_;
     my @parsed_quote;
-    my $edi = Business::Edifact::Interchange->new();
+    my $edi = $self->{edi};
     $edi->parse_file( $self->{edidir} . $quote->{filename} );
     foreach my $m ( $edi->messages() ) {
 
@@ -162,3 +172,57 @@ sub _get_shipping_fund_id {
 }
 
 1;
+__END__
+
+=head1 NAME
+
+Koha::EDI::Parser - Parser wrapper
+
+=head1 SYNOPSIS
+
+use Koha::EDI::Parser
+
+=head1 DESCRIPTION
+
+Parse Edi message. Koha wrapper around Business::Edifact::Interchange
+
+=head1 METHODS
+
+=head2 new
+
+my $parser = Koha::EDI::Parser->new()
+
+Constructor
+
+=head2 parse_invoice
+
+=head2 parse_quote
+
+=head1 DIAGNOSTICS
+
+=head1 DEPENDENCIES
+
+=head1 BUGS AND LIMITATIONS
+
+=head1 AUTHOR
+
+Colin Campbell <colin.campbell@ptfs-europe.com>
+
+=head1 LICENCE AND COPYRIGHT
+
+Copyright 2014 PTFS-Europe Ltd
+
+This file is part of Koha.
+
+Koha is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+Koha is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Koha; if not, see <http://www.gnu.org/licenses>.
