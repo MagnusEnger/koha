@@ -5,6 +5,9 @@ use C4::Context;
 use DBI;
 use Net::FTP;
 use Net::SFTP::Foreign;
+use English qw{ -no_match_vars };
+
+our $VERSION = 1.00;
 
 sub new {
     my ( $class, $arg_ref ) = @_;
@@ -53,7 +56,7 @@ sub insert {
         my $dbh = C4::Context->dbh;
         my $sql = <<'END_INSSQL';
 insert into vendor_edi_accounts
-  (description, host, username, password, vendor_id, remote_directory, san)
+  (description, host, username, password, vendor_id, remote_directory, san, transport)
   values (?,?,?,?,?,?,?)
 END_INSSQL
         my $rv = $dbh->do(
@@ -61,7 +64,7 @@ END_INSSQL
             $self->{description}, $self->{host},
             $self->{user},        $self->{pass},
             $self->{vendor_id},   $self->{remote_directory},
-            $self->{san}
+            $self->{san},         $self->{transport}
         );
         $self->{id} = $dbh->{mysql_insertid};
         return $rv;
@@ -114,16 +117,63 @@ sub log_last_activity {
 sub download {
     my ( $self, $notice_type ) = @_;
 
-    #TBD add a transport so that SFTP can be used and
-    #have separate routines using either Net::FTP
-    #or Net::SFTP::Foreign
+    if ( $self->{transport} eq 'SFTP' ) {
+        return $self->sftp_download();
+    }
+    else {    # assume FTP
+        return $self->ftp_download();
+    }
+}
+
+sub download_sftp {
+    my $self = shift;
+    my @downloaded_files;
+    my $edidir = C4::Context->config('edidir');
+    my $sftp   = Net::SFTP::Foreign->new(
+        $self->{host},
+        {
+            user     => $self->{user},
+            password => $self->{password},
+            timeout  => 10,
+        }
+    );
+    if ( $sftp->error ) {
+        return _abort_download( undef,
+            'Unable to connect to remote host: ' . $sftp->error );
+    }
+    $sftp->setcwd( $self->{remote_directory} )
+      or _abort_download( $sftp, "Cannot change remote dir : $sftp->error" );
+    my $file_list = $sftp->ls()
+      or _abort_download( $sftp,
+        "cannot get file list from server: $sftp->error" );
+    foreach my $filename ( @{$file_list} ) {
+        if ( $self->is_file_new($filename) ) {
+
+            $sftp->get( $filename, "$edidir/$filename" );
+            if ( $sftp->error ) {
+                _abort_download( $sftp,
+                    "Error retrieving $filename: $sftp->error" );
+
+                # or log & try next
+            }
+            push @downloaded_files, $filename;
+        }
+    }
+    $sftp->disconnect;
+    return @downloaded_files;
+}
+
+sub download_ftp {
+    my $self   = shift;
+    my $edidir = C4::Context->config('edidir');
     my @downloaded_files;
     my $ftp = Net::FTP->new(
         $self->{host},
         Timeout => 10,
         Passive => 1
       )
-      or return _abort_download( undef, "Cannot connect to $self->{host}: $@" );
+      or return _abort_download( undef,
+        "Cannot connect to $self->{host}: $EVAL_ERROR" );
     $ftp->login( $self->{username}, $self->{password} )
       or _abort_download( $ftp, "Cannot login: $ftp->message()" );
     $ftp->cwd( $self->{remote_directory} )
@@ -131,20 +181,30 @@ sub download {
     my $file_list = $ftp->ls()
       or _abort_download( $ftp, 'cannot get file list from server' );
     foreach my $filename ( @{$file_list} ) {
+
         if ( $self->is_file_new($filename) ) {
 
-            #$ftp->get(__REMOTE_FILE__, __LOCAL_FILE__);
+            $ftp->get( $filename, "$edidir/$filename" );
+
+            # TBD error handling
             push @downloaded_files, $filename;
         }
     }
     $ftp->quit;
-
     return @downloaded_files;
+}
+
+sub is_file_new {
+    my ( $self, $filename ) = @_;
+
+    # call Message to check
+    return;
 }
 
 sub _abort_download {
 
     # log info if ftp open close it
+    # if sftp abort
     #returns undef i.e. an empty array
     return;
 }
@@ -224,7 +284,7 @@ before returning it
 $ret = $obj->retrieve()
 
 retrieves the data fields for Account with object's id attribute from
-the database returns 1 on a succesful read undef otherwise
+the database returns 1 on a successful read undef otherwise
 
 =head2 insert
 
@@ -238,7 +298,7 @@ to the approprate value
 
 $ret = $obj->del()
 
-Deletes the row corresponding to the object's id attribute from permanent 
+Deletes the row corresponding to the object's id attribute from permanent
 store. Returns the deletes return value or undef if no id attribute is set
 
 =head2 update
@@ -259,9 +319,10 @@ This can only be done by this method call it is not updated by update
 
 Download new edi files from this account
 
--head2 id
+=head2 id
 
 Return the id of this account or undef if none assigned
+
 =head2 get_all
 
 my $accts = Koha::EDI::Account->get_all()

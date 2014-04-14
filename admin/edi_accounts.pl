@@ -63,6 +63,7 @@ else {
             vendor_id   => $input->param('vendor_id'),
             directory   => $input->param('directory'),
             san         => $input->param('san'),
+            transport   => $input->param('transport'),
         };
         if ($id) {
             $fields->{id} = $id;

@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS vendor_edi_accounts (
   vendor_id int(11) references aqbooksellers( id ),
   remote_directory text,
   san varchar(20),
+  transport varchar(6) default 'FTP',
   PRIMARY KEY  (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -21,6 +22,7 @@ CREATE TABLE IF NOT EXISTS edifact_messages (
   edi text,
   remote_file text,
   invoiceid int(11) references aqinvoices( invoiceid ),
+  deleted boolean default 0,
   PRIMARY KEY  (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

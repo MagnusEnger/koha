@@ -81,6 +81,10 @@
      <input type="text" name="description" id="description" size="20" maxlength="90" value="[% account.description %]" />
   </li>
   <li>
+     <label for="transport">Transport: </label>
+     <input type="text" name="transport" id="transport" size="10" maxlength="10" value="[% account.transport %]" />
+  </li>
+  <li>
      <label for="host">Remote host: </label>
      <input type="text" name="host" id="host" size="20" maxlength="90" value="[% account.host %]" />
   </li>
@@ -150,6 +154,7 @@
        <th>ID</th>
        <th>Vendor</th>
        <th>Description</th>
+       <th>Transport</th>
        <th>Remote host</th>
        <th>Username</th>
        <th>Password</th>
@@ -165,6 +170,7 @@
       <td>[% account.id %]</td>
       <td><a href="/cgi-bin/koha/acqui/supplier.pl?supplierid=[% account.vendor_id %]">[% account.vendor %]</a></td>
       <td>[% account.description %]</td>
+      <td>[% account.transport %]</td>
       <td>[% account.host %]</td>
       <td>[% account.username %]</td>
       <td>[% IF account.password %]xxxxx[% END %]</td>
