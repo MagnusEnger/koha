@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Copyright 2013,2014 PTFS Europe Ltd
+# Copyright 2014 PTFS Europe Ltd
 #
 # This file is part of Koha.
 #
