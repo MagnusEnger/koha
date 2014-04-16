@@ -126,7 +126,10 @@ sub download {
 }
 
 sub download_sftp {
-    my $self = shift;
+    my $self     = shift;
+    my $type     = shift;
+    my $file_ext = _get_file_ext($type);    # C = ready to retrieve E = Edifact
+
     my @downloaded_files;
     my $edidir = C4::Context->config('edidir');
     my $sftp   = Net::SFTP::Foreign->new(
@@ -147,8 +150,8 @@ sub download_sftp {
       or _abort_download( $sftp,
         "cannot get file list from server: $sftp->error" );
     foreach my $filename ( @{$file_list} ) {
-        if ( $self->is_file_new($filename) ) {
 
+        if ( $filename =~ m/\.$file_ext$/ ) {
             $sftp->get( $filename, "$edidir/$filename" );
             if ( $sftp->error ) {
                 _abort_download( $sftp,
@@ -157,6 +160,9 @@ sub download_sftp {
                 # or log & try next
             }
             push @downloaded_files, $filename;
+            my $processed_name = $filename;
+            substr $processed_name, -3, 1, 'E';
+            $sftp->rename( $filename, $processed_name );
         }
     }
     $sftp->disconnect;
@@ -164,7 +170,10 @@ sub download_sftp {
 }
 
 sub download_ftp {
-    my $self   = shift;
+    my $self     = shift;
+    my $type     = shift;
+    my $file_ext = _get_file_ext($type);    # C = ready to retrieve E = Edifact
+
     my $edidir = C4::Context->config('edidir');
     my @downloaded_files;
     my $ftp = Net::FTP->new(
@@ -180,25 +189,22 @@ sub download_ftp {
       or _abort_download( $ftp, "Cannot change remote dir : $ftp->message()" );
     my $file_list = $ftp->ls()
       or _abort_download( $ftp, 'cannot get file list from server' );
+
     foreach my $filename ( @{$file_list} ) {
 
-        if ( $self->is_file_new($filename) ) {
+        if ( $filename =~ m/\.$file_ext$/ ) {
 
             $ftp->get( $filename, "$edidir/$filename" );
 
             # TBD error handling
             push @downloaded_files, $filename;
+            my $processed_name = $filename;
+            substr $processed_name, -3, 1, 'E';
+            $ftp->rename( $filename, $processed_name );
         }
     }
     $ftp->quit;
     return @downloaded_files;
-}
-
-sub is_file_new {
-    my ( $self, $filename ) = @_;
-
-    # call Message to check
-    return;
 }
 
 sub _abort_download {
@@ -245,6 +251,24 @@ sub exist {
     else {
         return 0;
     }
+}
+
+sub _get_file_ext {
+    my $type = shift;
+
+    # Extension format
+    # 1st char Status C = Ready For pickup A = Completed E = Extracted
+    # 2nd Char Standard E = Edifact
+    # 3rd Char Type of message
+    my %file_types = (
+        QUOTE   => 'CEQ',
+        INVOICE => 'CEI',
+        ALL     => 'CE.',
+    );
+    if ( exists $file_types{$type} ) {
+        return $file_types{$type};
+    }
+    return 'XXXX';    # non matching type
 }
 
 1;
