@@ -145,6 +145,7 @@ if ( $op eq 'add_form' ) {
         overduenoticerequired => $data->{'overduenoticerequired'},
         issuelimit            => $data->{'issuelimit'},
         reservefee            => sprintf( "%.2f", $data->{'reservefee'} || 0 ),
+        illlimit              =>  $data->{illlimit},
         hidelostitems         => $data->{'hidelostitems'},
         category_type         => $data->{'category_type'},
         default_privacy       => $data->{'default_privacy'},
@@ -240,7 +241,8 @@ elsif ( $op eq 'add_validate' ) {
                 overduenoticerequired,
                 category_type,
                 BlockExpiredPatronOpacActions,
-                default_privacy
+                default_privacy,
+                illlimit
             )
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)" );
         my $inserted = $sth->execute(
@@ -251,7 +253,7 @@ elsif ( $op eq 'add_validate' ) {
                 'enrolmentfee',    'reservefee',
                 'hidelostitems',   'overduenoticerequired',
                 'category_type',   'block_expired',
-                'default_privacy',
+                'default_privacy', 'illlimit',
             )
         );
         if ( $inserted ) {
@@ -350,6 +352,7 @@ if ( $op eq 'list' ) {
             dateofbirthrequired   => $results->[$i]{'dateofbirthrequired'},
             overduenoticerequired => $results->[$i]{'overduenoticerequired'},
             issuelimit            => $results->[$i]{'issuelimit'},
+            illlimit              => $results->[$i]->{illlimit},
             hidelostitems         => $results->[$i]{'hidelostitems'},
             category_type         => $results->[$i]{'category_type'},
             default_privacy       => $results->[$i]{'default_privacy'},
