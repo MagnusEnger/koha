@@ -84,6 +84,15 @@
         [% IF ( borrower_files ) %]<li class="active">[% ELSE %]<li>[% END %]<a href="/cgi-bin/koha/members/files.pl?borrowernumber=[% borrowernumber %]">Files</a></li>
     [% END %]
     [% IF (  suggestions ) %]<li class="active">[% ELSE %]<li>[% END %]<a href="/cgi-bin/koha/members/purchase-suggestions.pl?borrowernumber=[% borrowernumber %]">Purchase<br/>suggestions</a></li>
+    [% IF ILLModule %]
+       [% IF ill %]
+           <li class="active">
+       [% ELSE %]
+           <li>
+       [% END %]
+       <a href="/cgi-bin/koha/members/illrequests.pl?borrowernumber=[% borrowernumber %]">ILL Requests</a>
+       </li>
+    [% END %]
 </ul></div>
 [% END %]
 
