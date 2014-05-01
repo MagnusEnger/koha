@@ -33,7 +33,7 @@ use C4::Reserves;
 use Encode;
 use XML::LibXML;
 use XML::LibXSLT;
-use LWP::Simple;
+use LWP::UserAgent;
 
 use vars qw($VERSION @ISA @EXPORT);
 
@@ -43,7 +43,6 @@ BEGIN {
     @ISA = qw(Exporter);
     @EXPORT = qw(
         &XSLTParse4Display
-        &GetURI
     );
 }
 
@@ -52,19 +51,6 @@ BEGIN {
 C4::XSLT - Functions for displaying XSLT-generated content
 
 =head1 FUNCTIONS
-
-=head2 GetURI
-
-GetURI file and returns the xslt as a string
-
-=cut
-
-sub GetURI {
-    my ($uri) = @_;
-    my $string;
-    $string = get $uri ;
-    return $string;
-}
 
 =head2 transformMARCXML4XSLT
 
@@ -231,8 +217,14 @@ sub XSLTParse4Display {
         my $xslt = XML::LibXSLT->new();
         my $style_doc;
         if ( $xslfilename =~ /^https?:\/\// ) {
-            my $xsltstring = GetURI($xslfilename);
-            $style_doc = $parser->parse_string($xsltstring);
+	    my $ua = LWP::UserAgent->new( ssl_opts => { verify_hostname => 0 } );
+	    my $response = $ua->get($xslfilename);
+	    if ( $response->is_success ) {
+		my $xsltstring = $response->decoded_content;
+                $style_doc = $parser->parse_string($xsltstring);
+	    } else {
+		warn "Cannot fetch remote XSLT file";
+	    }
         } else {
             use Cwd;
             $style_doc = $parser->parse_file($xslfilename);
