@@ -1515,7 +1515,7 @@ sub NormalizeISBN {
 
     my $isbn = Business::ISBN->new($string);
 
-    if ( $isbn && $isbn->error != Business::ISBN::BAD_ISBN ) {
+    if ( $isbn && $isbn->is_valid() ) {
 
         if ( $format eq 'ISBN-10' ) {
             $isbn = $isbn->as_isbn10();
