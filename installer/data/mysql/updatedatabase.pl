@@ -8511,6 +8511,68 @@ if ( CheckVersion($DBversion) ) {
     SetVersion ($DBversion);
 }
 
+$DBversion = '3.16.04.001';
+if ( CheckVersion($DBversion) ) {
+    my @temp= $dbh->selectrow_array(qq|
+        SELECT count(*)
+        FROM marc_subfield_structure
+        WHERE kohafield='permanent_location' OR kohafield='items.permanent_location'
+    |);
+    print "Upgrade to $DBversion done (Bug 7817: Check for permanent_location)\n";
+    if( $temp[0] ) {
+        print "WARNING for Koha administrator: Your database contains one or more mappings for permanent_location to the MARC structure. This item field however is for internal use and should not be linked to a MARC (sub)field. Please correct it. See also Bugzilla reports 7817 and 12818.\n";
+    }
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.16.04.002";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type) VALUES('AcqItemSetSubfieldsWhenReceiptIsCancelled','', '','Upon cancelling a receipt, update the items subfields if they were created when placing an order (e.g. o=5|a="bar foo")', 'Free')
+    });
+    print "Upgrade to $DBversion done (Bug 11169 - Add AcqItemSetSubfieldsWhenReceiptIsCancelled syspref)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.16.04.003";
+if(CheckVersion($DBversion)) {
+    $dbh->do(q{
+        ALTER TABLE issues ADD auto_renew BOOLEAN default FALSE AFTER renewals
+    });
+    $dbh->do(q{
+        ALTER TABLE old_issues ADD auto_renew BOOLEAN default FALSE AFTER renewals
+    });
+    $dbh->do(q{
+        ALTER TABLE issuingrules ADD auto_renew BOOLEAN default FALSE AFTER norenewalbefore
+    });
+    print "Upgrade to $DBversion done (Bug 11577: [ENH] Automatic renewal feature)\n";
+    SetVersion($DBversion);
+}
+
+
+$DBversion = '3.16.04.004';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(qq{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES('StatisticsFields','location|itype|ccode','Define fields (from the items table) used for statistics members',NULL,'Free')
+    });
+    print "Upgrade to $DBversion done (Bug 12728: Checked syspref StatisticsFields)\n";
+}
+
+$DBversion = "3.16.04.005";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(
+"INSERT INTO systempreferences (variable,value,options,explanation,type) VALUES ('ReplytoDefault',  '',  NULL,  'The default email address to be set as replyto.',  'Free')"
+    );
+    $dbh->do(
+"INSERT INTO systempreferences (variable,value,options,explanation,type) VALUES ('ReturnpathDefault',  '',  NULL,  'The default email address to be set as return-path',  'Free')"
+    );
+    $dbh->do("ALTER TABLE branches ADD branchreplyto mediumtext AFTER branchemail");
+    $dbh->do("ALTER TABLE branches ADD branchreturnpath mediumtext AFTER branchreplyto");
+    print
+"Upgrade to $DBversion done (Bug XXX Adding replyto and returnpath addresses.)\n";
+    SetVersion($DBversion);
+}
+
 =head1 FUNCTIONS
 
 =head2 TableExists($table)
