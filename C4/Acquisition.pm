@@ -79,6 +79,7 @@ BEGIN {
 
         &AddClaim
         &GetBiblioCountByBasketno
+        GetBasketEdiStatus
     );
 }
 
@@ -2955,6 +2956,31 @@ sub GetBiblioCountByBasketno {
     my $sth = $dbh->prepare($query);
     $sth->execute($basketno);
     return $sth->fetchrow;
+}
+
+
+=head3 GetBasketEdiStatus
+
+$status_array_ref = BasketEdiStatus($basketno);
+
+return a array reference indicating if an edifact order has been created for
+this basket and its status
+
+=cut
+
+sub GetBasketEdiStatus {
+    my ($basketno) = @_;
+    if ( !$basketno ) {
+        return;
+    }
+    my $dbh = C4::Context->dbh;
+    my $sql = <<'SQLEND';
+    SELECT transfer_date, status, filename
+    FROM edifact_messages
+    WHERE basket no = ?
+    AND message_type = 'ORDERS' AND deleted = 0
+SQLEND
+    return $dbh->selectall_arrayref( $sql, { Slice => {} }, $basketno );
 }
 
 1;
