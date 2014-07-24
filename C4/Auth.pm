@@ -298,11 +298,18 @@ sub get_template_and_user {
     }
     else {    # if this is an anonymous session, setup to display public lists...
 
-	# If shibboleth is enabled, and we have a shibboleth login attribute,
-	# but we are in an anonymouse session, we clearly have an invalid
-	# Shibboleth account.
-	if ( $shib && $shib_login ) {
-	    $template->param( invalidShibLogin => '1');
+	# If shibboleth is enabled, and we're in an anonymous session, we should allow
+    # the user to attemp login via shibboleth.
+	if ( $shib ) {
+	    $template->param( shibbolethAuthentication => $shib,
+                shibbolethLoginUrl    => login_shib_url($in->{'query'}),
+            );
+            # If shibboleth is enabled and we have a shibboleth login attribute,
+            # but we are in an anonymous session, then we clearly have an invalid
+            # shibboleth koha account.
+            if ( $shib_login ) {
+                $template->param( invalidShibLogin => '1');
+            }
         }
 
         $template->param( sessionID        => $sessionID );
@@ -1174,6 +1181,7 @@ sub checkauth {
 
     if ($shib) {
             $template->param(
+                shibbolethAuthentication => $shib,
                 shibbolethLoginUrl    => login_shib_url($query),
             );
     }

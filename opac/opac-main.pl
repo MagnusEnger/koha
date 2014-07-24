@@ -21,7 +21,6 @@
 use Modern::Perl;
 use CGI;
 use C4::Auth;    # get_template_and_user
-use C4::Auth_with_shibboleth qw( login_shib_url );
 use C4::Output;
 use C4::NewsChannels;    # GetNewsToDisplay
 use C4::Languages qw(getTranslatedLanguages accept_language);
@@ -44,13 +43,6 @@ my $casAuthentication = C4::Context->preference('casAuthentication');
 $template->param(
     casAuthentication   => $casAuthentication,
 );
-
-if ( C4::Context->config('useshibboleth') ) {
-    $template->param(
-        shibbolethAuthentication => C4::Context->config('useshibboleth'),
-        shibbolethLoginUrl => C4::Auth_with_shibboleth::login_shib_url($input)
-    );
-};
 
 # display news
 # use cookie setting for language, bug default to syspref if it's not set
