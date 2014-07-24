@@ -720,7 +720,7 @@ sub checkauth {
                 $session->param('surname'),      $session->param('branch'),
                 $session->param('branchname'),   $session->param('flags'),
                 $session->param('emailaddress'), $session->param('branchprinter'),
-                $session->param('persona')
+                $session->param('persona'),      $session->param('shibboleth')
             );
             C4::Context::set_shelves_userenv('bar',$session->param('barshelves'));
             C4::Context::set_shelves_userenv('pub',$session->param('pubshelves'));
@@ -732,7 +732,7 @@ sub checkauth {
             $sessiontype = $session->param('sessiontype') || '';
         }
         if ( ( $query->param('koha_login_context') && ($q_userid ne $s_userid) )
-          || ( $cas && $query->param('ticket') ) ) {
+          || ( $cas && $query->param('ticket') ) || ( $shib && $shib_login && !$logout ) ) {
             #if a user enters an id ne to the id in the current session, we need to log them in...
             #first we need to clear the anonymous session...
             $debug and warn "query id = $q_userid but session id = $s_userid";
