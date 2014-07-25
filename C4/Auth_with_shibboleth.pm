@@ -98,6 +98,14 @@ sub checkpw_shib {
         $retnumber = $sth->fetchrow;
         return ( 1, $retnumber, $userid );
     }
+    $sth = $dbh->prepare("select userid, cardnumber from borrowers where email=?");
+    $sth->execute($userid);
+    if ( $sth->rows ) {
+        my @retvals = $sth->fetchrow;
+        $retnumber = $retvals[1];
+        $userid = $retvals[0];
+        return ( 1, $retnumber, $userid );
+    }
 
     # If we reach this point, the user is not a valid koha user
     $debug and warn "User $userid is not a valid Koha user";
