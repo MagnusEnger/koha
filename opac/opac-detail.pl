@@ -550,6 +550,7 @@ foreach my $subscription (@subscriptions) {
     $cell{hasalert}          = $subscription->{hasalert};
     $cell{callnumber}        = $subscription->{callnumber};
     $cell{closed}            = $subscription->{closed};
+    $cell{location}            = $subscription->{'location_description'} = $shelflocations->{ $subscription->{'location'} };
     #get the three latest serials.
     $serials_to_display = $subscription->{opacdisplaycount};
     $serials_to_display = C4::Context->preference('OPACSerialIssueDisplayCount') unless $serials_to_display;

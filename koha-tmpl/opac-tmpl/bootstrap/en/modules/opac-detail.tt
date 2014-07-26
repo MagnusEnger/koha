@@ -774,6 +774,9 @@
                                         <h3>At library: [% subscription.branchcode %]</h3>
                                     [% END %]
                                 [% END %]
+                                [% IF ( subscription.location ) %]
+                                    <p>Location: [% subscription.location %]</p>
+                                [% END %]
                                 [% IF ( subscription.closed ) %]
                                     <p>This subscription is closed.</p>
                                 [% END %]
