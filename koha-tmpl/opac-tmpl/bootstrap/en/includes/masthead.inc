@@ -185,6 +185,11 @@
                                     <option value="callnum">Call number</option>
                                 [% END # /ms_callnum %]
                             [% END # /numbersphr %]
+                            [% IF ( ms_jt ) %]
+                                <option selected="selected" value="mc-ccode,phr:Jounral AND ti,wrdl">Journal Search</option>
+                            [% ELSE %]
+                                <option value="mc-ccode,phr:Jounral AND ti,wrdl">Journal Search</option>
+                            [% END %]
                             </select>
 
                             [% UNLESS ( Koha.Preference( 'OpacAddMastheadLibraryPulldown' ) == 1 ) %]
