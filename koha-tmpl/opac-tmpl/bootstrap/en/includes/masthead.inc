@@ -152,6 +152,11 @@
                             [% ELSE %]
                                 <option value="ti">Title</option>
                             [% END # /ms_ti %]
+                            [% IF ( ms_tp ) %]
+                                <option selected="selected" value="ti,phr">Title phrase</option>
+                            [% ELSE %]
+                                <option value="ti,phr">Title phrase</option>
+                            [% END %]
                             [% IF ( ms_au ) %]
                                 <option selected="selected" value="au">Author</option>
                             [% ELSE %]
