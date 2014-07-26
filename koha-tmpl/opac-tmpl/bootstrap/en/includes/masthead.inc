@@ -167,6 +167,11 @@
                             [% ELSE %]
                                 <option value="su">Subject</option>
                             [% END # /ms_su %]
+                            [% IF ( ms_sp ) %]
+                                <option selected="selected" value="su,phr">Subject phrase</option>
+                            [% ELSE %]
+                                <option value="su,phr">Subject phrase</option>
+                            [% END %]
                             [% IF ( ms_nb ) %]
                                 <option selected="selected" value="nb">ISBN</option>
                             [% ELSE %]
