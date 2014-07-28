@@ -210,6 +210,11 @@
                             [% ELSE %]
                                 <option value="mc-ccode,phr:Jounral AND ti,wrdl">Journal Search</option>
                             [% END %]
+                            [% IF (ms_des ) %]
+                                <option selected="selected" value="extent,wrdl">Description Search</option>
+                            [% ELSE %]
+                                <option value="extent,wrdl">Description Search</option>
+                            [% END %]
                             </select>
 
                             [% UNLESS ( Koha.Preference( 'OpacAddMastheadLibraryPulldown' ) == 1 ) %]
