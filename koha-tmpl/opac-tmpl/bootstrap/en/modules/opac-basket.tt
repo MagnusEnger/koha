@@ -22,7 +22,7 @@
                                     <a href="opac-basket.pl" class="detail" onclick="showMore(); return false;">More details</a>
                                 [% END %]
                                 [% IF Koha.Preference( 'opacuserlogin' ) == 1 %]
-                                    <a class="send" href="opac-basket.pl" onclick="sendBasket(); return false;">Send</a>
+                                <!--<a class="send" href="opac-basket.pl" onclick="sendBasket(); return false;">Send</a>-->
                                 [% END %]
                                 <a class="download" href="opac-basket.pl" onclick="downloadBasket(); return false;">Download</a>
                                 <a class="print-large" href="opac-basket.pl" onclick="printBasket(); return false;">Print</a>
