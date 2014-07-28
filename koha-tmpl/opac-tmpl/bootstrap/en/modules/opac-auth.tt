@@ -12,7 +12,7 @@
 <body id="opac-login-page" class="scrollto">
 [% IF ( shibbolethAuthentication ) %]
 <div id="sso_msg" style="font-size: largest; position: fixed; top: 50%; width: 100%;">
-    <p style="display: block; margin-left: auto; margin-right: auto; text-align: center;">Attempting to connect to freshfields IdP...</p>
+    <p style="display: block; margin-left: auto; margin-right: auto; text-align: center;"><b>Attempting to connect to freshfields IdP...</b></p>
 </div>
 [% END %]
 [% INCLUDE 'masthead.inc' %]
@@ -105,7 +105,7 @@
 
                                 <img src="https://lonssodev.freshfieldsbruckhaus.com/test.gif"
                                           onload="window.location='[% shibbolethLoginUrl %]';"
-                                          onerror="$('#shib').after('<p><b>Error:</b> Are you trying to access this resource from outside the Freshfields Network?</p>');"
+                                          onerror="$('#shib').after('<p><b>Error:</b> Initial attempts to connect to the Freshfields Authentication Gateway failed.</br> This means you are either outside the Freshfields network, or the gateway is unavailable.</br> You may try a manual login by entering your details into the Local Login below.</p>');"
                                           style="display:none;">
 
                             [% END %]
