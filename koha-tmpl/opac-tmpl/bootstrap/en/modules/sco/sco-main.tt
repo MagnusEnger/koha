@@ -284,7 +284,7 @@
                                             </fieldset>
                                         [% ELSE %]
                                             <div class="input-append">
-                                                <label for="patronid">Please enter your card number:</label>
+                                                <label for="patronid">Please scan your card number (London Office) or Network Login (Other offices):</label>
                                                 <input type="text" id="patronid" class="focus" size="20" name="patronid" autocomplete="off" />
                                                 <button type="submit" class="btn">Submit</button>
                                             </div>
