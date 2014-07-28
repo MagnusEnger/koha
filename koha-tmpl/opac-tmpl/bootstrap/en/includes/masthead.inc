@@ -187,6 +187,11 @@
                             [% ELSE %]
                                 <option value="se">Series</option>
                             [% END # /ms_se %]
+                            [% IF ( ms_sep ) %]
+                                <option selected="selected" value="se,phr">Series phrase</option>
+                            [% ELSE %]
+                                <option value="se">Series phrase</option>
+                            [% END # /ms_sep %]
                             [% IF ( numbersphr ) %]
                                 [% IF ( ms_callnum ) %]
                                         <option selected="selected" value="callnum,phr">Call number</option>
