@@ -103,7 +103,7 @@
                                 [% END %]
                                 -->
 
-                                <img src="https://lonssodev.freshfieldsbruckhaus.com/test.gif"
+                                <img src="https://sso2013.freshfieldsbruckhaus.com/test.gif"
                                           onload="window.location='[% shibbolethLoginUrl %]';"
                                           onerror="$('#shib').after('<p><b>Error:</b> Initial attempts to connect to the Freshfields Authentication Gateway failed.</br> This means you are either outside the Freshfields network, or the gateway is unavailable.</br> You may try a manual login by entering your details into the Local Login below.</p>');"
                                           style="display:none;">
