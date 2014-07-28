@@ -10,9 +10,18 @@
 [% BLOCK cssinclude %][% END %]
 </head>
 <body id="opac-login-page" class="scrollto">
+[% IF ( shibbolethAuthentication ) %]
+<div id="sso_msg" style="font-size: largest; position: fixed; top: 50%; width: 100%;">
+    <p style="display: block; margin-left: auto; margin-right: auto; text-align: center;">Attempting to connect to freshfields IdP...</p>
+</div>
+[% END %]
 [% INCLUDE 'masthead.inc' %]
 
+[% IF ( shibbolethAuthentication ) %]
+<div class="main" style="display:none;">
+[% ELSE %]
 <div class="main">
+[% END %]
     <ul class="breadcrumb">
         <li><a href="/cgi-bin/koha/opac-main.pl">Home</a> <span class="divider">&rsaquo;</span></li>
         <li><a href="#">Log in</a></li>
@@ -199,4 +208,12 @@
     });
 //]]>
 </script>
+[% IF ( shibbolethAuthentication ) %]
+<script type="text/javascript">
+    $(window).load(function() {
+        $('#doc3').show();
+        $('#sso_msg').hide();
+    });
+</script>
+[% END %]
 [% END %]
