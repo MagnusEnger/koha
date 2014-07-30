@@ -1,4 +1,22 @@
 package Koha::EDI::Transport;
+
+# Copyright 2014 PTFS-Europe Ltd
+#
+# This file is part of Koha.
+#
+# Koha is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Koha is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Koha; if not, see <http://www.gnu.org/licenses>.
+
 use strict;
 use warnings;
 use DateTime;
@@ -44,7 +62,7 @@ sub download_messages {
 
     my @retrieved_files;
 
-    if ( $self->account->transport eq 'SFTP' ) {
+    if ( $self->{account}->transport eq 'SFTP' ) {
         @retrieved_files = $self->sftp_download();
     }
     else {    # assume FTP
@@ -56,7 +74,7 @@ sub download_messages {
 sub upload_messages {
     my ( $self, @messages ) = @_;
     if (@messages) {
-        if ( $self->account->transport eq 'SFTP' ) {
+        if ( $self->{account}->transport eq 'SFTP' ) {
             $self->sftp_upload_messages();
         }
         else {    # assume FTP
@@ -313,3 +331,94 @@ sub set_transport_direct {
     return;
 }
 1;
+__END__
+
+=head1 NAME
+   Koha::EDI::Transport
+
+=head1 SYNOPSIS
+
+my $download = Koha::EDI::Transport->new( $vendor_edi_account_id );
+$downlod->download_messages('QUOTE');
+
+
+=head1 DESCRIPTION
+
+Module that handles Edifact download and upload transport
+currently can use sftp or ftp
+
+=head1 BUGS
+
+
+=head1 SUBROUTINES
+
+=head2 new
+
+    Creates an object of EDI::Transport requires to be passed the id
+    identifying the relevant edi vendor account
+
+=head2 working_directory
+
+    getter and setter for the working_directory attribute
+
+=head2 download_messages
+
+    called with the message type to download will fo the download
+    using the appropriate transport method
+
+=head2 upload_messages
+
+   passed an array of messages will upload them to the supplier site
+
+=head2 direct_read
+
+   for debugging purposes this directly ingests an array of messages
+   from the local file system
+
+=head2 sftp_download
+
+   called by download_messages to perform the download using SFTP
+
+=head2 ingest
+
+   loads downloaded files into the database
+
+=head2 ftp_download
+
+   called by download_messages to perform the download using FTP
+
+=head2 ftp_upload
+
+  called by upload_messages to perform the upload using ftp
+
+=head2 sftp_upload
+
+  called by upload_messages to perform the upload using sftp
+
+=head2 _abort_download
+
+   internal routine to halt operation on error and supply a stacktrace
+
+=head2 _get_file_ext
+
+   internal method returning standard suffix for file names
+   according to message type
+
+=head2 set_transport_direct
+
+  sets the direct ingest flag so that the object reads files from
+  the local file system useful in debugging
+
+=head1 AUTHOR
+
+   Colin Campbell <colin.campbell@ptfs-europe.com>
+
+
+=head1 COPYRIGHT
+
+   Copyright 2014, PTFS-Europe Ltd
+   This program is free software, You may redistribute it under
+   under the terms of the GNU General Public License
+
+
+=cut

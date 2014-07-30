@@ -30,14 +30,14 @@ my @edi_accts = $schema->resultset('VendorEdiAccount')->all();
 
 for my $acct (@edi_accts) {
     if ( $acct->quotes_enabled ) {
-        my $downloader = Koha::EDI::Downloader( $acct->id );
+        my $downloader = Koha::EDI::Transport->new( $acct->id );
         $downloader->download_messages('QUOTE');
 
         #update vendor last activity
     }
 
     if ( $acct->invoices_enabled ) {
-        my $downloader = Koha::EDI::Transport( $acct->id );
+        my $downloader = Koha::EDI::Transport->new( $acct->id );
         $downloader->download_messages('INVOICE');
 
         #update vendor last activity
@@ -45,14 +45,14 @@ for my $acct (@edi_accts) {
     if ( $acct->orders_enabled ) {
 
         # select pending messages
-        my @pending_orders = $schema->resultset('EdifactMessages')->search(
+        my @pending_orders = $schema->resultset('EdifactMessage')->search(
             {
                 message_type => 'ORDERS',
                 vendor_id    => $acct->id,
                 status       => 'Pending',
             }
         );
-        my $uploader = Koha::EDI::Transport( $acct->id );
+        my $uploader = Koha::EDI::Transport->new( $acct->id );
         $uploader->upload_messages(@pending_orders);
     }
 }
@@ -83,4 +83,4 @@ foreach my $invoice (@downloaded_invoices) {
     process_invoice($invoice);
 }
 
-return 0;
+exit 0;

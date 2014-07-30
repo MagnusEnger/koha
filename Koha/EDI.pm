@@ -1,4 +1,22 @@
 package Koha::EDI;
+
+# Copyright 2014 PTFS-Europe Ltd
+#
+# This file is part of Koha.
+#
+# Koha is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Koha is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Koha; if not, see <http://www.gnu.org/licenses>.
+
 use strict;
 use warnings;
 use base qw(Exporter);
@@ -15,6 +33,7 @@ use C4::Biblio qw( AddBiblio TransformKohaToMarc );
 use Koha::EDI::Order;
 use Koha::Edifact;
 
+our $VERSION = 1.1;
 our @EXPORT_OK =
   qw( process_quote process_invoice create_edi_order get_edifact_ean );
 
@@ -25,7 +44,7 @@ sub create_edi_order {
     my $branchcode = $parameters->{branchcode};
     my $noingest   = $parameters->{noingest};
     if ( !$basketno || !$ean ) {
-        carp "create_edi_order called with no basketno or ean";
+        carp 'create_edi_order called with no basketno or ean';
         return;
     }
 
@@ -118,8 +137,6 @@ sub process_quote {
 sub quote_item {
     my ( $item, $quote ) = @_;
 
-    my $ecost = discounted_price( $quote->vendor->discount, $item->price );
-
     # create biblio record
     my $bib_hash = {
         'biblioitems.cn_source' => 'ddc',
@@ -164,7 +181,7 @@ sub quote_item {
         $bib_hash->{'items.location'} = $value;
     }
 
-    my $budget = get_budget( $item->girfield('fund_allocation') );
+    my $budget = _get_budget( $item->girfield('fund_allocation') );
 
     my $note = {};
 
@@ -176,7 +193,7 @@ sub quote_item {
       $branch;
     my $bib_record = TransformKohaToMarc($bib_hash);
 
-    my $bib = check_for_existing_bib( $item->{item_number_id} );
+    my $bib = _check_for_existing_bib( $item->{item_number_id} );
     if ( !defined $bib ) {
         $bib = {};
         ( $bib->{biblionumber}, $bib->{biblioitemnumber} ) =
@@ -186,16 +203,16 @@ sub quote_item {
     my $order_note = $item->{free_text};
     $order_note ||= q{};
     my $order_hash = {
-        basketno                => $quote->basketno,
-        uncertainprice          => 0,
-        biblionumber            => $bib->{biblionumber},
-        title                   => $item->title,
-        quantity                => 1,
-        biblioitemnumber        => $bib->{biblioitemnumber},
-        rrp                     => $item->price,
-        ecost                   => $ecost,
-        sort1                   => q{},
-        sort2                   => q{},
+        basketno         => $quote->basketno,
+        uncertainprice   => 0,
+        biblionumber     => $bib->{biblionumber},
+        title            => $item->title,
+        quantity         => 1,
+        biblioitemnumber => $bib->{biblioitemnumber},
+        rrp              => $item->price,
+        ecost => _discounted_price( $quote->vendor->discount, $item->price ),
+        sort1 => q{},
+        sort2 => q{},
         booksellerinvoicenumber => $item->reference,
         listprice               => $item->price,
         branchcode              => $branch,
@@ -215,12 +232,25 @@ sub quote_item {
     return;
 }
 
-sub discounted_price {
+sub get_edifact_ean {
+
+    # kludge we need to identify the correct ean to use at present
+    # assuming we have one
+    # breakdown by branch vendor with a default
+    my $dbh = C4::Context->dbh;
+
+    my $eans = $dbh->selectcol_arrayref('select ean from edifact_ean');
+
+    return $eans->[0];
+}
+
+# We should not need to have a routine to do this here
+sub _discounted_price {
     my ( $discount, $price ) = @_;
     return ( $price - ( ( $discount * $price ) / 100 ) );
 }
 
-sub check_for_existing_bib {
+sub _check_for_existing_bib {
     my $isbn = shift;
 
     my $search_isbn = $isbn;
@@ -265,7 +295,8 @@ sub check_for_existing_bib {
 }
 
 # returns a budget obj or undef
-sub get_budget {
+# fact we need this shows what a mess Acq API is
+sub _get_budget {
     my $budget_code = shift;
     my $database    = Koha::Database->new();
     my $schema      = $database->schema();
@@ -279,16 +310,76 @@ sub get_budget {
     );
 }
 
-sub get_edifact_ean {
-
-    # kludge we need to identify the correct ean to use at present
-    # assuming we have one
-    # breakdown by branch vendor with a default
-    my $dbh = C4::Context->dbh;
-
-    my $eans = $dbh->selectcol_arrayref('select ean from edifact_ean');
-
-    return $eans->[0];
-}
-
 1;
+__END__
+
+=head1 NAME
+   Koha::EDI
+
+=head1 SYNOPSIS
+
+   Module exporting subroutines used in EDI processing for Koha
+
+=head1 DESCRIPTION
+
+   Subroutines called by batch processing to handle Edifact
+   messages of various types and related utilities
+
+=head1 BUGS
+
+   These routines should really be methods of some object.
+   get_edifact_ean is a stopgap which should be replaced
+
+=head1 SUBROUTINES
+
+=head2 process_quote
+
+    process_quote(quote_message);
+
+   passed a message object for a quote, parses it creating an order basket
+   and orderlines in the database
+   updates the message's status to received in the database and adds the
+   link to basket
+
+=head2 process_invoice
+
+    process_invoice(invoice_message)
+
+    TBD Unimplemented placeholder
+
+=head2 create_edi_order
+
+    create_edi_order( { parameter_hashref } )
+
+    parameters must include basketno and ean
+
+    branchcode can optionally be passed
+
+    returns 1 on success undef otherwise
+
+    if the parameter noingest is set the formatted order is returned
+    and not saved in the database. This functionality is intended for debugging only
+
+=head2 get_edifact_ean
+
+
+=head2 quote_item
+
+     quote_item(lineitem, quote_message);
+
+      Called by process_quote to handle an individual lineitem
+     Generate the biblios and items if required and orderline linking to them
+
+=head1 AUTHOR
+
+   Colin Campbell <colin.campbell@ptfs-europe.com>
+
+
+=head1 COPYRIGHT
+
+   Copyright 2014, PTFS-Europe Ltd
+   This program is free software, You may redistribute it under
+   under the terms of the GNU General Public License
+
+
+=cut

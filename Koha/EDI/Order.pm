@@ -3,6 +3,23 @@ package Koha::EDI::Order;
 use strict;
 use warnings;
 
+# Copyright 2014 PTFS-Europe Ltd
+#
+# This file is part of Koha.
+#
+# Koha is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Koha is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Koha; if not, see <http://www.gnu.org/licenses>.
+
 use Carp;
 use DateTime;
 use Readonly;
@@ -38,6 +55,10 @@ sub new {
         $self->{message_date} = DateTime->now( time_zone => 'local' );
     }
 
+    # do this once per object not once per orderline
+    my $database = Koha::Database->new();
+    $self->{schema} = $database->schema;
+
     bless $self, $class;
     return $self;
 }
@@ -67,7 +88,6 @@ sub encode {
     $self->{transmission} .= $self->user_data_message_segments();
 
     $self->{transmission} .= $self->trailing_service_segments();
-
     return $self->{transmission};
 }
 
@@ -137,12 +157,13 @@ sub user_data_message_segments {
 
 sub message_trailer {
     my $self = shift;
+    j
 
-    # terminate the message
-    $self->add_seg("UNS+S$seg_terminator");
+      # terminate the message
+      $self->add_seg("UNS+S$seg_terminator");
 
     # CNT Control_Total
-    # Could be (code = 1) total value of QTY segments
+    # Could be (code  1) total value of QTY segments
     # or ( code = 2 ) number of lineitems
     my $num_orderlines = @{ $self->{orderlines} };
     $self->add_seg("CNT+2:$num_orderlines$seg_terminator");
@@ -281,8 +302,7 @@ sub name_and_address {
 sub order_line {
     my ( $self, $linenumber, $orderline ) = @_;
 
-    my $database     = Koha::Database->new();
-    my $schema       = $database->schema();
+    my $schema       = $self->{schema};
     my $biblionumber = $orderline->biblionumber->biblionumber;
     my @biblioitems  = $schema->resultset('Biblioitem')
       ->search( { biblionumber => $biblionumber, } );
@@ -336,7 +356,7 @@ sub order_line {
     $self->add_seg($rff);
 
     # LOC-QTY multiple delivery locations
-    #TBD to specify extra elivery locs
+    #TBD to specify extra delivery locs
     # NAD order line name and address
     #TBD Optionally indicate a name & address or order originator
     # TDT method of delivey ol-specific
@@ -551,3 +571,189 @@ sub encode_text {
 }
 
 1;
+__END__
+
+=head1 NAME
+   Koha::EDI::Order
+
+=head1 SYNOPSIS
+
+Format an EDI Order message from a Koha basket
+
+=head1 DESCRIPTION
+
+
+Generates an Edifact format Order message for a Koha basket.
+Normally the only methods used directly by the caller would be
+new to set up the message, encode to return the formatted message
+and filename to obtain a name under which to store the message
+
+
+=head1 BUGS
+
+Should integrate into Koha::Edifact namespace
+Can caller interface be made cleaner?
+Make habdling of GIR segments more customizable
+
+
+=head1 METHODS
+
+=head2 new
+
+  my $edi_order = EDI::Order->new(
+  orderlines => \@orderlines,
+  vendor     => $vendor_edi_account,
+  ean        => $library_ean
+  );
+
+  instantiate the EDI::Order object, all parameters are Schema::Resultset objects
+  Called in Koha::EDI create_edi_order
+
+=head2 filename
+
+   my $filename = $edi_order->filename()
+
+   returns a filename for the edi order. The filename embeds a reference to the
+   basket the message was created to encode
+
+=head2 encode
+
+   my $edifact_message = $edi_order->encode();
+
+   Encodes the basket as a valid edifact message ready for transmission
+
+=head2 initial_service_segments
+
+    Creates the service segments which begin the message
+
+=head2 interchange_header
+
+    Return an interchange header encoding sender and recipient
+    ids message date and standards
+
+=head2 user_data_message_segments
+
+    Include message data within the encoded message
+
+=head2 message_trailer
+
+    Terminate message data including control data on number
+    of messages and segments included
+
+=head2 trailing_service_segments
+
+   Include the service segments occuring at the end of the message
+=head2 interchange_control_reference
+
+   Returns the unique interchange control reference as a 14 digit number
+
+=head2 message_reference
+
+    On generates and subsequently returns the unique message
+    reference number as a 12 digit number preceded by ME, to generate a new number
+    pass the string 'new'.
+    In practice we encode 1 message per transmission so there is only one message
+    referenced. were we to encode multiple messages a new reference would be
+    neaded for each
+
+=head2 message_header
+
+    Commences a new message
+
+=head2 interchange_trailer
+
+    returns the UNZ segment which ends the tranmission encoding the
+    message count and control reference for the interchange
+
+=head2 order_msg_header
+
+    Formats the message header segments
+
+=head2 beginning_of_message
+
+    Returns the BGM segment which includes the Koha basket number
+
+=head2 name_and_address
+
+    Parameters: Function ( BUYER, DELIVERY, INVOICE, SUPPLIER)
+                Id
+                Agency
+
+    Returns a NAD segment containg the id and agency for for the Function
+    value. Handles the fact that NAD segments encode the value for 'EAN' differently
+    to elsewhere.
+
+=head2 order_line
+
+    Creates the message segments wncoding an order line
+
+=head2 marc_based_description
+
+    Not yet implemented - To encode the the bibliographic info
+    as MARC based IMD fields has the potential of encoding a wider range of info
+
+=head2 item_description
+
+    Encodes the biblio item fields Author, title, publisher, date of publication
+    binding
+
+=head2 imd_segment
+
+    Formats an IMD segment, handles the chunking of data into the 35 character
+    lengths required and the creation of repeat segments
+
+=head2 gir_segments
+
+    Add item level information
+
+=head2 add_gir_identity_number
+
+    Handle the formatting of a GIR element
+    return empty string if no data
+
+=head2 add_seg
+
+    Adds a parssed array of segments to the objects segment list
+    ensures all segments are properly terminated by '
+
+=head2 lin_segment
+
+    Adds a LIN segment consisting of the line number and the ean number
+    if the passed isbn is valid
+
+=head2 additional_product_id
+
+    Add a PIA segment for an additional product id
+
+=head2 message_date_segment
+
+    Passed a DateTime object returns a correctly formatted DTM segment
+
+=head2 _const
+
+    Stores and returns constant strings for service_string_advice
+    and message_identifier
+    TBD replace with class variables
+
+=head2 _interchange_sr_identifier
+
+    Format sender and receipient identifiers for use in the interchange header
+
+=head2 encode_text
+
+    Encode textual data into the standard character set ( iso 8859-1 )
+    and quote any Edifact metacharacters
+
+=head1 AUTHOR
+
+   Colin Campbell <colin.campbell@ptfs-europe.com>
+
+
+=head1 COPYRIGHT
+
+   Copyright 2014, PTFS-Europe Ltd
+   This program is free software, You may redistribute it under
+   under the terms of the GNU General Public License
+
+
+=cut

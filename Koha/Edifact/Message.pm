@@ -1,5 +1,22 @@
 package Koha::Edifact::Message;
 
+# Copyright 2014 PTFS-Europe Ltd
+#
+# This file is part of Koha.
+#
+# Koha is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Koha is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Koha; if not, see <http://www.gnu.org/licenses>.
+
 use strict;
 use warnings;
 
@@ -96,3 +113,37 @@ sub lineitems {
 }
 
 1;
+__END__
+
+=head1 NAME
+   Koha::Edifact::Message
+
+=head1 SYNOPSIS
+
+
+=head1 DESCRIPTION
+
+Class modelling an Edifact Message for parsing
+
+=head1 BUGS
+
+
+=head1 SUBROUTINES
+
+=head2 new
+
+=head2 message_refno
+
+=head1 AUTHOR
+
+   Colin Campbell <colin.campbell@ptfs-europe.com>
+
+
+=head1 COPYRIGHT
+
+   Copyright 2014, PTFS-Europe Ltd
+   This program is free software, You may redistribute it under
+   under the terms of the GNU General Public License
+
+
+=cut

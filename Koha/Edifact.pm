@@ -1,5 +1,22 @@
 package Koha::Edifact;
 
+# Copyright 2014 PTFS-Europe Ltd
+#
+# This file is part of Koha.
+#
+# Koha is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Koha is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Koha; if not, see <http://www.gnu.org/licenses>.
+
 use strict;
 use warnings;
 use File::Slurp;
@@ -25,7 +42,7 @@ sub new {
     if ( $param_hashref->{filename} ) {
         if ( $param_hashref->{transmission} ) {
             carp
-"Cannot instanitate $class : both filename and transmission passed";
+"Cannot instantiate $class : both filename and transmission passed";
             return;
         }
         $transmission = read_file( $param_hashref->{filename} );
@@ -55,8 +72,6 @@ sub interchange_header {
         return;
     }
     my $data = $self->{transmission}->[0]->elem( $element{$field} );
-    if ( ref $data eq 'ARRAY' ) {
-    }
     return $data;
 }
 
@@ -140,7 +155,7 @@ sub _init {
     }
 }
 
-# return an array of message data which willbe used to
+# return an array of message data which will be used to
 # create Message objects
 sub message_array {
     my $self = shift;
@@ -212,45 +227,6 @@ sub segmentize {
     return \@segmented;
 }
 
-sub parse_seg {
-    my $s = shift;
-
-    my $e = {
-        raw => $s,
-        tag => substr( $s, 0, 3 ),
-        data => get_elements( substr( $s, 3 ) ),
-    };
-    return $e;
-}
-
-sub get_elements {
-    my $seg = shift;
-
-    #my @elem_array = split /$separator{data}/, $seg;
-    $seg =~ s/^[+]//;    # dont start with a dummy element`:w
-    my @elem_array = map { components($_) } split /(?<![?])[+]/, $seg;
-
-    return \@elem_array;
-}
-
-sub components {
-    my $element = shift;
-    my @c = split /(?<![?])\:/, $element;
-    if ( @c == 1 ) {     # single element return a string
-        return de_escape( $c[0] );
-    }
-    @c = map { de_escape($_) } @c;
-    return \@c;
-}
-
-sub de_escape {
-    my $string = shift;
-
-    # remove escaped characters from the component string
-    $string =~ s/[?]([:?+'])/$1/g;
-    return $string;
-}
-
 sub msgcharset {
     my $code = shift;
     if ( $code =~ m/^[^ABCDEF]$/ ) {
@@ -269,3 +245,89 @@ sub msgcharset {
 }
 
 1;
+__END__
+
+=head1 NAME
+   Koha::Edifact
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+   Koha module for parsing Edifact messages
+
+=head1 BUGS
+
+
+=head1 SUBROUTINES
+
+=head2 new
+
+     my $e = Koha::Edifact->new( { filename => 'myfilename' } );
+     or
+     my $e = Koha::Edifact->new( { transmission => $msg_variable } );
+
+     instantiate the Edifact parser, requires either to be passed an in-memory
+     edifact message as transmission or a filename which it will read on creation
+
+=head2 interchange_header
+
+     will return the data in the header field designated by the parameter
+     specified. Valid parameters are: 'sender', 'recipient', 'datetime',
+    'interchange_control_reference', and 'application_reference'
+
+=head2 interchange_trailer
+
+     called either with the string 'interchange_control_count' or
+     'interchange_control_reference' will return the corresponding field from
+     the interchange trailer
+
+=head2 new_data_iterator
+
+     Sets the object's data_iterator to point to the UNH segment
+=head2 next_segment
+
+     Returns the next segment pointed to by the data_iterator. Increments the
+     data_iterator member or destroys it if segment UNZ has been reached
+
+=head2 get_transmission
+
+     This method is useful in debugg:ing. Call on an Edifact it returns
+     the object's transmission member
+
+=head2 message_type
+
+     return the object's message type
+
+=head2 message_array
+
+     return an array of Message objects contained in the Edifact transmission
+
+=head1 Internal Methods
+
+=head2 service_string_advice
+
+  Examines the Service String Advice returns 1 if the default separartors are in use
+  undef otherwise
+
+=head2 segmentize
+
+   takes a raw Edifact message and returns a reference to an array of
+   its segments
+=head2 msgcharset
+
+    Return the character set the message was encoded in. The default is iso-8859-1
+
+=head1 AUTHOR
+
+   Colin Campbell <colin.campbell@ptfs-europe.com>
+
+
+=head1 COPYRIGHT
+
+   Copyright 2014, PTFS-Europe Ltd
+   This program is free software, You may redistribute it under
+   under the terms of the GNU General Public License
+
+
+=cut
