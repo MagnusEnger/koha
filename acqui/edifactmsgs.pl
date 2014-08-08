@@ -45,6 +45,7 @@ my @msgs = $schema->resultset('EdifactMessage')->search(
     },
     {
         join => 'vendor',
+        order_by => { -desc => 'transfer_date' },
     }
 
 )->all;

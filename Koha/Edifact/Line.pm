@@ -24,18 +24,6 @@ use MARC::Record;
 use MARC::Field;
 use Carp;
 
-# LIN
-# PIA
-# IMD
-# QTY
-# DTM
-# GIR
-# FTX
-# MOA
-# PRI-CUX-DTM
-# RFF
-# LOC-QTY
-
 sub new {
     my ( $class, $data_array_ref ) = @_;
     my $self = _parse_lines($data_array_ref);
@@ -85,8 +73,17 @@ sub _parse_lines {
         }
         elsif ( $s->tag eq 'FTX' ) {
 
-            #$d->{avaiability_date} = $s->elem(0,1);
-            $d->{free_text} = $s->elem(4);   # not as envidioned in the standard
+            my $ftx = $s->elem(3);
+            if ( ref $ftx eq 'ARRAY' ) {   # it comes in 70 character components
+                $ftx = join ' ', @{$ftx};
+            }
+            if ( exists $d->{free_text} ) {    # we can only catenate repeats
+                $d->{free_text} .= q{ };
+                $d->{free_text} .= $ftx;
+            }
+            else {
+                $d->{free_text} = $ftx;
+            }
         }
         elsif ( $s->tag eq 'MOA' ) {
 
@@ -377,6 +374,11 @@ sub publication_date {
 
 sub girfield {
     my ( $self, $field, $occ ) = @_;
+
+    # defaults to occurence 0 returns undef if occ requested > occs
+    if ( defined $occ && $occ > @{ $self->{GIR} } ) {
+        return;
+    }
     $occ ||= 0;
     return $self->{GIR}->[$occ]->{$field};
 }

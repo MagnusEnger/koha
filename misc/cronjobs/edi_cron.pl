@@ -48,7 +48,7 @@ for my $acct (@edi_accts) {
         my @pending_orders = $schema->resultset('EdifactMessage')->search(
             {
                 message_type => 'ORDERS',
-                vendor_id    => $acct->id,
+                vendor_id    => $acct->vendor_id,
                 status       => 'Pending',
             }
         );

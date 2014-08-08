@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use FindBin qw( $Bin );
 
-use Test::More tests => 26;
+use Test::More tests => 27;
 
 BEGIN { use_ok('Koha::Edifact') }
 
@@ -82,3 +82,10 @@ is( $collection_code, 'EBOO', "collection_code returned" );
 
 #my $shelfmark = $test_line->girfield('shelfmark');
 #my $classification = $test_line->girfield('classification');
+
+## text the free_text returned from the line
+my $test_line_2 = $lin->[12];
+
+my $ftx_string = 'E*610.72* - additional items';
+
+is( $test_line_2->free_text, $ftx_string, "ftx note retrieved" );

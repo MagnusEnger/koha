@@ -91,6 +91,11 @@ sub encode {
     return $self->{transmission};
 }
 
+sub msg_date_string {
+    my $self = shift;
+    return $self->{message_date}->ymd();
+}
+
 sub initial_service_segments {
     my $self = shift;
 
@@ -157,10 +162,9 @@ sub user_data_message_segments {
 
 sub message_trailer {
     my $self = shift;
-    j
 
-      # terminate the message
-      $self->add_seg("UNS+S$seg_terminator");
+    # terminate the message
+    $self->add_seg("UNS+S$seg_terminator");
 
     # CNT Control_Total
     # Could be (code  1) total value of QTY segments
@@ -349,7 +353,8 @@ sub order_line {
     # TBD what if #items exceeds quantity
 
     # FTX free text for current orderline TBD
-    #    dont really have a special instructions fiekd to encode here
+    #    dont really have a special instructions field to encode here
+    # Encode notes here
     # PRI-CUX-DTM unit price on which order is placed : optional
     # RFF unique orderline reference no
     my $rff = join q{}, 'RFF+LI:', $orderline->ordernumber, $seg_terminator;
@@ -743,6 +748,11 @@ Make habdling of GIR segments more customizable
 
     Encode textual data into the standard character set ( iso 8859-1 )
     and quote any Edifact metacharacters
+
+=head2 msg_date_string
+
+    Convenient routine which returns message date as a Y-m-d string
+    useful if the caller wants to log date of creation
 
 =head1 AUTHOR
 

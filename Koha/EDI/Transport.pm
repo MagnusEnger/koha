@@ -75,10 +75,10 @@ sub upload_messages {
     my ( $self, @messages ) = @_;
     if (@messages) {
         if ( $self->{account}->transport eq 'SFTP' ) {
-            $self->sftp_upload_messages();
+            $self->sftp_upload(@messages);
         }
         else {    # assume FTP
-            $self->ftp_upload_messages();
+            $self->ftp_upload(@messages);
         }
     }
     return;
@@ -120,20 +120,21 @@ sub sftp_download {
         }
     );
     if ( $sftp->error ) {
-        return _abort_download( undef,
+        return $self->_abort_download( undef,
             'Unable to connect to remote host: ' . $sftp->error );
     }
     $sftp->setcwd( $self->{account}->directory )
-      or _abort_download( $sftp, "Cannot change remote dir : $sftp->error" );
+      or $self->_abort_download( $sftp,
+        "Cannot change remote dir : $sftp->error" );
     my $file_list = $sftp->ls()
-      or _abort_download( $sftp,
+      or $self->_abort_download( $sftp,
         "cannot get file list from server: $sftp->error" );
     foreach my $filename ( @{$file_list} ) {
 
         if ( $filename =~ m/[.]$file_ext$/ ) {
             $sftp->get( $filename, "$self->{working_dir}/$filename" );
             if ( $sftp->error ) {
-                _abort_download( $sftp,
+                $self->_abort_download( $sftp,
                     "Error retrieving $filename: $sftp->error" );
                 last;
             }
@@ -182,21 +183,22 @@ sub ftp_download {
         Timeout => 10,
         Passive => 1
       )
-      or return _abort_download( undef,
+      or return $self->_abort_download( undef,
         "Cannot connect to $self->{account}->host: $EVAL_ERROR" );
     $ftp->login( $self->{account}->username, $self->{account}->password )
-      or _abort_download( $ftp, "Cannot login: $ftp->message()" );
+      or $self->_abort_download( $ftp, "Cannot login: $ftp->message()" );
     $ftp->cwd( $self->{account}->directory )
-      or _abort_download( $ftp, "Cannot change remote dir : $ftp->message()" );
+      or $self->_abort_download( $ftp,
+        "Cannot change remote dir : $ftp->message()" );
     my $file_list = $ftp->ls()
-      or _abort_download( $ftp, 'cannot get file list from server' );
+      or $self->_abort_download( $ftp, 'cannot get file list from server' );
 
     foreach my $filename ( @{$file_list} ) {
 
         if ( $filename =~ m/[.]$file_ext$/ ) {
 
             if ( !$ftp->get( $filename, "$self->{working_dir}/$filename" ) ) {
-                _abort_download( $ftp,
+                $self->_abort_download( $ftp,
                     "Error retrieving $filename: $ftp->message" );
                 last;
             }
@@ -221,12 +223,13 @@ sub ftp_upload {
         Timeout => 10,
         Passive => 1
       )
-      or return _abort_download( undef,
+      or return $self->_abort_download( undef,
         "Cannot connect to $self->{account}->host: $EVAL_ERROR" );
     $ftp->login( $self->{account}->username, $self->{account}->password )
-      or _abort_download( $ftp, "Cannot login: $ftp->message()" );
+      or $self->_abort_download( $ftp, "Cannot login: $ftp->message()" );
     $ftp->cwd( $self->{account}->directory )
-      or _abort_download( $ftp, "Cannot change remote dir : $ftp->message()" );
+      or $self->_abort_download( $ftp,
+        "Cannot change remote dir : $ftp->message()" );
     foreach my $m (@messages) {
         my $content = $m->raw_msg;
         if ($content) {
@@ -283,9 +286,12 @@ sub sftp_upload {
 }
 
 sub _abort_download {
-    my ( $handle, $log_message ) = @_;
+    my ( $self, $handle, $log_message ) = @_;
+
+    my $a = $self->{acct}->description;
 
     $handle->abort();
+    $log_message .= ": $a";
     carp $log_message;
 
     #returns undef i.e. an empty array

@@ -20,7 +20,6 @@ package Koha::EDI;
 use strict;
 use warnings;
 use base qw(Exporter);
-use DateTime;
 use Carp;
 use English qw{ -no_match_vars };
 use Business::ISBN;
@@ -43,6 +42,7 @@ sub create_edi_order {
     my $ean        = $parameters->{ean};
     my $branchcode = $parameters->{branchcode};
     my $noingest   = $parameters->{noingest};
+    $ean ||= C4::Context->preference('EDIfactEAN');
     if ( !$basketno || !$ean ) {
         carp 'create_edi_order called with no basketno or ean';
         return;
@@ -81,12 +81,13 @@ sub create_edi_order {
             return $order_file;
         }
         my $order = {
-            message_type => 'ORDERS',
-            raw_msg      => $order_file,
-            vendor_id    => $vendor->vendor_id,
-            status       => 'Pending',
-            basketno     => $basketno,
-            filename     => $edifact->filename(),
+            message_type  => 'ORDERS',
+            raw_msg       => $order_file,
+            vendor_id     => $vendor->vendor_id,
+            status        => 'Pending',
+            basketno      => $basketno,
+            filename      => $edifact->filename(),
+            transfer_date => $edifact->msg_date_string(),
         };
         $schema->resultset('EdifactMessage')->create($order);
         return 1;
@@ -97,6 +98,9 @@ sub create_edi_order {
 
 sub process_invoice {
     my $invoice_message = shift;
+    my $edi =
+      Koha::Edifact->new( { transmission => $invoice_message->raw_msg, } );
+    my $messages = $edi->message_array();
 
     #TBD
     #    my $edi = Koha::Edifact->new( { transmission => $quote->raw_msg, } );
@@ -207,7 +211,7 @@ sub quote_item {
         uncertainprice   => 0,
         biblionumber     => $bib->{biblionumber},
         title            => $item->title,
-        quantity         => 1,
+        quantity         => $item->quantity,
         biblioitemnumber => $bib->{biblioitemnumber},
         rrp              => $item->price,
         ecost => _discounted_price( $quote->vendor->discount, $item->price ),
@@ -222,12 +226,35 @@ sub quote_item {
 
     my ( undef, $ordernumber ) = NewOrder($order_hash);
 
-    # budget
     if ( C4::Context->preference('AcqCreateItem') eq 'ordering' ) {
         my $itemnumber;
         ( $bib->{biblionumber}, $bib->{biblioitemnumber}, $itemnumber ) =
           AddItemFromMarc( $bib_record, $bib->{biblionumber} );
         NewOrderItem( $itemnumber, $ordernumber );
+        if ( $item->quantity > 1 ) {
+            my $occurence = 1;
+            while ( $occurence < $item->quantity ) {
+                my $item = {
+                    notforloan       => -1,
+                    cn_sort          => q{},
+                    cn_source        => 'ddc',
+                    price            => $item->price,
+                    replacementprice => $item->price,
+                    itype => $item->girfield( 'stock_category', $occurence ),
+                    location =>
+                      $item->girfield( 'collection_code', $occurence ),
+                    itemcallnumber => $item->girfield( 'shelfmark', $occurence )
+                      || $item->girfield( 'classification', $occurence ),
+                    holdingbranch => $item->girfield( 'branch', $occurence ),
+                    homebranch    => $item->girfield( 'branch', $occurence ),
+                };
+                ( undef, undef, $itemnumber ) =
+                  AddItem( $item, $bib->{biblionumber} );
+                NewOrderItem( $itemnumber, $ordernumber );
+                ++$occurence;
+            }
+        }
+
     }
     return;
 }
