@@ -188,6 +188,7 @@ sub calculate {
     my $barcodelike   = @$filters[13];
     my $barcodefilter = @$filters[14];
     my $not;
+    my $colors = get_colors();
     
 # extract parameters
 	my $dbh = C4::Context->dbh;
@@ -476,7 +477,8 @@ if($barcodefilter){
 # 	my %cell;
 # 	%cell = {coltitle => "zzEMPTY"};
  	push @loopcol,{coltitle => "NULL"} if ($emptycol);
-	
+
+    my $loopcount = '0';
 	foreach my $row ( sort keys %table ) {
 		my @loopcell;
 		#@loopcol ensures the order for columns is common with column titles
@@ -488,8 +490,17 @@ if($barcodefilter){
 		push @looprow,{ 'rowtitle' => ($row eq "zzEMPTY")?"NULL":$row,
 						'loopcell' => \@loopcell,
 						'hilighted' => ($hilighted *= -1 > 0),
-						'totalrow' => $table{$row}->{totalrow}
+						'totalrow' => $table{$row}->{totalrow},
+                        'fill' => ${$colors}[$loopcount]->{fill},
+                        'stroke' => ${$colors}[$loopcount]->{stroke},
+                        'point' => ${$colors}[$loopcount]->{point},
+                        'highlight' => ${$colors}[$loopcount]->{highlight},
+
 					};
+        $loopcount++;
+        if ( $loopcount == '6' ) {
+            $loopcount = '0';
+        }
 	}
 	
 #	warn "footer processing";
@@ -516,6 +527,49 @@ if($barcodefilter){
 	$globalline{column} = $column;
 	push @mainloop,\%globalline;
 	return \@mainloop;
+}
+
+sub get_colors {
+    my $colors = [
+        {
+            fill                => "rgba(151,187,205,0.2)",
+            stroke              => "rgba(151,187,205,1)",
+            point               => "rgba(151,187,205,1)",
+            highlight           => "rgba(151,187,205,1)",
+        },
+        {
+            fill                => "rgba(216,191,216,0.2)",
+            stroke              => "rgba(216,191,216,1)",
+            point               => "rgba(216,191,216,1)",
+            highlight           => "rgba(216,191,216,1)",
+        },
+        {
+            fill                => "rgba(240,128,128,0.2)",
+            stroke              => "rgba(240,128,128,1)",
+            point               => "rgba(240,128,128,1)",
+            highlight           => "rgba(240,128,128,1)",
+        },
+        {
+            fill                => "rgba(240,230,140,0.2)",
+            stroke              => "rgba(240,230,140,1)",
+            point               => "rgba(240,230,140,1)",
+            highlight           => "rgba(240,230,140,1)",
+        },
+        {
+            fill                => "rgba(152,251,152,0.2)",
+            stroke              => "rgba(152,251,152,1)",
+            point               => "rgba(152,251,152,1)",
+            highlight           => "rgba(152,251,152,1)",
+        },
+        {
+            fill                => "rgba(216,191,216,0.2)",
+            stroke              => "rgba(216,191,216,1)",
+            point               => "rgba(216,191,216,1)",
+            highlight           => "rgba(216,191,216,1)",
+        },
+   ];
+
+    return $colors;
 }
 
 1;

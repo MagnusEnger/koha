@@ -2,6 +2,7 @@
 <title>Koha &rsaquo; Reports [% IF ( do_it ) %]&rsaquo; Catalog statistics &rsaquo; Results[% ELSE %]&rsaquo; Catalog statistics[% END %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
 [% INCLUDE 'calendar.inc' %]
+<script src="[% interface %]/lib/charts/Chart.min.js"></script>
 <script type="text/javascript">
 //<![CDATA[
         $(document).ready(function() {
@@ -51,7 +52,9 @@
 [% IF ( do_it ) %]
 	[% FOREACH mainloo IN mainloop %]
 		<h1>Catalog statistics</h1>
-		[% IF ( mainloo.loopfilter ) %]
+	    <canvas id="catChart" width="1000" height="400"></canvas>
+        <div id="toolbar" class="btn-toolbar"><div class="btn-group"><a id="updateChart" class="btn" href="#">Click to change to <span id="chartType">Line</span> Chart</a></div></div>
+	[% IF ( mainloo.loopfilter ) %]
             <p>Filtered on:</p>
 			[% FOREACH loopfilte IN mainloo.loopfilter %]
 					<p>[% loopfilte.crit %] =[% loopfilte.filter %]</p>
@@ -272,4 +275,49 @@
 [% INCLUDE 'reports-menu.inc' %]
 </div>
 </div>
+[% IF ( do_it ) %]
+<script type="text/javascript">
+    var ctx = $("#catChart").get(0).getContext("2d");
+
+    var chartData = {
+    labels: [[% FOREACH loopco IN mainloo.loopcol %]"[% loopco.coltitle_display |html %]", [% END %]],
+    datasets: [
+        [% FOREACH loopro IN mainloo.looprow %]{
+            label: "[% loopro.rowtitle_display or "UNKNOWN VALUE" |html %]",
+            fillColor: "[% loopro.fill %]",
+            strokeColor: "[% loopro.stroke %]",
+            pointColor: "[% loopro.point %]",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "[% loopro.highlight %]",
+            data: [[% FOREACH loopcel IN loopro.loopcell %]"[% loopcel.value %]", [% END %]]
+        }, [% END %]]
+    };
+
+    var chartType = "Bar";
+    var catChart = new Chart(ctx).Bar( chartData, {});
+
+    $("#updateChart").click(function() {
+        console.log("Updating Chart: ");
+
+        // Replace the chart canvas element
+        $('#catChart').replaceWith('<canvas id="catChart" width="1000" height="400"></canvas>');
+
+        // Draw the chart
+        ctx = $('#catChart').get(0).getContext("2d");
+
+        if ( chartType == "Bar" ) {
+            new Chart(ctx).Line( chartData, {});
+            $('#chartType').text('Bar');
+            chartType = "Line";
+        } else {
+            new Chart(ctx).Bar( chartData, {});
+            $('#chartType').text('Line');
+            chartType = "Bar";
+        }
+    });
+    //circChart.update();
+</script>
+[% END %]
+
 [% INCLUDE 'intranet-bottom.inc' %]
