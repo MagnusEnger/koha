@@ -26,6 +26,7 @@ __PACKAGE__->table("edifact_ean");
 =head2 branchcode
 
   data_type: 'varchar'
+  is_foreign_key: 1
   is_nullable: 0
   size: 10
 
@@ -46,16 +47,33 @@ __PACKAGE__->table("edifact_ean");
 
 __PACKAGE__->add_columns(
   "branchcode",
-  { data_type => "varchar", is_nullable => 0, size => 10 },
+  { data_type => "varchar", is_foreign_key => 1, is_nullable => 0, size => 10 },
   "ean",
   { data_type => "varchar", is_nullable => 0, size => 15 },
   "id_code_qualifier",
   { data_type => "varchar", default_value => 14, is_nullable => 0, size => 3 },
 );
 
+=head1 RELATIONS
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2014-05-29 11:15:33
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:MKXue/6zd/QCXpZp3astxg
+=head2 branchcode
+
+Type: belongs_to
+
+Related object: L<Koha::Schema::Result::Branch>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "branchcode",
+  "Koha::Schema::Result::Branch",
+  { branchcode => "branchcode" },
+  { is_deferrable => 1, on_delete => "RESTRICT", on_update => "RESTRICT" },
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2014-09-02 11:37:47
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:s5Z9txnCIqGyvOj02EOtdQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -95,12 +95,17 @@ sub _parse_lines {
             $d->{price} = $s->elem( 0, 1 );
         }
         elsif ( $s->tag eq 'RFF' ) {
-
-            # TBD handle qualifier
-            $d->{reference} = $s->elem( 0, 1 );    # assumimg QLI
+            my $qualifier = $s->elem( 0, 0 );
+            if ( $qualifier eq 'QLI' ) { # Suppliers unique quotation linenumber
+                $d->{reference} = $s->elem( 0, 1 );
+            }
+            elsif ( $qualifier eq 'LI' ) {    # Buyer's unique orderline number
+                $d->{ordernumber} = $s->elem( 0, 1 );
+            }
         }
     }
     $d->{item_description} = _format_item_description(@item_description);
+    $d->{segs}             = $aref;
 
     return $d;
 }
@@ -320,6 +325,11 @@ sub reference {
     return $self->{reference};
 }
 
+sub ordernumber {
+    my $self = shift;
+    return $self->{ordernumber};
+}
+
 sub free_text {
     my $self = shift;
     return $self->{free_text};
@@ -411,6 +421,103 @@ sub extract_gir {
         }
     }
     return $gir_element;
+}
+
+# mainly for invoice processing amt_ will derive from MOA price_ from PRI and tax_ from TAX/MOA pairsn
+sub moa_amt {
+    my ( $self, $qualifier ) = @_;
+    foreach my $s ( @{ $self->{segs} } ) {
+        if ( $s->tag eq 'MOA' && $s->elem( 0, 0 ) eq $qualifier ) {
+            return $s->elem( 0, 1 );
+        }
+    }
+    return;
+}
+
+sub amt_discount {
+    my $self = shift;
+    return $self->moa_amt('52');
+}
+
+sub amt_prepayment {
+    my $self = shift;
+    return $self->moa_amt('113');
+}
+
+# total including allowances & tax
+sub amt_total {
+    my $self = shift;
+    return $self->moa_amt('128');
+}
+
+sub amt_unitprice {
+    my $self = shift;
+    return $self->moa_amt('146');
+}
+
+# item amount after allowances excluding tax
+sub amt_lineitem {
+    my $self = shift;
+    return $self->moa_amt('146');
+}
+
+sub pri_price {
+    my ( $self, $price_qualifier ) = @_;
+    foreach my $s ( @{ $self->{segs} } ) {
+        if ( $s->tag eq 'PRI' && $s->elem( 0, 0 ) eq $price_qualifier ) {
+            return {
+                price          => $s->elem( 0, 1 ),
+                type           => $s->elem( 0, 2 ),
+                type_qualifier => $s->elem( 0, 3 ),
+            };
+        }
+    }
+    return;
+}
+
+# unit price that will be chaged excl tax
+sub price_net {
+    my $self = shift;
+    my $p    = $self->pri_price('AAA');
+    if ( defined $p ) {
+        return $p->{price};
+    }
+    return;
+}
+
+# unit price excluding all allowances, charges and taxes
+sub price_gross {
+    my $self = shift;
+    my $p    = $self->pri_price('AAB');
+    if ( defined $p ) {
+        return $p->{price};
+    }
+    return;
+}
+
+# information price incl tax excluding allowances, charges
+sub price_info {
+    my $self = shift;
+    my $p    = $self->pri_price('AAE');
+    if ( defined $p ) {
+        return $p->{price};
+    }
+    return;
+}
+
+# information price incl tax,allowances, charges
+sub price_info_inclusive {
+    my $self = shift;
+    my $p    = $self->pri_price('AAE');
+    if ( defined $p ) {
+        return $p->{price};
+    }
+    return;
+}
+
+sub tax {
+    my $self = shift;
+    return $self->moa_amt('124');
 }
 
 1;

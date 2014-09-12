@@ -20,24 +20,37 @@
 use warnings;
 use strict;
 
+use C4::Context;
+use Log::Log4perl qw(:easy);
 use Koha::Database;
 use Koha::EDI qw( process_quote process_invoice);
-use Koha::EDI::Transport;
+use Koha::Edifact::Transport;
+
+my $logdir = C4::context->logdir;
+
+Log::Log4perl->easy_init(
+    {
+        level => $TRACE,
+        file  => ">>$logdir/editrace.log",
+    }
+);
 
 my $schema = Koha::Database->new()->schema();
 
 my @edi_accts = $schema->resultset('VendorEdiAccount')->all();
 
+my $logger = Log::Log4perl->get_logger();
+
 for my $acct (@edi_accts) {
     if ( $acct->quotes_enabled ) {
-        my $downloader = Koha::EDI::Transport->new( $acct->id );
+        my $downloader = Koha::Edifact::Transport->new( $acct->id );
         $downloader->download_messages('QUOTE');
 
         #update vendor last activity
     }
 
     if ( $acct->invoices_enabled ) {
-        my $downloader = Koha::EDI::Transport->new( $acct->id );
+        my $downloader = Koha::Edifact::Transport->new( $acct->id );
         $downloader->download_messages('INVOICE');
 
         #update vendor last activity
@@ -52,7 +65,7 @@ for my $acct (@edi_accts) {
                 status       => 'Pending',
             }
         );
-        my $uploader = Koha::EDI::Transport->new( $acct->id );
+        my $uploader = Koha::Edifact::Transport->new( $acct->id );
         $uploader->upload_messages(@pending_orders);
     }
 }
@@ -67,6 +80,7 @@ my @downloaded_quotes = $schema->resultset('EdifactMessage')->search(
 )->all;
 
 foreach my $quote_file (@downloaded_quotes) {
+    $logger->trace("Processing quote $quote_file->filename");
     process_quote($quote_file);
 }
 
@@ -80,6 +94,7 @@ my @downloaded_invoices = $schema->resultset('EdifactMessage')->search(
 )->all;
 
 foreach my $invoice (@downloaded_invoices) {
+    $logger->trace("Processing invoice $invoice->filename");
     process_invoice($invoice);
 }
 

@@ -1,4 +1,4 @@
-package Koha::EDI::Order;
+package Koha::Edifact::Order;
 
 use strict;
 use warnings;
@@ -341,12 +341,15 @@ sub order_line {
     #if ( $orderline->{special_processing} ) {
     #    $self->add_seg( gir_segments( $orderline->{special_processing} ) );
     #}
-    my @items = $schema->resultset('Item')->search(
-        {
-            biblionumber => $biblionumber,
-            notforloan   => -1,
+    my @linked_itemnumbers = $orderline->aqorders_items;
+
+    my @items;
+    foreach my $item (@linked_itemnumbers) {
+        my $i_obj = $schema->resultset('Item')->find( $item->itemnumber );
+        if ( defined $i_obj ) {
+            push @items, $i_obj;
         }
-    );
+    }
     my $budget = GetBudget( $orderline->budget_id );
     $self->add_seg( gir_segments( $budget->{budget_code}, @items ) );
 
@@ -421,8 +424,10 @@ sub imd_segment {
     # chunk_line
     my @chunks;
     while ( my $x = substr $data, 0, $CHUNKSIZE, q{} ) {
-        if ( $x =~ s/([?]{1,2})$// ) {
-            $data = "$1$data";    # dont breakup ?' ?? etc
+        if ( length $x == $CHUNKSIZE ) {
+            if ( $x =~ s/([?]{1,2})$// ) {
+                $data = "$1$data";    # dont breakup ?' ?? etc
+            }
         }
         push @chunks, $x;
     }
@@ -579,11 +584,11 @@ sub encode_text {
 __END__
 
 =head1 NAME
-   Koha::EDI::Order
+   Koha::Edifact::Order
 
 =head1 SYNOPSIS
 
-Format an EDI Order message from a Koha basket
+Format an Edifact Order message from a Koha basket
 
 =head1 DESCRIPTION
 
@@ -605,14 +610,14 @@ Make habdling of GIR segments more customizable
 
 =head2 new
 
-  my $edi_order = EDI::Order->new(
+  my $edi_order = Edifact::Order->new(
   orderlines => \@orderlines,
   vendor     => $vendor_edi_account,
   ean        => $library_ean
   );
 
-  instantiate the EDI::Order object, all parameters are Schema::Resultset objects
-  Called in Koha::EDI create_edi_order
+  instantiate the Edifact::Order object, all parameters are Schema::Resultset objects
+  Called in Koha::Edifact create_edi_order
 
 =head2 filename
 

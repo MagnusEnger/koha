@@ -25,8 +25,7 @@ __PACKAGE__->table("edifact_messages");
 
 =head2 id
 
-  data_type: 'bigint'
-  extra: {unsigned => 1}
+  data_type: 'integer'
   is_auto_increment: 1
   is_nullable: 0
 
@@ -45,6 +44,13 @@ __PACKAGE__->table("edifact_messages");
 =head2 vendor_id
 
   data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 1
+
+=head2 edi_acct
+
+  data_type: 'integer'
+  is_foreign_key: 1
   is_nullable: 1
 
 =head2 status
@@ -55,6 +61,7 @@ __PACKAGE__->table("edifact_messages");
 =head2 basketno
 
   data_type: 'integer'
+  is_foreign_key: 1
   is_nullable: 1
 
 =head2 raw_msg
@@ -67,11 +74,6 @@ __PACKAGE__->table("edifact_messages");
   data_type: 'text'
   is_nullable: 1
 
-=head2 invoiceid
-
-  data_type: 'integer'
-  is_nullable: 1
-
 =head2 deleted
 
   data_type: 'tinyint'
@@ -82,28 +84,23 @@ __PACKAGE__->table("edifact_messages");
 
 __PACKAGE__->add_columns(
   "id",
-  {
-    data_type => "bigint",
-    extra => { unsigned => 1 },
-    is_auto_increment => 1,
-    is_nullable => 0,
-  },
+  { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
   "message_type",
   { data_type => "varchar", is_nullable => 0, size => 10 },
   "transfer_date",
   { data_type => "date", datetime_undef_if_invalid => 1, is_nullable => 1 },
   "vendor_id",
-  { data_type => "integer", is_nullable => 1 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
+  "edi_acct",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
   "status",
   { data_type => "text", is_nullable => 1 },
   "basketno",
-  { data_type => "integer", is_nullable => 1 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
   "raw_msg",
   { data_type => "text", is_nullable => 1 },
   "filename",
   { data_type => "text", is_nullable => 1 },
-  "invoiceid",
-  { data_type => "integer", is_nullable => 1 },
   "deleted",
   { data_type => "tinyint", default_value => 0, is_nullable => 0 },
 );
@@ -120,23 +117,86 @@ __PACKAGE__->add_columns(
 
 __PACKAGE__->set_primary_key("id");
 
+=head1 RELATIONS
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2014-05-23 16:34:46
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:6FbiKMewa/OKbLnsVRsipQ
+=head2 basketno
 
+Type: belongs_to
 
-# You can replace this text with custom code or comments, and it will be preserved on regeneration
+Related object: L<Koha::Schema::Result::Aqbasket>
+
+=cut
+
 __PACKAGE__->belongs_to(
-    'vendor',
-    'Koha::Schema::Result::Aqbookseller',
-    {
-        id => 'vendor_id' },
-    {
-        is_deferrable => 1,
-        join_type => 'LEFT',
-        on_delete => 'CASCADE',
-        on_update => 'CASCADE',
-    },
+  "basketno",
+  "Koha::Schema::Result::Aqbasket",
+  { basketno => "basketno" },
+  {
+    is_deferrable => 1,
+    join_type     => "LEFT",
+    on_delete     => "RESTRICT",
+    on_update     => "RESTRICT",
+  },
 );
+
+=head2 edi_acct
+
+Type: belongs_to
+
+Related object: L<Koha::Schema::Result::VendorEdiAccount>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "edi_acct",
+  "Koha::Schema::Result::VendorEdiAccount",
+  { id => "edi_acct" },
+  {
+    is_deferrable => 1,
+    join_type     => "LEFT",
+    on_delete     => "RESTRICT",
+    on_update     => "RESTRICT",
+  },
+);
+
+=head2 msg_invoices
+
+Type: has_many
+
+Related object: L<Koha::Schema::Result::MsgInvoice>
+
+=cut
+
+__PACKAGE__->has_many(
+  "msg_invoices",
+  "Koha::Schema::Result::MsgInvoice",
+  { "foreign.msg_id" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 vendor
+
+Type: belongs_to
+
+Related object: L<Koha::Schema::Result::Aqbookseller>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "vendor",
+  "Koha::Schema::Result::Aqbookseller",
+  { id => "vendor_id" },
+  {
+    is_deferrable => 1,
+    join_type     => "LEFT",
+    on_delete     => "RESTRICT",
+    on_update     => "RESTRICT",
+  },
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2014-09-02 11:37:47
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:i+ub7jB8jSLHqfX7BjnSbw
+
 
 1;

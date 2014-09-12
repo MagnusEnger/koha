@@ -44,7 +44,7 @@ my @msgs = $schema->resultset('EdifactMessage')->search(
         deleted => 0,
     },
     {
-        join => 'vendor',
+        join     => 'vendor',
         order_by => { -desc => 'transfer_date' },
     }
 

@@ -27,14 +27,14 @@ use Koha::Database;
 use CGI;
 my $schema = Koha::Database->new()->schema();
 
-my @eans     = $schema->resultset('EdifactEan')->search(
+my @eans = $schema->resultset('EdifactEan')->search(
     {},
     {
         join => 'branch',
     }
 );
-my $query      = CGI->new();
-my $basketno   = $query->param('basketno');
+my $query    = CGI->new();
+my $basketno = $query->param('basketno');
 
 if ( @eans == 1 ) {
     my $ean = $eans[0]->ean;

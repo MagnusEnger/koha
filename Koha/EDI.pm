@@ -26,11 +26,13 @@ use Business::ISBN;
 use Business::Edifact::Interchange;
 use C4::Context;
 use Koha::Database;
-use C4::Acquisition qw( NewBasket NewOrderItem NewOrder);
-use C4::Items qw(AddItemFromMarc);
+use C4::Acquisition
+  qw( NewBasket NewOrderItem NewOrder AddInvoice ModReceiveOrder );
+use C4::Items qw(AddItemFromMarc AddItem);
 use C4::Biblio qw( AddBiblio TransformKohaToMarc );
-use Koha::EDI::Order;
+use Koha::Edifact::Order;
 use Koha::Edifact;
+use Log::Log4perl;
 
 our $VERSION = 1.1;
 our @EXPORT_OK =
@@ -53,10 +55,12 @@ sub create_edi_order {
 
     my @orderlines = $schema->resultset('Aqorder')->search(
         {
-            basketno => $basketno,
+            basketno    => $basketno,
+            orderstatus => 'new',
         }
     )->all;
 
+    # TBD handle multiple accounts
     my $vendor = $schema->resultset('VendorEdiAccount')->search(
         {
             vendor_id => $orderlines[0]->basketno->booksellerid->id,
@@ -70,7 +74,7 @@ sub create_edi_order {
     my $ean_obj =
       $schema->resultset('EdifactEan')->search($ean_search_keys)->single;
 
-    my $edifact = Koha::EDI::Order->new(
+    my $edifact = Koha::Edifact::Order->new(
         { orderlines => \@orderlines, vendor => $vendor, ean => $ean_obj } );
 
     my $order_file = $edifact->encode();
@@ -88,6 +92,8 @@ sub create_edi_order {
             basketno      => $basketno,
             filename      => $edifact->filename(),
             transfer_date => $edifact->msg_date_string(),
+            edi_acct      => $vendor->id,
+
         };
         $schema->resultset('EdifactMessage')->create($order);
         return 1;
@@ -98,17 +104,84 @@ sub create_edi_order {
 
 sub process_invoice {
     my $invoice_message = shift;
+    my $database        = Koha::Database->new();
+    my $schema          = $database->schema();
+    my $vendor_acct;
+    my $logger = Log::Log4perl->get_logger();
     my $edi =
       Koha::Edifact->new( { transmission => $invoice_message->raw_msg, } );
     my $messages = $edi->message_array();
+    if ( @{$messages} ) {
 
-    #TBD
-    #    my $edi = Koha::Edifact->new( { transmission => $quote->raw_msg, } );
-    #    my $messages = $edi->message_array();
-    #    if ( @{$messages} && $invoice_message->vendor_id ) {
-    #    }
-    #    $invoice_message->status('received');
-    #    $invoice_message->update;    # status and basketno link
+        # BGM contains an invoice number
+        foreach my $msg ( @{$messages} ) {
+            my $invoicenumber  = $msg->docmsg_number();
+            my $shipmentcharge = $msg->shipment_charge();
+            my $msg_date       = $msg->message_date;
+            my $tax_date       = $msg->tax_point_date;
+            if ( !defined $tax_date || $tax_date !~ m/^\d{8}/ ) {
+                $tax_date = $msg_date;
+            }
+
+            my $vendor_ean = $msg->supplier_ean;
+            if ( !defined $vendor_acct || $vendor_ean ne $vendor_acct->san ) {
+                $vendor_acct = $schema->resultset('VendorEdiAccount')->search(
+                    {
+                        san => $vendor_ean,
+                    }
+                )->single;
+            }
+            if ( !$vendor_acct ) {
+                carp
+"Cannot find vendor with ean $vendor_ean for invoice $invoicenumber in $invoice_message->filename";
+                next;
+            }
+            $invoice_message->edi_acct( $vendor_acct->id );
+            $logger->trace("Adding invoice:$invoicenumber");
+            my $invoiceid = AddInvoice(
+                invoicenumber         => $invoicenumber,
+                booksellerid          => $invoice_message->vendor_id,
+                shipmentdate          => $msg_date,
+                billingdate           => $tax_date,
+                shipmentcost          => $shipmentcharge,
+                shipmentcost_budgetid => $vendor_acct->shipment_budget,
+            );
+            $logger->trace("Added as invoiceno :$invoiceid");
+            my $link = $schema->resultset('MsgInvoice')->new(
+                {
+                    msg_id    => $msg->id,
+                    invoiceid => $invoiceid,
+                }
+            );
+            $link->insert();
+            my $lines = $msg->lineitems();
+
+            foreach my $line ( @{$lines} ) {
+                my $ordernumber = $line->ordernumber;
+                $logger->trace("Receipting order:$ordernumber");
+
+                # handle old basketno/ordernumber references
+                if ( $ordernumber =~ m#\d+\/(\d+)# ) {
+                    $ordernumber = $1;
+                }
+                ModReceiveOrder(
+                    {
+                        biblionumber         => orderbumber => $ordernumber,
+                        quantityreceived     => $line->quantity,
+                        cost                 => $line->price_net,
+                        invoiceid            => $invoicenumber,
+                        datereceived         => $msg_date,
+                        received_itemnumbers => [],
+                    }
+                );
+
+            }
+
+        }
+    }
+
+    $invoice_message->status('received');
+    $invoice_message->update;    # status and basketno link
     return;
 }
 
@@ -118,21 +191,31 @@ sub process_quote {
 
     my $edi = Koha::Edifact->new( { transmission => $quote->raw_msg, } );
     my $messages = $edi->message_array();
+    my $process_errors = 0;
+    my $logger         = Log::Log4perl->get_logger();
 
     if ( @{$messages} && $quote->vendor_id ) {
         my $basketno =
           NewBasket( $quote->vendor_id, 0, $quote->filename, q{}, q{} . q{} );
         $quote->basketno($basketno);
+        $logger->trace("Created basket :$basketno");
         for my $msg ( @{$messages} ) {
             my $items  = $msg->lineitems();
             my $refnum = $msg->message_refno;
 
             for my $item ( @{$items} ) {
-                quote_item( $item, $quote );
+                if ( !quote_item( $item, $quote ) ) {
+                    ++$process_errors;
+                }
             }
         }
     }
-    $quote->status('received');
+    my $status = 'received';
+    if ($process_errors) {
+        $status = 'error';
+    }
+
+    $quote->status($status);
     $quote->update;    # status and basketno link
 
     return;
@@ -142,6 +225,7 @@ sub quote_item {
     my ( $item, $quote ) = @_;
 
     # create biblio record
+    my $logger   = Log::Log4perl->get_logger();
     my $bib_hash = {
         'biblioitems.cn_source' => 'ddc',
         'items.cn_source'       => 'ddc',
@@ -187,6 +271,12 @@ sub quote_item {
 
     my $budget = _get_budget( $item->girfield('fund_allocation') );
 
+    if ( !$budget ) {
+        carp "Skipping line with no budget info";
+        $logger->trace('line skipped for invalid budget');
+        return;
+    }
+
     my $note = {};
 
     my $shelfmark =
@@ -197,11 +287,16 @@ sub quote_item {
       $branch;
     my $bib_record = TransformKohaToMarc($bib_hash);
 
+    $logger->trace("Checking db for matches with $item->{item_number_id}");
     my $bib = _check_for_existing_bib( $item->{item_number_id} );
     if ( !defined $bib ) {
         $bib = {};
         ( $bib->{biblionumber}, $bib->{biblioitemnumber} ) =
           AddBiblio( $bib_record, q{} );
+        $logger->trace("New biblio added $bib->{biblionumber}");
+    }
+    else {
+        $logger->trace("Match found: $bib->{biblionumber}");
     }
 
     my $order_note = $item->{free_text};
@@ -225,6 +320,7 @@ sub quote_item {
     };
 
     my ( undef, $ordernumber ) = NewOrder($order_hash);
+    $logger->trace("Order created :$ordernumber");
 
     if ( C4::Context->preference('AcqCreateItem') eq 'ordering' ) {
         my $itemnumber;
@@ -256,7 +352,7 @@ sub quote_item {
         }
 
     }
-    return;
+    return 1;
 }
 
 sub get_edifact_ean {
@@ -372,7 +468,6 @@ __END__
 
     process_invoice(invoice_message)
 
-    TBD Unimplemented placeholder
 
 =head2 create_edi_order
 

@@ -1,6 +1,6 @@
 package Koha::Template::Plugin::Edifact;
 
-# Copyright PTFS Europe 201ub
+# Copyright PTFS Europe Ltd
 
 # This file is part of Koha.
 #

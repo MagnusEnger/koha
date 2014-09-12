@@ -69,7 +69,7 @@
      <label for="branchcode">Branchcode: </label>
      <select name="branchcode" id="branchcode">
         [% FOREACH branch IN branches %]
-            [% IF branch.branchcode == ean.branchcode %]
+            [% IF branch.branchcode == ean.branch.branchcode %]
                <option value="[% branch.branchcode %]" selected="selected">[% branch.branchname %]</option>
             [% ELSE %]
                <option value="[% branch.branchcode %]">[% branch.branchname %]</option>
@@ -109,7 +109,7 @@
 [% END %]
 [% IF delete_confirm %]
 <div class="dialog alert">
-<h3>Delete EAN [% ean.ean %] for branch [% ean.branchname %]?</h3>
+<h3>Delete EAN [% ean.ean %] for branch [% ean.branch.branchname %]?</h3>
 <form action="/cgi-bin/koha/admin/edi_ean_accounts.pl" method="post">
     <input type="hidden" name="op" value="delete_confirmed" />
     <input type="hidden" name="branchcode" value="[% ean.branch.branchcode %]" />

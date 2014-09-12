@@ -57,7 +57,7 @@ sub segmentize {
 
     my $re = qr{
 (?>    # dont backtrack into this group
-    \?.      # either the escape character
+    [?].      # either the escape character
             # followed by any other character
      |      # or
      [^'?]   # a character that is neither escape

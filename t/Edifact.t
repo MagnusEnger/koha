@@ -13,22 +13,20 @@ my $quote = Koha::Edifact->new( { filename => $filename, } );
 
 isa_ok( $quote, 'Koha::Edifact' );
 
-my $control_reference = 'EDIQ2857763';
-my $x                 = $quote->interchange_header('sender');
+my $x = $quote->interchange_header('sender');
 is( $x, '5013546027856', "sender returned" );
 
 $x = $quote->interchange_header('recipient');
 is( $x, '5030670137480', "recipient returned" );
 $x = $quote->interchange_header('datetime');
 is( $x->[0], '140430', "datetime returned" );
+my $control_reference = 'EDIQ2857763';
 $x = $quote->interchange_header('interchange_control_reference');
 is( $x, $control_reference, "interchange_control_reference returned" );
 
 $x = $quote->interchange_header('application_reference');
 is( $x, 'QUOTES', "application_reference returned" );
 
-$x = $quote->interchange_trailer('interchange_control_reference');
-is( $x, $control_reference, "interchange_control_reference returned" );
 $x = $quote->interchange_trailer('interchange_control_count');
 is( $x, 1, "interchange_control_count returned" );
 
@@ -40,7 +38,8 @@ my $m = $msgs->[0];
 is( $m->message_type, 'QUOTES', "Message shows correct type" );
 is( $m->message_reference_number,
     'MQ09791', "Message reference number returned" );
-is( $m->docmsg_number, 'Q741588', "Message docmsg number returned" );
+is( $m->docmsg_number, 'Q741588',  "Message docmsg number returned" );
+is( $m->message_date,  '20140430', "Message date returned" );
 
 my $lin = $m->lineitems();
 

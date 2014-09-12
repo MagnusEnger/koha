@@ -27,11 +27,17 @@ sub new {
     my $header       = shift @{$data_array_ref};
     my $bgm          = shift @{$data_array_ref};
     my $msg_function = $bgm->elem(2);
+    my $dtm          = [];
+    while ( $data_array_ref->[0]->tag eq 'DTM' ) {
+        push @{$dtm}, shift( @{$data_array_ref} );
+    }
 
     my $self = {
+        function                 => $msg_function,
         header                   => $header,
         bgm                      => $bgm,
         message_reference_number => $header->elem(0),
+        dtm                      => $dtm,
         datasegs                 => $data_array_ref,
     };
 
@@ -76,6 +82,106 @@ sub message_code {
 sub docmsg_number {
     my $self = shift;
     return $self->{bgm}->elem(1);
+}
+
+sub message_date {
+    my $self = shift;
+
+    # usually the first if not only dtm
+    foreach my $d ( @{ $self->{dtm} } ) {
+        if ( $d->elem( 0, 0 ) eq '137' ) {
+            return $d->elem( 0, 1 );
+        }
+    }
+    return;    # this should not happen
+}
+
+sub tax_point_date {
+    my $self = shift;
+    if ( $self->message_type eq 'INVOIC' ) {
+        foreach my $d ( @{ $self->{dtm} } ) {
+            if ( $d->elem( 0, 0 ) eq '131' ) {
+                return $d->elem( 0, 1 );
+            }
+        }
+    }
+    return;
+}
+
+sub expiry_date {
+    my $self = shift;
+    if ( $self->message_type eq 'QUOTES' ) {
+        foreach my $d ( @{ $self->{dtm} } ) {
+            if ( $d->elem( 0, 0 ) eq '36' ) {
+                return $d->elem( 0, 1 );
+            }
+        }
+    }
+    return;
+}
+
+sub shipment_charge {
+    my $self = shift;
+
+    # A large number of different charges can be expressed at invoice and
+    # item level but the only one koha takes cognizance of is shipment
+    # should we wrap all invoice level charges into it??
+    if ( $self->message_type eq 'INVOIC' ) {
+        my $delivery = 0;
+        my $amt      = 0;
+        foreach my $s ( @{ $self->{datasegs} } ) {
+            if ( $s->tag eq 'LIN' ) {
+                last;
+            }
+            if ( $s->tag eq 'ALC' ) {
+                if ( $s->elem(0) eq 'C' ) {    # Its a charge
+                    if ( $s->elem( 4, 0 ) eq 'DL' ) {    # delivery charge
+                        $delivery = 1;
+                    }
+                }
+                next;
+            }
+            if ( $s->tag eq 'MOA' ) {
+                $amt += $s->elem( 0, 1 );
+            }
+        }
+        return $amt;
+    }
+    return;
+}
+
+# return NAD fields
+sub buyer_ean {
+    my $self = shift;
+    foreach my $s ( @{ $self->{datasegs} } ) {
+        if ( $s->tag eq 'LIN' ) {
+            last;
+        }
+        if ($s->tag eq 'NAD' ) {
+            my $qualifier = $s->elem(0);
+            if ($qualifier eq 'BY') {
+                return $s->elem(1,0);
+            }
+        }
+    }
+    return;
+}
+
+sub supplier_ean {
+    my $self = shift;
+    foreach my $s ( @{ $self->{datasegs} } ) {
+        if ( $s->tag eq 'LIN' ) {
+            last;
+        }
+        if ($s->tag eq 'NAD' ) {
+            my $qualifier = $s->elem(0);
+            if ($qualifier eq 'SU') {
+                return $s->elem(1,0);
+            }
+        }
+    }
+    return;
+
 }
 
 sub lineitems {

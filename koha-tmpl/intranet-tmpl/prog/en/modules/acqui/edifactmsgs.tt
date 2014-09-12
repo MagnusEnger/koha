@@ -4,13 +4,11 @@
 [% INCLUDE 'doc-head-close.inc' %]
 [% INCLUDE 'datatables.inc' %]
 <script type="text/javascript">
-//<![CDATA[
 $(document).ready(function() {
     $('#edi_msgs').dataTable($.extend(true, {}, dataTablesDefaults, {
         'sPaginationType': "four_button",
         }));
 });
-//]]>
 </script>
 
 </head>
@@ -56,8 +54,8 @@ $(document).ready(function() {
 [% msg.vendor.name %]
 </td>
 <td>
-<a href="/cgi-bin/koha/acqui/basket.pl?basketno=[% msg.basketno %]"</a>
-[% msg.basketno %]
+<a href="/cgi-bin/koha/acqui/basket.pl?basketno=[% msg.basketno.basketno %]"</a>
+[% msg.basketno.basketno %]
 </td>
 <td>[% msg.filename %]</td>
 <td>

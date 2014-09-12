@@ -368,6 +368,21 @@ __PACKAGE__->might_have(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 edifact_eans
+
+Type: has_many
+
+Related object: L<Koha::Schema::Result::EdifactEan>
+
+=cut
+
+__PACKAGE__->has_many(
+  "edifact_eans",
+  "Koha::Schema::Result::EdifactEan",
+  { "foreign.branchcode" => "self.branchcode" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 hold_fill_targets
 
 Type: has_many
@@ -484,8 +499,8 @@ Composing rels: L</branchrelations> -> categorycode
 __PACKAGE__->many_to_many("categorycodes", "branchrelations", "categorycode");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07025 @ 2014-04-08 22:40:15
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:1RVlM6TXiG4B7szUQSN64Q
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2014-09-02 11:37:47
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:lMlAl2Ddlgjz0jYycOQsYQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

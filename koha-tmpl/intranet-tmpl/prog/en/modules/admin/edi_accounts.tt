@@ -213,7 +213,7 @@
       [% ELSE %]
          <td></td>
       [% END %]
-      [% IF account.orders %]
+      [% IF account.orders_enabled %]
          <td>Y</td>
       [% ELSE %]
          <td></td>

@@ -1,4 +1,4 @@
-package Koha::EDI::Transport;
+package Koha::Edifact::Transport;
 
 # Copyright 2014 PTFS-Europe Ltd
 #
@@ -288,7 +288,7 @@ sub sftp_upload {
 sub _abort_download {
     my ( $self, $handle, $log_message ) = @_;
 
-    my $a = $self->{acct}->description;
+    my $a = $self->{account}->description;
 
     $handle->abort();
     $log_message .= ": $a";
@@ -321,6 +321,7 @@ sub message_hash {
     my $msg  = {
         message_type  => $self->{message_type},
         vendor_id     => $self->{account}->vendor_id,
+        edi_acct      => $self->{account}->id,
         status        => 'new',
         deleted       => 0,
         transfer_date => $self->{transfer_date}->ymd(),
@@ -340,11 +341,11 @@ sub set_transport_direct {
 __END__
 
 =head1 NAME
-   Koha::EDI::Transport
+   Koha::Edifact::Transport
 
 =head1 SYNOPSIS
 
-my $download = Koha::EDI::Transport->new( $vendor_edi_account_id );
+my $download = Koha::Edifact::Transport->new( $vendor_edi_account_id );
 $downlod->download_messages('QUOTE');
 
 
@@ -360,7 +361,7 @@ currently can use sftp or ftp
 
 =head2 new
 
-    Creates an object of EDI::Transport requires to be passed the id
+    Creates an object of Edifact::Transport requires to be passed the id
     identifying the relevant edi vendor account
 
 =head2 working_directory
