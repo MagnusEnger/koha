@@ -119,7 +119,7 @@ sub process_invoice {
             my $shipmentcharge = $msg->shipment_charge();
             my $msg_date       = $msg->message_date;
             my $tax_date       = $msg->tax_point_date;
-            if ( !defined $tax_date || $tax_date !~ m/^\d{8}/ ) {
+            if ( !defined $tax_date || $tax_date !~ m/^\d{8}/xms ) {
                 $tax_date = $msg_date;
             }
 
@@ -161,7 +161,7 @@ sub process_invoice {
                 $logger->trace("Receipting order:$ordernumber");
 
                 # handle old basketno/ordernumber references
-                if ( $ordernumber =~ m#\d+\/(\d+)# ) {
+                if ( $ordernumber =~ m{\d+\/(\d+)}xms ) {
                     $ordernumber = $1;
                 }
                 my $order = $schema->resultset('Aqorder')->find($ordernumber);
@@ -244,47 +244,26 @@ sub quote_item {
         'items.notforloan'      => -1,
         'items.cn_sort'         => q{},
     };
-    my $value;
-    if ( $value = $item->series ) {
-        $bib_hash->{'biblio.seriestitle'} = $value;
-    }
+    $bib_hash->{'biblio.seriestitle'} = $item->series;
 
-    if ( $value = $item->publisher ) {
-        $bib_hash->{'biblioitems.publishercode'} = $value;
-    }
-    if ( $value = $item->publication_date ) {
-        $bib_hash->{'biblioitems.publicationyear'} =
-          $bib_hash->{'biblio.copyrightdate'} = $value;
-    }
+    $bib_hash->{'biblioitems.publishercode'} = $item->publisher;
+    $bib_hash->{'biblioitems.publicationyear'} =
+      $bib_hash->{'biblio.copyrightdate'} = $item->publication_date;
 
-    if ( $value = $item->title ) {
-        $bib_hash->{'biblio.title'} = $value;
-    }
-    if ( $value = $item->author ) {
-        $bib_hash->{'biblio.author'} = $value;
-    }
-    if ( $value = $item->{item_number_id} ) {
-        $bib_hash->{'biblioitems.isbn'} = $value;
-    }
-    if ( $value = $item->girfield('stock_category') ) {
-        $bib_hash->{'biblioitems.itemtype'} = $value;
-    }
-    $bib_hash->{'items.booksellerid'} = $quote->vendor_id;
-    if ( $value = $item->price ) {
-        $bib_hash->{'items.price'} = $bib_hash->{'items.replacementprice'} =
-          $value;
-    }
-    if ( $value = $item->girfield('stock_category') ) {
-        $bib_hash->{'items.itype'} = $value;
-    }
-    if ( $value = $item->girfield('collection_code') ) {
-        $bib_hash->{'items.location'} = $value;
-    }
+    $bib_hash->{'biblio.title'}         = $item->title;
+    $bib_hash->{'biblio.author'}        = $item->author;
+    $bib_hash->{'biblioitems.isbn'}     = $item->item_number_id;
+    $bib_hash->{'biblioitems.itemtype'} = $item->girfield('stock_category');
+    $bib_hash->{'items.booksellerid'}   = $quote->vendor_id;
+    $bib_hash->{'items.price'} = $bib_hash->{'items.replacementprice'} =
+      $item->price;
+    $bib_hash->{'items.itype'}    = $item->girfield('stock_category');
+    $bib_hash->{'items.location'} = $item->girfield('collection_code');
 
     my $budget = _get_budget( $item->girfield('fund_allocation') );
 
     if ( !$budget ) {
-        carp "Skipping line with no budget info";
+        carp 'Skipping line with no budget info';
         $logger->trace('line skipped for invalid budget');
         return;
     }
@@ -382,15 +361,15 @@ sub get_edifact_ean {
 # We should not need to have a routine to do this here
 sub _discounted_price {
     my ( $discount, $price ) = @_;
-    return ( $price - ( ( $discount * $price ) / 100 ) );
+    return $price - ( ( $discount * $price ) / 100 );
 }
 
 sub _check_for_existing_bib {
     my $isbn = shift;
 
     my $search_isbn = $isbn;
-    $search_isbn =~ s/^\s*/%/;
-    $search_isbn =~ s/\s*$/%/;
+    $search_isbn =~ s/^\s*/%/xms;
+    $search_isbn =~ s/\s*$/%/xms;
     my $dbh = C4::Context->dbh;
     my $sth = $dbh->prepare(
 'select biblionumber, biblioitemnumber from biblioitems where isbn like ?',
@@ -402,15 +381,15 @@ sub _check_for_existing_bib {
     }
     else {
         undef $search_isbn;
-        $isbn =~ s/\-//g;
-        if ( $isbn =~ m/(\d{13})/ ) {
+        $isbn =~ s/\-//xmsg;
+        if ( $isbn =~ m/(\d{13})/xms ) {
             my $b_isbn = Business::ISBN->new($1);
             if ( $b_isbn && $b_isbn->is_valid ) {
                 $search_isbn = $b_isbn->as_isbn10->as_string();
             }
 
         }
-        elsif ( $isbn =~ m/(\d{9}[xX]|\d{10})/ ) {
+        elsif ( $isbn =~ m/(\d{9}[xX]|\d{10})/xms ) {
             my $b_isbn = Business::ISBN->new($1);
             if ( $b_isbn && $b_isbn->is_valid ) {
                 $search_isbn = $b_isbn->as_isbn13->as_string();
@@ -479,6 +458,11 @@ __END__
 =head2 process_invoice
 
     process_invoice(invoice_message)
+
+    passed a message object for an invoice, add the contained invoices
+    and update the orderlines referred to in the invoice
+    As an Edifact invoice is in effect a despatch note this receipts the
+    appropriate quantities in the orders
 
 
 =head2 create_edi_order
