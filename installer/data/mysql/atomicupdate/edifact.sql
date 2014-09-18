@@ -41,6 +41,10 @@ CREATE TABLE IF NOT EXISTS edifact_messages (
   CONSTRAINT emfk_basketno FOREIGN KEY ( basketno ) REFERENCES aqbasket ( basketno )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+ALTER TABLE aqinvoices ADD COLUMN message_id int(11) references edifact_messages( id );
+
+ALTER TABLE aqinvoices ADD CONSTRAINT edifact_msg_fk FOREIGN KEY ( message_id ) REFERENCES edifact_messages ( id ) ON DELETE SET NULL;
+
 CREATE TABLE IF NOT EXISTS msg_invoice (
   mi_id int(11) NOT NULL auto_increment,
   msg_id int(11) references edifact_messages( id ),
