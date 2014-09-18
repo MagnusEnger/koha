@@ -145,15 +145,9 @@ sub process_invoice {
                 billingdate           => $tax_date,
                 shipmentcost          => $shipmentcharge,
                 shipmentcost_budgetid => $vendor_acct->shipment_budget,
+                message_id            => $msg->id,
             );
             $logger->trace("Added as invoiceno :$invoiceid");
-            my $link = $schema->resultset('MsgInvoice')->new(
-                {
-                    msg_id    => $msg->id,
-                    invoiceid => $invoiceid,
-                }
-            );
-            $link->insert();
             my $lines = $msg->lineitems();
 
             foreach my $line ( @{$lines} ) {

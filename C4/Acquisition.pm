@@ -2754,7 +2754,7 @@ sub AddInvoice {
     return unless(%invoice and $invoice{invoicenumber});
 
     my @columns = qw(invoicenumber booksellerid shipmentdate billingdate
-        closedate shipmentcost shipmentcost_budgetid);
+        closedate shipmentcost shipmentcost_budgetid message_id);
 
     my @set_strs;
     my @set_args;
