@@ -342,7 +342,7 @@ sub quote_item {
         if ( $item->quantity > 1 ) {
             my $occurence = 1;
             while ( $occurence < $item->quantity ) {
-                my $item = {
+                my $new_item = {
                     notforloan       => -1,
                     cn_sort          => q{},
                     cn_source        => 'ddc',
@@ -357,7 +357,7 @@ sub quote_item {
                     homebranch    => $item->girfield( 'branch', $occurence ),
                 };
                 ( undef, undef, $itemnumber ) =
-                  AddItem( $item, $bib->{biblionumber} );
+                  AddItem( $new_item, $bib->{biblionumber} );
                 NewOrderItem( $itemnumber, $ordernumber );
                 ++$occurence;
             }
