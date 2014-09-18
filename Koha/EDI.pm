@@ -164,16 +164,28 @@ sub process_invoice {
                 if ( $ordernumber =~ m#\d+\/(\d+)# ) {
                     $ordernumber = $1;
                 }
-                ModReceiveOrder(
-                    {
-                        biblionumber         => orderbumber => $ordernumber,
-                        quantityreceived     => $line->quantity,
-                        cost                 => $line->price_net,
-                        invoiceid            => $invoicenumber,
-                        datereceived         => $msg_date,
-                        received_itemnumbers => [],
-                    }
-                );
+                my $order = $schema->resultset('Aqorder')->find($ordernumber);
+
+      # ModReceiveOrder does not validate that $ordernumber exists validate here
+                if ($order) {
+                    ModReceiveOrder(
+                        {
+                            biblionumber         => $order->biblionumber,
+                            ordernumber          => $ordernumber,
+                            quantityreceived     => $line->quantity,
+                            cost                 => $line->price_net,
+                            invoiceid            => $invoicenumber,
+                            datereceived         => $msg_date,
+                            received_itemnumbers => [],
+                        }
+                    );
+                }
+                else {
+                    $logger->error(
+                        "No order found for $ordernumber Invoice:$invoicenumber"
+                    );
+                    next;
+                }
 
             }
 
