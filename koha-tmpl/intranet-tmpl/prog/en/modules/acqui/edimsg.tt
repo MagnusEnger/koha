@@ -5,7 +5,6 @@
 <body id="acq_edifactmsgs" class="acq">
 [% INCLUDE 'header.inc' %]
 [% INCLUDE 'acquisitions-search.inc' %]
-
 <div id="breadcrumbs">
 <a href="/cgi-bin/koha/mainpage.pl">Home</a>
 &rsaquo; <a href="/cgi-bin/koha/acqui/acqui-home.pl">Acquisitions</a>
@@ -27,7 +26,6 @@
    </ul>
 [% END %]
 
-</div>
 </div>
 </div>
 <div class="yui-b">
