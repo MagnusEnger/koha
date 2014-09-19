@@ -2639,6 +2639,10 @@ sub GetInvoices {
         push @bind_strs, " borrowers.branchcode = ? ";
         push @bind_args, $args{branchcode};
     }
+    if($args{message_id}) {
+        push @bind_strs, " aqinvoices.message_id = ? ";
+        push @bind_args, $args{message_id};
+    }
 
     $query .= " WHERE " . join(" AND ", @bind_strs) if @bind_strs;
     $query .= " GROUP BY aqinvoices.invoiceid ";
