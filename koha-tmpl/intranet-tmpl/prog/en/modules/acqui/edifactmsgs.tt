@@ -38,9 +38,8 @@ $(document).ready(function() {
 <th>Transferred</th>
 <th>Status</th>
 <th>Vendor</th>
-<th>Basket</th>
+<th>Details</th>
 <th>Filename</th>
-<th>Invoice</th>
 <th> </th>
 </thead>
 <tbody>
@@ -54,14 +53,22 @@ $(document).ready(function() {
 [% msg.vendor.name %]
 </td>
 <td>
-<a href="/cgi-bin/koha/acqui/basket.pl?basketno=[% msg.basketno.basketno %]"</a>
-[% msg.basketno.basketno %]
+[% IF msg.message_type == 'QUOTE' || msg.message_type == 'ORDERS' %]
+    [% IF msg.basketno %]
+    <a href="/cgi-bin/koha/acqui/basket.pl?basketno=[% msg.basketno.basketno %]">
+    Basket: [% msg.basketno.basketno %]
+    </a>
+    [% END %]
+    [% ELSE %]
+<!-- Assuming invoices -->
+     <a href="/cgi-bin/koha/acqui/invoices.pl?message_id=[% msg.id %]">
+      Invoices
+     </a>
+     [% END %]
+</td>
+[% END %]
 </td>
 <td>[% msg.filename %]</td>
-<td>
-<a href="/cgi-bin/koha/acqui/invoice.pl?invoiceid=[% msg.invoiceid %]"</a>
-[% msg.invoiceid %]
-</td>
 <td><a class="popup" target="_blank" title="View Message" href="/cgi-bin/koha/acqui/edimsg.pl?id=[% msg.id %]"</a>View Message</td>
 </tr>
 [% END %]
