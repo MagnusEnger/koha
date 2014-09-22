@@ -15,23 +15,20 @@
     <div id="yui-main">
     <div class="yui-b">
 
-    <h2>Identify the branch submitting the EDI order</h2>
+    <h2>Identify the branch account submitting the EDI order</h2>
     <br />
-    <p>
     <form action="/cgi-bin/koha/acqui/basket.pl" method="get">
-         <p> Ordering branch: <select id="ean" name="ean">
-             <select name="ean">
-             [% FOREACH ean IN eans %]
-             <option value="[% ean.ean %]">[% ean.branch.branchname %] ([% ean.ean %])</option>
+         <p>Select ordering branch account: </p>
+         <select id="ean" name="ean">
+             [% FOREACH eanacct IN eans %]
+             <option value="[% eanacct.ean %]">[% eanacct.branch.branchname %] ([% eanacct.ean %])</option>
              [% END %]
-            </select>
-            <input type="hidden" id="basketno" value="[% basketno %]" name="basketno" />
-            <input type="hidden" value="ediorder" name="op" />
-            <input type="submit" value="Send EDI order" />
-         </p>
+        </select>
+        <br />
+        <input type="hidden" id="basketno" value="[% basketno %]" name="basketno" />
+        <input type="hidden" value="ediorder" name="op" />
+        <input type="submit" value="Send EDI order" />
     </form>
-    </p>
-
 </div>
 </div>
 <div class="yui-b">
