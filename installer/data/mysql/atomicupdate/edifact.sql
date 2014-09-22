@@ -41,17 +41,9 @@ CREATE TABLE IF NOT EXISTS edifact_messages (
   CONSTRAINT emfk_basketno FOREIGN KEY ( basketno ) REFERENCES aqbasket ( basketno )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS msg_invoice (
-  mi_id int(11) NOT NULL auto_increment,
-  msg_id int(11) references edifact_messages( id ),
-  invoiceid int(11) references aqinvoices( invoiceid ),
-  PRIMARY KEY (mi_id),
-  KEY msgid ( msg_id),
-  KEY invoiceid ( invoiceid ),
-  CONSTRAINT mifk_msgid FOREIGN KEY ( msg_id ) REFERENCES edifact_messages ( id ),
-  CONSTRAINT mifk_invoiceid FOREIGN KEY ( invoiceid ) REFERENCES aqinvoices ( invoiceid )
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+ALTER TABLE aqinvoices ADD COLUMN message_id int(11) references edifact_messages( id );
 
+ALTER TABLE aqinvoices ADD CONSTRAINT edifact_msg_fk FOREIGN KEY ( message_id ) REFERENCES edifact_messages ( id ) ON DELETE SET NULL;
 
 CREATE TABLE IF NOT EXISTS edifact_ean (
   branchcode varchar(10) not null references branches (branchcode),

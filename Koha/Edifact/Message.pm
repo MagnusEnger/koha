@@ -29,7 +29,7 @@ sub new {
     my $msg_function = $bgm->elem(2);
     my $dtm          = [];
     while ( $data_array_ref->[0]->tag eq 'DTM' ) {
-        push @{$dtm}, shift( @{$data_array_ref} );
+        push @{$dtm}, shift @{$data_array_ref};
     }
 
     my $self = {
@@ -157,10 +157,10 @@ sub buyer_ean {
         if ( $s->tag eq 'LIN' ) {
             last;
         }
-        if ($s->tag eq 'NAD' ) {
+        if ( $s->tag eq 'NAD' ) {
             my $qualifier = $s->elem(0);
-            if ($qualifier eq 'BY') {
-                return $s->elem(1,0);
+            if ( $qualifier eq 'BY' ) {
+                return $s->elem( 1, 0 );
             }
         }
     }
@@ -173,10 +173,10 @@ sub supplier_ean {
         if ( $s->tag eq 'LIN' ) {
             last;
         }
-        if ($s->tag eq 'NAD' ) {
+        if ( $s->tag eq 'NAD' ) {
             my $qualifier = $s->elem(0);
-            if ($qualifier eq 'SU') {
-                return $s->elem(1,0);
+            if ( $qualifier eq 'SU' ) {
+                return $s->elem( 1, 0 );
             }
         }
     }

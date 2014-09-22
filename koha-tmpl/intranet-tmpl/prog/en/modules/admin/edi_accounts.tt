@@ -101,7 +101,7 @@
      <input type="text" name="directory" id="directory" size="20" maxlength="90" value="[% account.directory %]" />
   </li>
   <li>
-     <label for="id_code_qualifier">
+     <label for="id_code_qualifier">Qualifier:</label>
      <select name="id_code_qualifier" id="id_code_qualifier">
      [% FOREACH qualifier IN code_qualifiers %]
         [% IF qualifier.code == account.id_code_qualifier %]
@@ -114,6 +114,7 @@
            </option>
         [% END %]
      [% END %]
+   </select>
   </li>
   <li>
      <label for="san">SAN: </label>
@@ -121,7 +122,7 @@
   </li>
   <li>
      <label for="quotes_enabled">Quotes enabled: </label>
-     <input type="checkbox" name="quotes_enabled" id="quotes_enabled" value=[% account.quotes_enabled %]" [% IF account.quotes_enabled %]checked[% END %] />
+     <input type="checkbox" name="quotes_enabled" id="quotes_enabled" value="[% account.quotes_enabled %]" [% IF account.quotes_enabled %]checked[% END %] />
   </li>
   <li>
      <label for="orders_enabled">Orders enabled: </label>

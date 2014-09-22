@@ -17,6 +17,10 @@
 # with Koha; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+# This is an awkward construct and should probably be totally replaced
+# but as all sites so far are single ordering ean its not clear what we should
+# replace it with
+#
 use strict;
 use warnings;
 

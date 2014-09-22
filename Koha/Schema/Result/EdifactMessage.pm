@@ -119,6 +119,21 @@ __PACKAGE__->set_primary_key("id");
 
 =head1 RELATIONS
 
+=head2 aqinvoices
+
+Type: has_many
+
+Related object: L<Koha::Schema::Result::Aqinvoice>
+
+=cut
+
+__PACKAGE__->has_many(
+  "aqinvoices",
+  "Koha::Schema::Result::Aqinvoice",
+  { "foreign.message_id" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 basketno
 
 Type: belongs_to
@@ -159,21 +174,6 @@ __PACKAGE__->belongs_to(
   },
 );
 
-=head2 msg_invoices
-
-Type: has_many
-
-Related object: L<Koha::Schema::Result::MsgInvoice>
-
-=cut
-
-__PACKAGE__->has_many(
-  "msg_invoices",
-  "Koha::Schema::Result::MsgInvoice",
-  { "foreign.msg_id" => "self.id" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
-
 =head2 vendor
 
 Type: belongs_to
@@ -195,8 +195,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2014-09-02 11:37:47
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:i+ub7jB8jSLHqfX7BjnSbw
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2014-09-18 16:21:46
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:aOMWguyzdK9caRRecsuTmQ
 
 
 1;
