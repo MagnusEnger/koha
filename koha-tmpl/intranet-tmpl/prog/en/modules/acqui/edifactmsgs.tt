@@ -6,7 +6,8 @@
 <script type="text/javascript">
 $(document).ready(function() {
     $('#edi_msgs').dataTable($.extend(true, {}, dataTablesDefaults, {
-        'sPaginationType': "four_button",
+        'aaSorting': [[1, "desc" ]],
+        'sPaginationType': "four_button"
         }));
 });
 </script>
