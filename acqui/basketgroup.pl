@@ -58,6 +58,7 @@ use C4::Acquisition qw/CloseBasketgroup ReOpenBasketgroup GetOrders GetBasketsBy
 use C4::Bookseller qw/GetBookSellerFromId/;
 use C4::Branch qw/GetBranches/;
 use C4::Members qw/GetMember/;
+use Koha::EDI qw/create_edi_order get_edifact_ean/;
 
 our $input=new CGI;
 
@@ -294,6 +295,17 @@ sub printbasketgrouppdf{
 
 }
 
+sub generate_edifact_orders {
+    my $basketgroupid = shift;
+    my $baskets       = GetBasketsByBasketgroup($basketgroupid);
+    my $ean           = get_edifact_ean();
+
+    for my $basket ( @{$baskets} ) {
+        create_edi_order( { ean => $ean, basketno => $basket->{basketno}, } );
+    }
+    return;
+}
+
 my $op = $input->param('op') || 'display';
 my $booksellerid = $input->param('booksellerid');
 $template->param(booksellerid => $booksellerid);
@@ -483,6 +495,10 @@ if ( $op eq "add" ) {
     $url .= "&closed=1" if ($input->param("closed")); 
     print $input->redirect($url);
     
+} elsif ( $op eq 'ediprint') {
+    my $basketgroupid = $input->param('basketgroupid');
+    generate_edifact_orders( $basketgroupid );
+    exit;
 }else{
     my $basketgroups = &GetBasketgroups($booksellerid);
     my $bookseller = &GetBookSellerFromId($booksellerid);
