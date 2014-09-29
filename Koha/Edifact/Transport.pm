@@ -27,6 +27,7 @@ use Net::SFTP::Foreign;
 use File::Slurp;
 use File::Copy;
 use File::Basename qw( fileparse );
+use File::Spec;
 use Koha::Database;
 
 sub new {
@@ -37,7 +38,7 @@ sub new {
     my $self     = {
         account     => $acct,
         schema      => $schema,
-        working_dir => '/tmp',    #temporary work directory
+        working_dir => File::Spec->tmpdir(),    #temporary work directory
         transfer_date => DateTime->now( time_zone => 'local' ),
     };
 
