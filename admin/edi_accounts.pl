@@ -83,18 +83,19 @@ else {
         # validate & display
         my $id     = $input->param('id');
         my $fields = {
-            description       => $input->param('description'),
-            host              => $input->param('host'),
-            username          => $input->param('username'),
-            password          => $input->param('password'),
-            vendor_id         => $input->param('vendor_id'),
-            directory         => $input->param('directory'),
-            san               => $input->param('san'),
-            transport         => $input->param('transport'),
-            quotes_enabled    => defined $input->param('quotes_enabled'),
-            invoices_enabled  => defined $input->param('invoices_enabled'),
-            orders_enabled  => defined $input->param('orders_enabled'),
-            id_code_qualifier => $input->param('id_code_qualifier'),
+            description        => $input->param('description'),
+            host               => $input->param('host'),
+            username           => $input->param('username'),
+            password           => $input->param('password'),
+            vendor_id          => $input->param('vendor_id'),
+            upload_directory   => $input->param('upload_directory'),
+            download_directory => $input->param('download_directory'),
+            san                => $input->param('san'),
+            transport          => $input->param('transport'),
+            quotes_enabled     => defined $input->param('quotes_enabled'),
+            invoices_enabled   => defined $input->param('invoices_enabled'),
+            orders_enabled     => defined $input->param('orders_enabled'),
+            id_code_qualifier  => $input->param('id_code_qualifier'),
         };
 
         if ($id) {

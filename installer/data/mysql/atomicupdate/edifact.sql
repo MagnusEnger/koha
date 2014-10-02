@@ -53,3 +53,10 @@ CREATE TABLE IF NOT EXISTS edifact_ean (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 insert into permissions (module_bit, code, description) values (11, 'edi_manage', 'Manage EDIFACT transmissions');
+
+ALTER TABLE vendor_edi_accounts CHANGE COLUMN directory download_directory text;
+
+ALTER TABLE vendor_edi_accounts ADD COLUMN upload_directory text after download_directory;
+
+UPDATE vendor_edi_accounts SET upload_directory = download_directory where download_directory IS NOT NULL;
+

@@ -97,8 +97,12 @@
      <input type="text" name="password" id="password" size="20" maxlength="90" value="[% account.password %]" />
   </li>
   <li>
-     <label for="directory">Remote directory: </label>
-     <input type="text" name="directory" id="directory" size="20" maxlength="90" value="[% account.directory %]" />
+     <label for="download_directory">Download directory: </label>
+     <input type="text" name="download_directory" id="download_directory" size="20" maxlength="90" value="[% account.download_directory %]" />
+  </li>
+  <li>
+     <label for="upload_directory">Upload directory: </label>
+     <input type="text" name="upload_directory" id="upload_directory" size="20" maxlength="90" value="[% account.upload_directory %]" />
   </li>
   <li>
      <label for="id_code_qualifier">Qualifier:</label>
@@ -186,7 +190,8 @@
        <th>Remote host</th>
        <th>Username</th>
        <th>Password</th>
-       <th>Remote Directory</th>
+       <th>Download Directory</th>
+       <th>Upload Directory</th>
        <th>id_code_type</th>
        <th>id_code</th>
        <th>Quotes</th>
@@ -206,7 +211,8 @@
       <td>[% account.host %]</td>
       <td>[% account.username %]</td>
       <td>[% IF account.password %]xxxxx[% END %]</td>
-      <td>[% account.directory %]</td>
+      <td>[% account.download_directory %]</td>
+      <td>[% account.upload_directory %]</td>
       <td>[% account.id_code_qualifier %]</td>
       <td>[% account.san %]</td>
       [% IF account.quotes_enabled %]

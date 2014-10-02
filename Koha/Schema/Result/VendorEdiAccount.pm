@@ -64,7 +64,12 @@ __PACKAGE__->table("vendor_edi_accounts");
   is_foreign_key: 1
   is_nullable: 1
 
-=head2 directory
+=head2 download_directory
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 upload_directory
 
   data_type: 'text'
   is_nullable: 1
@@ -130,7 +135,9 @@ __PACKAGE__->add_columns(
   { data_type => "date", datetime_undef_if_invalid => 1, is_nullable => 1 },
   "vendor_id",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
-  "directory",
+  "download_directory",
+  { data_type => "text", is_nullable => 1 },
+  "upload_directory",
   { data_type => "text", is_nullable => 1 },
   "san",
   { data_type => "varchar", is_nullable => 1, size => 20 },
@@ -218,8 +225,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2014-09-02 11:37:47
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:qgoM1bXODrj3ODwq9msaFA
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2014-10-02 17:14:15
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:6Yp5lyH2ld4lrmaM0OeYcw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
