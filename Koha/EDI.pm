@@ -297,11 +297,11 @@ sub quote_item {
         ecost => _discounted_price( $quote->vendor->discount, $item->price ),
         sort1 => q{},
         sort2 => q{},
-        booksellerinvoicenumber => $item->reference,
-        listprice               => $item->price,
-        branchcode              => $branch,
-        budget_id               => $budget->budget_id,
-        notes                   => $order_note,
+        supplierreference => $item->reference,
+        listprice         => $item->price,
+        branchcode        => $branch,
+        budget_id         => $budget->budget_id,
+        notes             => $order_note,
     };
 
     my ( undef, $ordernumber ) = NewOrder($order_hash);
