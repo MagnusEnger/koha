@@ -26,7 +26,7 @@ use Koha::Database;
 use Koha::EDI qw( process_quote process_invoice);
 use Koha::Edifact::Transport;
 
-my $logdir = C4::context->logdir;
+my $logdir = C4::Context->logdir;
 
 Log::Log4perl->easy_init(
     {
