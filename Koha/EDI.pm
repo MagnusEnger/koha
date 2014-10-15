@@ -76,6 +76,9 @@ sub create_edi_order {
 
     my $edifact = Koha::Edifact::Order->new(
         { orderlines => \@orderlines, vendor => $vendor, ean => $ean_obj } );
+    if ( !$edifact ) {
+        return;
+    }
 
     my $order_file = $edifact->encode();
 

@@ -55,6 +55,22 @@ sub new {
         $self->{message_date} = DateTime->now( time_zone => 'local' );
     }
 
+    # validate that its worth proceeding
+    if ( !$self->{orderlines} ) {
+        carp 'No orderlines passed to create order';
+        return;
+    }
+    if ( !$self->{recipient} ) {
+        carp
+"No vendor passed to order creation: basket = $self->{basket}->basketno()";
+        return;
+    }
+    if ( !$self->{sender} ) {
+        carp
+"No sender ean passed to order creation: basket = $self->{basket}->basketno()";
+        return;
+    }
+
     # do this once per object not once per orderline
     my $database = Koha::Database->new();
     $self->{schema} = $database->schema;
