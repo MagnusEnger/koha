@@ -289,8 +289,13 @@ sub quote_item {
 
     my $order_note = $item->{free_text};
     $order_note ||= q{};
+    my $basketno = $quote->basketno();
+    if ( !$basketno ) {
+        $logger->error('Skipping order creation no basketno');
+        return;
+    }
     my $order_hash = {
-        basketno         => $quote->basketno,
+        basketno         => $basketno,
         uncertainprice   => 0,
         biblionumber     => $bib->{biblionumber},
         title            => $item->title,
@@ -334,6 +339,7 @@ sub quote_item {
                 };
                 ( undef, undef, $itemnumber ) =
                   AddItem( $new_item, $bib->{biblionumber} );
+                $logger->trace("New item $itemnumber added");
                 NewOrderItem( $itemnumber, $ordernumber );
                 ++$occurence;
             }
