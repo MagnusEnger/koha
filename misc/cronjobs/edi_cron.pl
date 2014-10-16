@@ -80,7 +80,8 @@ my @downloaded_quotes = $schema->resultset('EdifactMessage')->search(
 )->all;
 
 foreach my $quote_file (@downloaded_quotes) {
-    $logger->trace("Processing quote $quote_file->filename");
+    my $filename = $quote_file->filename;
+    $logger->trace("Processing quote $filename");
     process_quote($quote_file);
 }
 
@@ -94,7 +95,8 @@ my @downloaded_invoices = $schema->resultset('EdifactMessage')->search(
 )->all;
 
 foreach my $invoice (@downloaded_invoices) {
-    $logger->trace("Processing invoice $invoice->filename");
+    my $filename = $invoice->filename();
+    $logger->trace("Processing invoice $filename");
     process_invoice($invoice);
 }
 
