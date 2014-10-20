@@ -213,7 +213,7 @@ sub process_quote {
             my $refnum = $msg->message_refno;
 
             for my $item ( @{$items} ) {
-                if ( !quote_item( $item, $quote ) ) {
+                if ( !quote_item( $item, $quote, $basketno ) ) {
                     ++$process_errors;
                 }
             }
@@ -231,7 +231,7 @@ sub process_quote {
 }
 
 sub quote_item {
-    my ( $item, $quote ) = @_;
+    my ( $item, $quote, $basketno ) = @_;
 
     # create biblio record
     my $logger   = Log::Log4perl->get_logger();
@@ -289,7 +289,6 @@ sub quote_item {
 
     my $order_note = $item->{free_text};
     $order_note ||= q{};
-    my $basketno = $quote->basketno();
     if ( !$basketno ) {
         $logger->error('Skipping order creation no basketno');
         return;
@@ -319,6 +318,7 @@ sub quote_item {
         my $itemnumber;
         ( $bib->{biblionumber}, $bib->{biblioitemnumber}, $itemnumber ) =
           AddItemFromMarc( $bib_record, $bib->{biblionumber} );
+        $logger->trace("Added item:$itemnumber");
         NewOrderItem( $itemnumber, $ordernumber );
         if ( $item->quantity > 1 ) {
             my $occurence = 1;
