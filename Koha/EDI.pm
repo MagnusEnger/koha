@@ -23,7 +23,6 @@ use base qw(Exporter);
 use Carp;
 use English qw{ -no_match_vars };
 use Business::ISBN;
-use Business::Edifact::Interchange;
 use C4::Context;
 use Koha::Database;
 use C4::Acquisition
@@ -273,6 +272,11 @@ sub quote_item {
     my $branch = $item->girfield('branch');
     $bib_hash->{'items.holdingbranch'} = $bib_hash->{'items.homebranch'} =
       $branch;
+    for my $key ( keys %{$bib_hash} ) {
+        if ( !defined $bib_hash->{$key} ) {
+            delete $bib_hash->{$key};
+        }
+    }
     my $bib_record = TransformKohaToMarc($bib_hash);
 
     $logger->trace("Checking db for matches with $item->{item_number_id}");
