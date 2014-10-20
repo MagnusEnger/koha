@@ -3,13 +3,10 @@ use strict;
 use warnings;
 use FindBin qw( $Bin );
 
-use Test::More tests => 7;
+use Test::More tests => 6;
 
 BEGIN { use_ok('Koha::Edifact::Order') }
 
-my $order = Koha::Edifact::Order->new();
-
-isa_ok( $order, 'Koha::Edifact::Order' );
 
 # The following tests are for internal methods but they could
 # error spectacularly so yest
