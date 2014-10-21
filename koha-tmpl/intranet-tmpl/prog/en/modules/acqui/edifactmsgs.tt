@@ -69,7 +69,7 @@ $(document).ready(function() {
 </td>
 </td>
 <td>[% msg.filename %]</td>
-<td><a class="popup" target="_blank" title="View Message" href="/cgi-bin/koha/acqui/edimsg.pl?id=[% msg.id %]"</a>View Message</td>
+<td><a class="popup" target="_blank" title="View Message" href="/cgi-bin/koha/acqui/edimsg.pl?op=do_search&id=[% msg.id %]"</a>View Message</td>
 </tr>
 [% END %]
 
