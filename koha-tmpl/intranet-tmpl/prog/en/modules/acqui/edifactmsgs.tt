@@ -54,7 +54,7 @@ $(document).ready(function() {
 [% msg.vendor.name %]
 </td>
 <td>
-[% IF msg.message_type == 'QUOTE' || msg.message_type == 'ORDERS' %]
+[% IF msg.message_type == 'QUOTE' || msg.message_type == 'ORDERS' || msg.message_type = 'ORDER' %]
     [% IF msg.basketno %]
     <a href="/cgi-bin/koha/acqui/basket.pl?basketno=[% msg.basketno.basketno %]">
     Basket: [% msg.basketno.basketno %]
