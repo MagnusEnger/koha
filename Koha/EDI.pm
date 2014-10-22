@@ -314,6 +314,10 @@ sub quote_item {
         budget_id         => $budget->budget_id,
         notes             => $order_note,
     };
+    if ( $item->girfield('servicing_instruction') ) {
+        $order_hash->{order_vendornote} =
+          $item->girfield('servicing_instruction');
+    }
 
     my ( undef, $ordernumber ) = NewOrder($order_hash);
     $logger->trace("Order created :$ordernumber");

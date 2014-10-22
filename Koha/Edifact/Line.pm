@@ -404,6 +404,7 @@ sub extract_gir {
         LSM => 'shelfmark',
         LSQ => 'collection_code',
         LST => 'stock_category',
+        LVT => 'servicing_instruction',
     );
 
     my $set_qualifier = $s->elem( 0, 0 );    # copy number
