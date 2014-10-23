@@ -318,6 +318,9 @@ sub quote_item {
         $order_hash->{order_vendornote} =
           $item->girfield('servicing_instruction');
     }
+    if ( $item->internal_notes() ) {
+        $order_hash->{order_internalnote} = $item->internal_notes;
+    }
 
     my ( undef, $ordernumber ) = NewOrder($order_hash);
     $logger->trace("Order created :$ordernumber");

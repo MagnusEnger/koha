@@ -73,16 +73,24 @@ sub _parse_lines {
         }
         elsif ( $s->tag eq 'FTX' ) {
 
+            my $type = $s->elem(1);
+            if ( $type eq 'LNO' ) {    # Ingrams Oasis Internal Notes field
+                $type = 'internal_notes';
+            }
+            else {
+                $type = 'free_text';
+            }
+
             my $ftx = $s->elem(3);
             if ( ref $ftx eq 'ARRAY' ) {   # it comes in 70 character components
                 $ftx = join ' ', @{$ftx};
             }
-            if ( exists $d->{free_text} ) {    # we can only catenate repeats
-                $d->{free_text} .= q{ };
-                $d->{free_text} .= $ftx;
+            if ( exists $d->{$type} ) {    # we can only catenate repeats
+                $d->{$type} .= q{ };
+                $d->{$type} .= $ftx;
             }
             else {
-                $d->{free_text} = $ftx;
+                $d->{$type} = $ftx;
             }
         }
         elsif ( $s->tag eq 'MOA' ) {
@@ -333,6 +341,11 @@ sub ordernumber {
 sub free_text {
     my $self = shift;
     return $self->{free_text};
+}
+
+sub internal_notes {
+    my $self = shift;
+    return $self->{internal_notes};
 }
 
 # return item_desription_fields
