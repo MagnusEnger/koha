@@ -125,10 +125,10 @@ sub sftp_download {
             'Unable to connect to remote host: ' . $sftp->error );
     }
     $sftp->setcwd( $self->{account}->download_directory )
-      or $self->_abort_download( $sftp,
+      or return $self->_abort_download( $sftp,
         "Cannot change remote dir : $sftp->error" );
     my $file_list = $sftp->ls()
-      or $self->_abort_download( $sftp,
+      or return $self->_abort_download( $sftp,
         "cannot get file list from server: $sftp->error" );
     foreach my $filename ( @{$file_list} ) {
 
@@ -187,12 +187,13 @@ sub ftp_download {
       or return $self->_abort_download( undef,
         "Cannot connect to $self->{account}->host: $EVAL_ERROR" );
     $ftp->login( $self->{account}->username, $self->{account}->password )
-      or $self->_abort_download( $ftp, "Cannot login: $ftp->message()" );
+      or return $self->_abort_download( $ftp, "Cannot login: $ftp->message()" );
     $ftp->cwd( $self->{account}->download_directory )
-      or $self->_abort_download( $ftp,
+      or return $self->_abort_download( $ftp,
         "Cannot change remote dir : $ftp->message()" );
     my $file_list = $ftp->ls()
-      or $self->_abort_download( $ftp, 'cannot get file list from server' );
+      or
+      return $self->_abort_download( $ftp, 'cannot get file list from server' );
 
     foreach my $filename ( @{$file_list} ) {
 
@@ -227,9 +228,9 @@ sub ftp_upload {
       or return $self->_abort_download( undef,
         "Cannot connect to $self->{account}->host: $EVAL_ERROR" );
     $ftp->login( $self->{account}->username, $self->{account}->password )
-      or $self->_abort_download( $ftp, "Cannot login: $ftp->message()" );
+      or return $self->_abort_download( $ftp, "Cannot login: $ftp->message()" );
     $ftp->cwd( $self->{account}->upload_directory )
-      or $self->_abort_download( $ftp,
+      or return $self->_abort_download( $ftp,
         "Cannot change remote dir : $ftp->message()" );
     foreach my $m (@messages) {
         my $content = $m->raw_msg;
