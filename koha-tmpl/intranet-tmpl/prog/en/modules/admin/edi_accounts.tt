@@ -81,8 +81,21 @@
      <input type="text" name="description" id="description" size="20" maxlength="90" value="[% account.description %]" />
   </li>
   <li>
+     [% transport_types = [
+                 'FTP', 'SFTP'
+            ]
+     %]
      <label for="transport">Transport: </label>
-     <input type="text" name="transport" id="transport" size="10" maxlength="10" value="[% account.transport %]" />
+     <select name="transport" title="valid types of transport are FTP and SFTP"
+      id="transport">
+      [% FOREACH transport_type IN transport_types %]
+           [% IF transport_type == account.transport %]
+              <option value="[% transport_type %]" selected="selected">[% transport_type %]</option>
+           [% ELSE %]
+              <option value="[% transport_type %]">[% transport_type %]</option>
+           [% END %]
+       [% END %]
+     </select>
   </li>
   <li>
      <label for="host">Remote host: </label>
@@ -98,11 +111,15 @@
   </li>
   <li>
      <label for="download_directory">Download directory: </label>
-     <input type="text" name="download_directory" id="download_directory" size="20" maxlength="90" value="[% account.download_directory %]" />
+     <input type="text" name="download_directory" id="download_directory" size="20" maxlength="90"
+      title="The download directory specifies the directory on the ftpsite we download quotes and invoices from"
+      value="[% account.download_directory %]" />
   </li>
   <li>
      <label for="upload_directory">Upload directory: </label>
-     <input type="text" name="upload_directory" id="upload_directory" size="20" maxlength="90" value="[% account.upload_directory %]" />
+     <input type="text" name="upload_directory" id="upload_directory" size="20" maxlength="90" 
+      title="The upload directory specifies the directory on the ftp site we upload orders to"
+      value="[% account.upload_directory %]" />
   </li>
   <li>
      <label for="id_code_qualifier">Qualifier:</label>
