@@ -709,6 +709,21 @@ our $PERL_DEPS = {
         'required' => '1',
         'min_ver'  => '0.91',
     },
+    'LWP::Protocol::https' => {
+        'usage'    => 'OverDrive integration',
+        'required' => '0',
+        'min_ver'  => '5.836',
+    },
+    'Net::SFTP::Foreign' => {
+        'usage'    => 'Edifact',
+        'required' => '0',
+        'min_ver'  => '1.73',
+    },
+    'Log::Log4perl' => {
+        'usage'    => 'Edifact',
+        'required' => '0',
+        'min_ver'  => '1.29',
+    },
 };
 
 1;
