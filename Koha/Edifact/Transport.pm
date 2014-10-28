@@ -29,6 +29,7 @@ use File::Copy;
 use File::Basename qw( fileparse );
 use File::Spec;
 use Koha::Database;
+use Encode qw( from_to );
 
 sub new {
     my ( $class, $account_id ) = @_;
@@ -155,16 +156,14 @@ sub ingest {
     my ( $self, $msg_hash, @downloaded_files ) = @_;
     foreach my $f (@downloaded_files) {
         $msg_hash->{filename} = $f;
-        my @lines = read_file("$self->{working_dir}/$f");
-        if ( !defined $lines[0] ) {
+        my $file_content =
+          read_file( "$self->{working_dir}/$f", binmode => ':raw' );
+        if ( !defined $file_content ) {
             carp "Unable to read download file $f";
             next;
         }
-        for (@lines) {
-            chomp;
-            s/\r$//;
-        }
-        $msg_hash->{raw_msg} = join q{}, @lines;
+        from_to( $file_content, 'iso-8859-1', 'utf8' );
+        $msg_hash->{raw_msg} = $file_content;
         $self->{schema}->resultset('EdifactMessage')->create($msg_hash);
     }
     return;

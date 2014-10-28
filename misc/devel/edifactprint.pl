@@ -4,13 +4,16 @@ use strict;
 use warnings;
 use feature qw( say );
 use File::Slurp;
+use Encode qw( from_to);
+
 # Debug and development tool
 # print passed edifact files one segment per line
 
 my @files = @ARGV;
 
 foreach my $filename (@files) {
-    my $edi_transmission = read_file($filename);
+    my $edi_transmission = read_file( $filename, binmode => ':raw' );
+    from_to( $edi_transmission, 'iso-8859-1', 'utf8' );
 
     # can we just remove \n \r check doc for allowable chars
 

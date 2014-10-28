@@ -205,11 +205,13 @@ sub segmentize {
     my $raw = shift;
 
     # In practice edifact uses latin-1 but check
-    my $char_set = 'iso-8859-1';
-    if ( $raw =~ m/^UNB[+]UNO(.)/ ) {
-        $char_set = msgcharset($1);
-    }
-    from_to( $raw, $char_set, 'utf8' );
+    # Transport now converts to utf-8 on ingest
+    # Do not convert here
+    #my $char_set = 'iso-8859-1';
+    #if ( $raw =~ m/^UNB[+]UNO(.)/ ) {
+    #    $char_set = msgcharset($1);
+    #}
+    #from_to( $raw, $char_set, 'utf8' );
 
     my $re = qr{
 (?>         # dont backtrack into this group
