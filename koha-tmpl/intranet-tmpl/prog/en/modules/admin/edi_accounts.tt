@@ -112,13 +112,13 @@
   <li>
      <label for="download_directory">Download directory: </label>
      <input type="text" name="download_directory" id="download_directory" size="20" maxlength="90"
-      title="The download directory specifies the directory on the ftpsite we download quotes and invoices from"
+      title="The download directory specifies the directory on the ftpsite from which we download quotes and invoices"
       value="[% account.download_directory %]" />
   </li>
   <li>
      <label for="upload_directory">Upload directory: </label>
      <input type="text" name="upload_directory" id="upload_directory" size="20" maxlength="90" 
-      title="The upload directory specifies the directory on the ftp site we upload orders to"
+      title="The upload directory specifies the directory on the ftp site to which we upload orders"
       value="[% account.upload_directory %]" />
   </li>
   <li>
