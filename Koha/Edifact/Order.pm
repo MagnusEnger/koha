@@ -353,17 +353,25 @@ sub order_line {
 
     # DTM Optional date constraints on delivery
     #     we dont currently support this in koha
-    # GIR copy-related data special apps special processing goes there
-    #if ( $orderline->{special_processing} ) {
-    #    $self->add_seg( gir_segments( $orderline->{special_processing} ) );
-    #}
-    my @linked_itemnumbers = $orderline->aqorders_items;
-
+    # GIR copy-related data
     my @items;
-    foreach my $item (@linked_itemnumbers) {
-        my $i_obj = $schema->resultset('Item')->find( $item->itemnumber );
-        if ( defined $i_obj ) {
-            push @items, $i_obj;
+    if ( C4::Context->preference('AcqCreateItem') eq 'ordering' ) {
+        my @linked_itemnumbers = $orderline->aqorders_items;
+
+        foreach my $item (@linked_itemnumbers) {
+            my $i_obj = $schema->resultset('Item')->find( $item->itemnumber );
+            if ( defined $i_obj ) {
+                push @items, $i_obj;
+            }
+        }
+    }
+    else {
+        for ( 0 .. $orderline->quantity ) {
+            push @items,
+              {
+                itemtype  => $biblioitem->itemtype,
+                shelfmark => $biblioitem->cn_class,
+              };
         }
     }
     my $budget = GetBudget( $orderline->budget_id );
@@ -471,10 +479,20 @@ sub gir_segments {
     my $sequence_no = 1;
     foreach my $item (@onorderitems) {
         my $seg = sprintf 'GIR+%03d', $sequence_no;
-        $seg .= add_gir_identity_number( 'LLO', $item->homebranch->branchcode );
         $seg .= add_gir_identity_number( 'LFN', $budget_code );
-        $seg .= add_gir_identity_number( 'LST', $item->itype );
-        $seg .= add_gir_identity_number( 'LSQ', $item->location );
+        if ( C4::Context->preference('AcqCreateItem') eq 'ordering' ) {
+            $seg .=
+              add_gir_identity_number( 'LLO', $item->homebranch->branchcode );
+            $seg .= add_gir_identity_number( 'LST', $item->itype );
+            $seg .= add_gir_identity_number( 'LSQ', $item->location );
+            $seg .= add_gir_identity_number( 'LSM', $item->itemcallnumber );
+
+            # itemcallnumber -> shelfmark
+        }
+        else {
+            $seg .= add_gir_identity_number( 'LST', $item->{itemtype} );
+            $seg .= add_gir_identity_number( 'LSM', $item->{shelfmark} );
+        }
         $sequence_no++;
         push @segments, $seg;
     }
