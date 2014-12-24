@@ -9585,13 +9585,20 @@ if ( CheckVersion($DBversion) ) {
     SetVersion ($DBversion);
 }
 
-$DBversion = "3.18.01.XXX";
+$DBversion = "3.18.02.000";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (3.18.2 release)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.18.02.XXX";
 if ( CheckVersion($DBversion) ) {
     $dbh->do("INSERT INTO `systempreferences` (variable,value,explanation,options,type) VALUES('SessionRestrictionByIP','1','Check for Change in  Remote IP address for Session Security. Disable when remote ip address changes frequently.','','YesNo')");
     print "Upgrade to $DBversion done (Bug 5511 - SessionRestrictionByIP)";
     SetVersion ($DBversion);
+}
 
-$DBversion = "3.18.01.XXX";
+$DBversion = "3.18.02.XXX";
 if( CheckVersion($DBversion) ){
 
     my $sql=<<'VEA_END';
@@ -9668,12 +9675,6 @@ EAN_END
     $dbh->do("INSERT INTO `systempreferences` (variable,value,explanation,,type) VALUES('EDIInvoicesShippingBudget','The budget code used to allocate shippoing charges when processing EDI Invoice messages','free')");
 
     print "Upgrade to $DBversion done (Bug 7736 DB Changes for Edifact Processing ( Quote, Order and Invoice))\n";
-    SetVersion($DBversion);
-}
-
-$DBversion = "3.18.02.000";
-if ( CheckVersion($DBversion) ) {
-    print "Upgrade to $DBversion done (3.18.2 release)\n";
     SetVersion($DBversion);
 }
 
