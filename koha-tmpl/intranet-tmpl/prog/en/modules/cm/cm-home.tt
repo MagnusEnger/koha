@@ -1,0 +1,26 @@
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Koha &rsaquo; Cash Management</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body id="cm-home" class="cm">
+[% INCLUDE 'header.inc' %]
+
+
+<div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; Cash Management</div>
+
+<div id="doc" class="yui-t7">
+
+  <div id="bd">
+    <div class="yui-g">
+
+      <h1>Cash Management</h1>
+
+      <div class="yui-u">
+
+         <p>Work in Progress</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+[% INCLUDE 'intranet-bottom.inc' %]

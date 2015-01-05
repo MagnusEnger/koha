@@ -322,6 +322,21 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 cashes_till
+
+Type: has_many
+
+Related object: L<Koha::Schema::Result::CashTill>
+
+=cut
+
+__PACKAGE__->has_many(
+  "cashes_till",
+  "Koha::Schema::Result::CashTill",
+  { "foreign.branch" => "self.branchcode" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 categories_branches
 
 Type: has_many
@@ -513,8 +528,8 @@ Composing rels: L</branchrelations> -> categorycode
 __PACKAGE__->many_to_many("categorycodes", "branchrelations", "categorycode");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07039 @ 2014-11-06 15:26:36
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:CGNPB/MkGLOihDThj43/4A
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2014-12-18 15:56:17
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:9XuGvbPjdBTYlWRmPrdOTQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

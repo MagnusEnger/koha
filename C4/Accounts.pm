@@ -25,6 +25,7 @@ use C4::Stats;
 use C4::Members;
 use C4::Circulation qw(ReturnLostItem);
 use C4::Log qw(logaction);
+use Koha::Till;
 
 use Data::Dumper qw(Dumper);
 
@@ -165,6 +166,12 @@ sub recordpayment {
                 borrowernumber => $borrowernumber,
                 accountno => $nextaccntno }
     );
+    if ( C4::Context->preference('CashManagement')) {
+        my $tcode;
+        my $payment_type;
+        my $till = Koha::Till->new();
+        $till->payin($data, $tcode, $payment_type);
+    }
 
     if ( C4::Context->preference("FinesLog") ) {
         $accdata->{'amountoutstanding_new'} = $newamtos;
@@ -273,6 +280,13 @@ sub makepayment {
             accountlines_paid => [$data->{'accountlines_id'}],
             manager_id        => $manager_id,
         }));
+    }
+
+    if ( C4::Context->preference('CashManagement')) {
+        my $tcode;
+        my $payment_type;
+        my $till = Koha::Till->new();
+        $till->payin($amount, $tcode, $payment_type);
     }
 
     UpdateStats({
@@ -666,6 +680,13 @@ sub recordpayment_selectaccts {
                 accountno => $nextaccntno}
     );
 
+    if ( C4::Context->preference('CashManagement')) {
+        my $tcode;
+        my $payment_type;
+        my $till = Koha::Till->new();
+        $till->payin($amount, $tcode, $payment_type);
+    }
+
     if ( C4::Context->preference("FinesLog") ) {
         logaction("FINES", 'CREATE',$borrowernumber,Dumper({
             action            => 'create_payment',
@@ -724,6 +745,13 @@ sub makepartialpayment {
 
     $dbh->do(  $insert, undef, $borrowernumber, $nextaccntno, $amount,
         '', 'Pay', $data->{'itemnumber'}, $manager_id, $payment_note);
+
+    if ( C4::Context->preference('CashManagement')) {
+        my $tcode;
+        my $payment_type;
+        my $till = Koha::Till->new();
+        $till->payin($amount, $tcode, $payment_type);
+    }
 
     UpdateStats({
                 branch => $user,
