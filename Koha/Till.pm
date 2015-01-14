@@ -43,6 +43,7 @@ sub payin {
 
 sub payout {
     my ( $self, $amt, $code ) = @_;
+    $amt *= -1;    # payouts are negative
     my $new_transaction =
       $self->{schema}->resultset('CashTransaction')->create(
         {
