@@ -269,7 +269,11 @@ RECORD: while (  ) {
         my $server = ( $authorities ? 'authorityserver' : 'biblioserver' );
         $debug && warn $query;
         my ( $error, $results, $totalhits ) = C4::Search::SimpleSearch( $query, 0, 3, [$server] );
-        die "unable to search the database for duplicates : $error" if ( defined $error );
+        # changed to warn so able to continue with one broken record
+        if ( defined $error ) {
+            warn "unable to search the database for duplicates : $error";
+            next;
+        }
         $debug && warn "$query $server : $totalhits";
         if ( $results && scalar(@$results) == 1 ) {
             my $marcrecord = C4::Search::new_record_from_zebra( $server, $results->[0] );
@@ -398,7 +402,7 @@ RECORD: while (  ) {
             if ($biblionumber) {
                 eval{$biblioitemnumber=GetBiblioData($biblionumber)->{biblioitemnumber};};
                 if ($update) {
-                    eval { ( $biblionumber, $biblioitemnumber ) = ModBiblio( $record, $biblionumber, GetFrameworkcode($biblionumber) ) };
+                    eval { ( $biblionumber, $biblioitemnumber ) = ModBiblio( $record, $biblionumber, GetFrameworkCode($biblionumber) ) };
                     if ($@) {
                         warn "ERROR: Edit biblio $biblionumber failed: $@\n";
                         printlog( { id => $id || $originalid || $biblionumber, op => "update", status => "ERROR" } ) if ($logfile);
