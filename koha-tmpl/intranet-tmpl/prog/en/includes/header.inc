@@ -26,6 +26,11 @@
                     [% IF ( UseCourseReserves ) %]
                     <li><a href="/cgi-bin/koha/course_reserves/course-reserves.pl">Course reserves</a></li>
                     [% END %]
+		    [% IF CAN_user_cashmanage %]
+		    <li>
+		      <a href="/cgi-bin/koha/cm/till.pl">Cash management</a>
+		    </li>
+		    [% END %]
                     [% IF ( CAN_user_reports ) %]
                     <li><a href="/cgi-bin/koha/reports/reports-home.pl">Reports</a></li>
                     [% END %]
