@@ -1,10 +1,12 @@
 package Koha::Service::Till;
 
 use Modern::Perl;
+use JSON;
 
 use base 'Koha::Service';
 
 use Koha::Database;
+use Data::Dumper;
 
 sub new {
     my ( $class ) = @_;
@@ -31,7 +33,6 @@ sub create {
 
 sub read {
     my ( $self, $tillid ) = @_;
-    warn "hit get till resource";
 
     my $response = {};
     my $schema = Koha::Database->new()->schema();
@@ -48,10 +49,23 @@ sub read {
 }
 
 sub update {
-    my ( $self ) = @_;
+    my ( $self, $tillid ) = @_;
 
-    my $input = $self->query->param('POSTDATA');
-    my $result = {};
+    my $response = {};
+    my $input = from_json($self->query->param('PUTDATA'));
+    my $schema = Koha::Database->new()->schema();
+    my $till = $schema->resultset('CashTill')->find( { tillid => $tillid } );
+
+    unless ( $till ) {
+        $self->output( {}, { status => 404, type => 'json' } );
+        return;
+    }
+    $self->output( $input, { status => '200 OK', type => 'json' } );
+
+#    $till->update( { $column => $value } )->discard_changes();
+#    $self->output( $response, { status => '200 OK', type => 'json' } );
+
+    return;
 }
 
 sub delete {

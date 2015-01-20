@@ -7,49 +7,66 @@
 [% INCLUDE 'datatables.inc' %]
 <script type="text/javascript"src="[% interface %]/lib/jquery/plugins/jquery.jeditable.mini.js"></script>
 <script type="text/javascript">
-    //<![CDATA[
-    $(document).ready(function() {
-            $('#tills_editor').dataTable(
-                $.extend(true, {}, dataTablesDefaults, {
-                   "ajax": "/cgi-bin/koha/svc/tills",
-                   "columnDefs": [
-                        {
-                           "targets": 0,
-                           "orderable": true,
-                           "searchable": false,
-                           "data":"tillid"
-                        },
-                        {
-                           "targets": 1,
-                           "orderable": true,
-                           "searchable": true,
-                           "data":"description"
-                        },
-                        {
-                           "targets": 2,
-                           "orderable": true,
-                           "searchable": true,
-                           "data":"branch"
-                        }
-                    ],
-                        "order": [ 1, 'asc' ],
-                   "drawCallback": function( settings ) {
-                        // add jEditable handlers
-                        $('#tills_editor tbody tr td[id!="no_edit"]').editable(
-                            function(value, settings) {
-                                alert(JSON.stringify(this, null, 4));
-                                alert(value);
-                                alert(JSON.stringify(settings, null, 4));
-                                //'/cgi-bin/koha/svc/tills'
-                                return(value);
-                                }, {
-                            indicator : 'Saving...',
-                            tooltip   : 'Click to edit...',
-                            } );
+//<![CDATA[
+$(document).ready(function() {
+    tillTable = $('#tills_editor').dataTable(
+        $.extend(true, {}, dataTablesDefaults, {
+            "ajax": "/cgi-bin/koha/svc/tills",
+            "columnDefs": [{
+                "targets": 0,
+                "orderable": true,
+                "searchable": false,
+                "data": "tillid"
+            }, {
+                "targets": 1,
+                "orderable": true,
+                "searchable": true,
+                "data": "description"
+            }, {
+                "targets": 2,
+                "orderable": true,
+                "searchable": true,
+                "data": "branch"
+            }],
+            "order": [1, 'asc'],
+            "drawCallback": function(settings) {
+                var api = this.api();
+                // add jEditable handlers
+                $('#tills_editor tbody tr td[id!="no_edit"]').editable(
+                    function(value, settings) {
+                        var columnSrc = api.column(tillTable.fnGetPosition(this)[1]).dataSrc();
+                        var tillid = api.row(tillTable.fnGetPosition(this)[0]).data().tillid;
+                        var newData = {};
+                        newData[columnSrc] = value;
+                        console.log(newData);
+                        $.ajax({
+                            type: "PUT",
+                            url: '/cgi-bin/koha/svc/tills/' + tillid,
+                            contentType: 'application/json',
+                            data: JSON.stringify(newData),
+                            dataType: 'json',
+                            success: function(data) {
+                                console.log('success: ' + JSON.stringify(data));
+                                result = value;
                             },
-                } ) )
+                            error: function(data) {
+                                console.log('error: ' + JSON.stringify(data));
+                                result = (this.revert);
+                            }
+                        });
+                        return value;
+                    }, {
+                        indicator : "<img src='/images/spinner.gif'>",
+                        tooltip: 'Click to edit...',
+                        callback: function(value, settings) {
+                            $('<img class="pull-right" src="[% interface %]/lib/jquery/plugins/themes/classic/throbber.gif">').appendTo(this);
+                        },
+                    }
+                );
+            },
+        }))
 
-       } );
+});
 //]]>
 </script>
 <style type="text/css">
