@@ -26,6 +26,7 @@ use C4::Context;
 use Koha::Database;
 use C4::Members qw( GetMember );
 use C4::Branch qw( GetBranchName );
+use List::Util qw(sum);
 
 my $q = CGI->new();
 my ( $template, $loggedinuser, $cookie, $user_flags ) = get_template_and_user(
@@ -53,12 +54,17 @@ my @transactions = $schema->resultset('CashTransaction')->search(
 )->all();
 
 
+my $total_paid_in = sum grep { $_->amt if $_->amt > 0} @transactions;
+my $total_paid_out = sum grep { $_->amt if $_->amt < 0} @transactions;
+
 
 
 $template->param(
     branchname => $branchname,
     till       => $till,
     transactions => \@transactions,
+    total_in => $total_paid_in,
+    total_out => $total_paid_out,
 );
 
 output_html_with_http_headers( $q, $cookie, $template->output );
