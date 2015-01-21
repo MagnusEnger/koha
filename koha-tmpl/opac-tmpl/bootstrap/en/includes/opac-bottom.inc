@@ -191,6 +191,16 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
     </script>
 [% END %]
 
+[% IF ( OverDriveEnabled ) %]
+    <script type="text/javascript">
+    //<![CDATA[
+    var SEARCH_OVERDRIVE = _("Searching OverDrive...");
+    var OVERDRIVE_ERROR = _("Error searching OverDrive collection");
+    var OVERDRIVE_COLLECTION = _(" in OverDrive Collection");
+    //]]>
+    </script>
+[% END %]
+
 [% IF ( BakerTaylorEnabled ) %]
     <script type="text/javascript" src="[% interface %]/[% theme %]/js/bakertaylorimages.js"></script>
     <script type="text/javascript">
