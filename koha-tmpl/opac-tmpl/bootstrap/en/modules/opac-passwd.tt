@@ -5,7 +5,6 @@
 </head>
 [% INCLUDE 'bodytag.inc' bodyid='opac-passwd' %]
 [% INCLUDE 'masthead.inc' %]
-
 <div class="main">
     <ul class="breadcrumb">
         <li><a href="/cgi-bin/koha/opac-main.pl">Home</a> <span class="divider">&rsaquo;</span></li>
@@ -40,12 +39,24 @@
                             </p>
                         </div>
                     [% END # /IF Error_messages %]
-
                     [% IF ( OpacPasswordChange ) %]
                         [% IF ( Ask_data ) %]
                             <form action="/cgi-bin/koha/opac-passwd.pl" name="mainform" id="mainform" method="post">
                                 <fieldset>
-                                    [% UNLESS ( ShortPass ) %]<div class="alert alert-info">Your password must be at least [% minpasslen %] characters long.</div>[% END %]
+                                    [% UNLESS ( ShortPass ) %]
+                                    <div class="alert alert-info">
+                                        <p>Your password must be at least [% minpasslen %] characters long.</p>
+                                        <p>
+                                            It is your responsability to set a strong password, and the below meter will give you an estimate
+                                            of your chosen passwords strength.</br>
+                                            Hint: Passphrases are inherantly stronger than passwords, and
+                                            come with the added bonus that they are often substantially easier to remember too.
+                                        </p>
+                                        <div class="progress">
+                                            <div id="complexity-bar" class="bar bar-danger" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    [% END %]
                                     <label for="Oldkey">Current password:</label> <input type="password" id="Oldkey" size="25"  name="Oldkey" />
                                     <label for="Newkey">New password:</label> <input type="password" id="Newkey"  size="25"  name="Newkey" />
                                     <label for="Confirm">Re-type new password:</label> <input type="password"  id="Confirm" size="25" name="Confirm" />
@@ -76,4 +87,22 @@
 
 
 [% INCLUDE 'opac-bottom.inc' %]
-[% BLOCK jsinclude %][% END %]
+[% BLOCK jsinclude %]
+[% INCLUDE 'complexify.inc' %]
+<script type="text/javascript">
+//<![CDATA[
+$(document).ready(function() {
+    $("#Newkey").complexify({}, function(valid, complexity){
+      var progressBar = $('#complexity-bar');
+
+      progressBar.toggleClass('bar-success', valid);
+      progressBar.toggleClass('bar-danger', !valid);
+      progressBar.css({'width': complexity + '%'});
+
+      $('#complexify #complexity').text(Math.round(complexity) + '%');
+    });
+});
+//]]>
+</script>
+[% END %]
+
