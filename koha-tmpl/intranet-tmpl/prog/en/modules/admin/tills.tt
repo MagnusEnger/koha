@@ -47,7 +47,7 @@ $(document).ready(function() {
                             dataType: 'json',
                             success: function(data) {
                                 console.log('success: ' + JSON.stringify(data));
-                                result = value;
+                                $('#feedback').remove();
                             },
                             error: function(data) {
                                 console.log('error: ' + JSON.stringify(data));
@@ -56,10 +56,9 @@ $(document).ready(function() {
                         });
                         return value;
                     }, {
-                        indicator : "<img src='/images/spinner.gif'>",
                         tooltip: 'Click to edit...',
                         callback: function(value, settings) {
-                            $('<img class="pull-right" src="[% interface %]/lib/jquery/plugins/themes/classic/throbber.gif">').appendTo(this);
+                            $('<img id="feedback" class="pull-right" src="[% interface %]/lib/jquery/plugins/themes/classic/throbber.gif">').appendTo(this);
                         },
                     }
                 );

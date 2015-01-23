@@ -57,13 +57,12 @@ sub update {
     my $till = $schema->resultset('CashTill')->find( { tillid => $tillid } );
 
     unless ( $till ) {
-        $self->output( {}, { status => 404, type => 'json' } );
+        $self->output( {}, { status => '404', type => 'json' } );
         return;
     }
-    $self->output( $input, { status => '200 OK', type => 'json' } );
 
-#    $till->update( { $column => $value } )->discard_changes();
-#    $self->output( $response, { status => '200 OK', type => 'json' } );
+    $till->update( $input )->discard_changes();
+    $self->output( { $till->get_columns }, { status => '200 OK', type => 'json' } );
 
     return;
 }
