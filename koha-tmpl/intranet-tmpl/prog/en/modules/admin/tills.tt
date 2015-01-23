@@ -9,7 +9,7 @@
 <script type="text/javascript">
 //<![CDATA[
 $(document).ready(function() {
-    tillTable = $('#tills_editor').dataTable(
+    var tillTable = $('#tills_editor').dataTable(
         $.extend(true, {}, dataTablesDefaults, {
             "ajax": "/cgi-bin/koha/svc/tills",
             "columnDefs": [{
@@ -99,8 +99,43 @@ $(document).ready(function() {
                 );
 
             },
-        }))
+        })
+    );
 
+    $("#addTillForm").submit(function() {
+
+        var description = $("input:[name=description]").val();
+        var branch = $('#branch').val();
+        var branchname = $("#branch option:selected").text();
+        var till = { "branch": branch, "description": description };
+        $.ajax({
+               type: "POST",
+               url: "/cgi-bin/koha/svc/tills",
+               contentType: 'application/json',
+               data: JSON.stringify(till),
+               dataType: 'json',
+               success: function(data)
+               {
+                   console.log("data returned: " + JSON.stringify(data));
+                   tillTable.api().row.add(data).draw();
+                   $('#addTill').modal('hide');
+               },
+               error: function(data)
+               {
+                   tillTable.api().row.add(till).draw();
+                   $('#addTill').modal('hide');
+               }
+             });
+
+        console.log("description: " + $("input:[name=description]").val());
+        console.log("branchvalue: " + $("#branch").val());
+        console.log("branchoption: " + $("#branch option:selected").text());
+        return false; // avoid to execute the actual submit of the form.
+    });
+
+    $('#addTillSubmit').click(function() {
+        $( "#addTillForm" ).submit();
+    });
 });
 //]]>
 </script>
@@ -158,7 +193,7 @@ $(document).ready(function() {
                 <h3 id="addTillHeader">Add till</h3>
             </div>
             <div class="modal-body">
-                <form>
+                <form id="addTillForm">
                     <fieldset class="rows">
                         <ol>
                             <li>
@@ -179,6 +214,6 @@ $(document).ready(function() {
             </div>
             <div class="modal-footer">
                 <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                <button class="btn btn-primary">Add till</button>
+                <button type="submit" id="addTillSubmit" class="btn btn-primary">Add till</button>
             </div>
         </div>

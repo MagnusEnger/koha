@@ -27,9 +27,21 @@ sub new {
 sub create {
     my ($self) = @_;
 
-    my $result = {};
-    my $input  = $self->query->param('POSTDATA');
+    my $response = {};
+    my $input  = from_json($self->query->param('POSTDATA'));
 
+    my $schema = Koha::Database->new()->schema();
+    my $till = $schema->resultset('CashTill')->create( $input );
+
+    unless ( $till ) {
+        $self->output( $response, { status => '200 OK', type => 'json' } );
+        return;
+    }
+
+    $response = { $till->get_columns };
+    $response->{'branchname'} = $till->branch->get_column('branchname');
+    $self->output( $response, { status => '200 OK', type => 'json' } );
+    return;
 }
 
 sub read {
