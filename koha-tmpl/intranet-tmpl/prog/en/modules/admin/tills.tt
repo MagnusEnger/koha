@@ -22,18 +22,20 @@ $(document).ready(function() {
                 "targets": 1,
                 "orderable": true,
                 "searchable": true,
-                "data": "description"
+                "data": "description",
+                "className": "desc"
             }, {
                 "targets": 2,
                 "orderable": true,
                 "searchable": true,
-                "data": "branch"
+                "data": "branchname",
+                "className": "branch"
             }],
             "order": [1, 'asc'],
             "drawCallback": function(settings) {
                 var api = this.api();
                 // add jEditable handlers
-                $('#tills_editor tbody tr td:not(.no_edit)').editable(
+                $('#tills_editor tbody tr td:not(.no_edit).desc').editable(
                     function(value, settings) {
                         var columnSrc = api.column(tillTable.fnGetPosition(this)[1]).dataSrc();
                         var tillid = api.row(tillTable.fnGetPosition(this)[0]).data().tillid;
@@ -63,6 +65,39 @@ $(document).ready(function() {
                         },
                     }
                 );
+                $('#tills_editor tbody tr td:not(.no_edit).branch').editable(
+                    function(value, settings) {
+                        var tillid = api.row(tillTable.fnGetPosition(this)[0]).data().tillid;
+                        var newData = {};
+                        newData['branch'] = value;
+                        console.log(newData);
+                        $.ajax({
+                            type: "PUT",
+                            url: '/cgi-bin/koha/svc/tills/' + tillid,
+                            contentType: 'application/json',
+                            data: JSON.stringify(newData),
+                            dataType: 'json',
+                            success: function(data) {
+                                console.log('success: ' + JSON.stringify(data));
+                                $('#feedback').remove();
+                            },
+                            error: function(data) {
+                                console.log('error: ' + JSON.stringify(data));
+                                result = (this.revert);
+                            }
+                        });
+                        return JSON.parse(settings.data)[value];
+                    }, {
+                        data: '{[% FOREACH branch IN branches_loop %]"[% branch.branchcode %]":"[% branch.branchname %]"[% IF !loop.last %],[% END %][% END %]}',
+                        type: 'select',
+                        submit: 'OK',
+                        tooltip: 'Click to edit...',
+                        callback: function(value, settings) {
+                            $('<img id="feedback" class="pull-right" src="[% interface %]/lib/jquery/plugins/themes/classic/throbber.gif">').appendTo(this);
+                        },
+                    }
+                );
+
             },
         }))
 
@@ -87,10 +122,10 @@ $(document).ready(function() {
             <div id="yui-main">
                 <div class="yui-b">
                     <div id="toolbar" class="btn-toolbar">
-                        <a class="btn btn-small" id="add_till" href="#"><i class="icon-plus"></i> Add till</a>
+                        <a class="btn btn-small" id="add_till" role="button" href="#addTill" data-toggle="modal"><i class="icon-plus"></i> Add till</a>
                     </div>
                     <h3>Tills</h3>
-                    <table id="tills_editor">
+                    <table id="tills_editor" width="100%">
                         <thead>
                             <tr>
                                 <th>
@@ -115,3 +150,35 @@ $(document).ready(function() {
             </div>
         </div>
         [% INCLUDE 'intranet-bottom.inc' %]
+
+        <!-- AddItem Modal -->
+        <div id="addTill" class="modal hide fade" tabindex="-1" role="dialog">
+            <div class="modal-header">
+                <button type="button" class="closebtn" data-dismiss="modal" aria-hidden="true">x</button>
+                <h3 id="addTillHeader">Add till</h3>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <fieldset class="rows">
+                        <ol>
+                            <li>
+                                <label for="description">Description:</label>
+                                <input type="text" id="description" name="description">
+                            </li>
+                            <li>
+                                <label for="branch">Branch:</label>
+                                <select id="branch" name="branch">
+                                    [% FOREACH branch IN branches_loop %]
+                                    <option value="[% branch.branchcode %]">[% branch.branchname %]</option>
+                                    [% END %]
+                                </select>
+                            </li>
+                        </ol>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                <button class="btn btn-primary">Add till</button>
+            </div>
+        </div>

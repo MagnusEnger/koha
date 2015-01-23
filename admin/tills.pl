@@ -23,6 +23,7 @@ use CGI;
 use autouse 'Data::Dumper' => qw(Dumper);
 
 use C4::Auth;
+use C4::Branch;
 use C4::Koha;
 use C4::Context;
 use C4::Output;
@@ -39,5 +40,17 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
         debug           => 1,
     }
 );
+
+# Get branches
+my $branches = GetBranches;
+my @branches_loop;
+foreach my $branch (sort keys %$branches) {
+    push @branches_loop, {
+        branchcode => $$branches{$branch}{branchcode},
+        branchname => $$branches{$branch}{branchname},
+    };
+}
+
+$template->param( branches_loop => \@branches_loop, );
 
 output_html_with_http_headers $cgi, $cookie, $template->output;
