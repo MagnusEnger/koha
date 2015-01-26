@@ -65,5 +65,6 @@
         </div>
     [% END %]
 [% END %]
+[% INCLUDE 'till-modal.inc' %]
     </body>
 </html>

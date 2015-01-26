@@ -1,6 +1,7 @@
 package Koha::Service::Till;
 
 use Modern::Perl;
+use CGI::Cookie;
 use JSON;
 
 use base 'Koha::Service';
@@ -15,7 +16,7 @@ sub new {
         {
             needed_flags => { admin => 'edit_tills' },
             routes       => [
-                [ qr'GET /',         'read' ],
+                [ qr'GET /(\d*)',    'read' ],
                 [ qr'POST /',        'create' ],
                 [ qr'PUT /(\d+)',    'update' ],
                 [ qr'DELETE /(\d+)', 'delete' ],
@@ -49,8 +50,19 @@ sub read {
 
     my $response = {};
     my $schema   = Koha::Database->new()->schema();
+    my $filter = {};
+    if ( $tillid ) {
+        $filter->{'tillid'} = $tillid;
+        my $till_cookie = CGI::Cookie->new(
+                -name => 'KohaStaffClient',
+                -value => $tillid,
+                -HttpOnly => 1,
+                -expires => '+3y'
+            );
+        $self->cookie([ $self->cookie, $till_cookie ]);
+    }
     my $tills_rs = $schema->resultset('CashTill')->search(
-        {},
+        $filter,
         {
             prefetch  => 'branch',
             '+select' => ['branch.branchname'],
@@ -65,6 +77,12 @@ sub read {
     }
 
     $self->output( $response, { status => '200 OK', type => 'json' } );
+    return;
+}
+
+sub other {
+    my ( $self, $tillid ) = @_;
+    warn "Other tillid: " . Dumper($tillid);
     return;
 }
 

@@ -78,6 +78,9 @@
                         <a class="toplinks" href="/cgi-bin/koha/circ/selectbranchprinter.pl">Set library</a>
                     </li>
                     [% END %]
+                    <li>
+                        <a id="till-select" class="toplinks" href="#selectTill" data-toggle="modal">Set till</a>
+                    </li>
                     [% IF EnableSearchHistory %]
                     <li>
                         <a class="toplinks" href="/cgi-bin/koha/catalogue/search-history.pl">Search history</a>
