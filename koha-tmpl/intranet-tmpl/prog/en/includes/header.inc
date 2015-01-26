@@ -79,7 +79,7 @@
                     </li>
                     [% END %]
                     <li>
-                        <a id="till-select" class="toplinks" href="#selectTill" data-toggle="modal">Set till</a>
+                        <a id="till-select" class="toplinks" href="#selectTill" data-toggle="modal">Set till (<span id="KohaStaffClient">[% till.description %]</span>)</a>
                     </li>
                     [% IF EnableSearchHistory %]
                     <li>

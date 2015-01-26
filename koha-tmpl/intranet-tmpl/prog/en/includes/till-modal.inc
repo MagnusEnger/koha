@@ -14,8 +14,7 @@
                     tillid,
                 success: function(data)
                 {
-                    console.log("data returned: " +
-                        JSON.stringify(data));
+                    $('#KohaStaffClient').text(tilldescription);
                     $('#selectTill').modal('hide');
                 },
                 error: function(data)

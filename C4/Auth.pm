@@ -384,8 +384,12 @@ sub get_template_and_user {
             }
         );
         my @tills_loop;
+        my $current_till;
         while ( my $till = $tills_rs->next ) {
             push @tills_loop, { tillid => $till->get_column('tillid'), description => $till->get_column('description') };
+            if ( $in->{'query'}->cookie("KohaStaffClient") eq $till->get_column('tillid') ) {
+                $current_till = { tillid => $till->get_column('tillid'), description => $till->get_column('description') };
+            }
         }
 
         $template->param(
@@ -420,6 +424,7 @@ sub get_template_and_user {
             UseKohaPlugins              => C4::Context->preference('UseKohaPlugins'),
             UseCourseReserves            => C4::Context->preference("UseCourseReserves"),
             tills_loop                  => \@tills_loop,
+            till                        => $current_till,
         );
     }
     else {
