@@ -10,6 +10,8 @@ create table cash_till (
 create table cash_transcode (
 	code varchar(10) not null,
         description varchar(100) not null default '',
+	income_group varchar(10),
+	taxrate varchar(10),
 	primary key (code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -30,3 +32,24 @@ INSERT INTO systempreferences (variable,value,options,explanation,type) VALUES('
 
 insert into userflags values ( 21, 'cashmanage', 'Access cash management', 0);
 -- payment types should be linked to auth value
+
+insert into authorised_values (category, authorised_value, lib)
+   values( 'PaymentType', 'Cash', 'cash');
+
+insert into authorised_values (category, authorised_value, lib)
+   values( 'PaymentType', 'Card', 'Debit or Credit card');
+
+insert into authorised_values (category, authorised_value, lib)
+   values( 'PaymentType', 'Cheque', 'Cheque');
+
+insert into authorised_values (category, authorised_value, lib)
+   values( 'TaxRate', 'Standard Rate', 'VAT at standard rate');
+
+insert into authorised_values (category, authorised_value, lib)
+   values( 'TaxRate', 'None', 'Out of scope of VAT');
+
+insert into authorised_values (category, authorised_value, lib)
+   values( 'TaxRate', 'Exempt', 'Exempt');
+
+insert into authorised_values (category, authorised_value, lib)
+   values( 'TaxRate', 'Zero', 'Zero rated');

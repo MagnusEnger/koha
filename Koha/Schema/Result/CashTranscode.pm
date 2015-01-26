@@ -36,6 +36,18 @@ __PACKAGE__->table("cash_transcode");
   is_nullable: 0
   size: 100
 
+=head2 income_group
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 10
+
+=head2 taxrate
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 10
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -43,6 +55,10 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0, size => 10 },
   "description",
   { data_type => "varchar", default_value => "", is_nullable => 0, size => 100 },
+  "income_group",
+  { data_type => "varchar", is_nullable => 1, size => 10 },
+  "taxrate",
+  { data_type => "varchar", is_nullable => 1, size => 10 },
 );
 
 =head1 PRIMARY KEY
@@ -75,8 +91,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2014-12-18 15:37:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:PTrze4Oy/uDQMVpiDVReZw
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2015-01-26 13:07:28
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:w/72TwUhzqEFnBzmdZTFXw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
