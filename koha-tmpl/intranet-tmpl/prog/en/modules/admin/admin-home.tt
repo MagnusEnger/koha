@@ -94,6 +94,13 @@
 
 </dl>
 
+<h3>Cash management parameters</h3>
+
+<dl>
+    <dt><a href="/cgi-bin/koha/admin/transcode.pl">Cash Management Categories</a></dt>
+    <dd>Define categories for recording paymenrs in cash management.</dd>
+</dl>
+
 <h3>Additional parameters</h3>
 <dl>
 	<!-- <dt><a href="/cgi-bin/koha/admin/printers.pl">Network Printers</a></dt>

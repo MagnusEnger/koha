@@ -1,0 +1,60 @@
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Koha &rsaquo; Administration &rsaquo; Cash Management Transaction Categories</title>
+</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body id="admin_edi_ean" class="admin">
+[% INCLUDE 'header.inc' %]
+[% INCLUDE 'cat-search.inc' %]
+
+<div id="breadcrumbs">
+<a href="/cgi-bin/koha/mainpage.pl">Home</a>
+ &rsaquo; <a href="/cgi-bin/koha/admin/admin-home.pl">Administration</a>
+ &rsaquo; <a href="/cgi-bin/koha/admin/transcode.pl">Cash management</a>
+     &rsaquo; Transaction categories
+</div>
+
+<div id="doc3" class="yui-t2">
+
+<div id="bd">
+<div id="yui-main">
+<div class="yui-b">
+[% IF display %]
+    <div id="toolbar" class="btn-toolbar">
+    <a class="btn btn-small" id="newtranscode" href="/cgi-bin/koha/admin/transcode.pl?op=code_form">
+         <i class="icon-plus"></i>
+         New Category
+    </a>
+    </div>
+[% END %]
+
+[% IF display %]
+<h2>Transaction categories</h2>
+   <table>
+   <tr>
+      <th>Code</th>
+      <th>Descrption</th>
+      <th>Group Code</th>
+      <th>Tax rate</th>
+   </tr>
+   [% FOREACH tcode IN transcodes %]
+   [% IF loop.even %]<tr>
+   [% ELSE %]<tr class="highlight">
+   [% END %]
+      <td>[% tcode.code %]</td>
+      <td>[% tcode.description %]</td>
+      <td>[% tcode.income_group %]</td>
+      <td>[% tcode.taxrate %]</td>
+   </tr>
+   [% END %]
+    </table>
+[% END %]
+
+</div>
+</div>
+<div class="yui-b">
+    [% INCLUDE 'admin-menu.inc' %]
+</div>
+</div>
+[% INCLUDE 'intranet-bottom.inc' %]
+
