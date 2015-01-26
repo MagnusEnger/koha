@@ -375,8 +375,9 @@ sub get_template_and_user {
     );
     if ( $in->{'type'} eq "intranet" ) {
         my $schema   = Koha::Database->new()->schema();
+        my $filter = { branch => C4::Context->userenv?C4::Context->userenv->{"branch"}:undef };
         my $tills_rs = $schema->resultset('CashTill')->search(
-            {},
+            $filter,
             {
                 prefetch  => 'branch',
                 '+select' => ['branch.branchname'],
