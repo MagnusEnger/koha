@@ -27,6 +27,7 @@ use Koha::Database;
 use C4::Members qw( GetMember );
 use C4::Branch qw( GetBranchName );
 use List::Util qw(sum);
+use Koha::CM;
 
 my $q = CGI->new();
 my ( $template, $loggedinuser, $cookie, $user_flags ) = get_template_and_user(
@@ -73,7 +74,7 @@ sub get_till {
     my ($schema, $cgi_query) = @_;
     
 
-    if (my $id = $cgi_query->param('till_id')) {
+    if (my $id = $cgi_query->param('till_id') || $id = SessionTillId() ) {
         return $schema->resultset('CashTill')->find($id);
     }
     # use name

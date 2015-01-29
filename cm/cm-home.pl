@@ -22,6 +22,7 @@ use C4::Auth;
 use C4::Output;
 use C4::Context;
 use Koha::Till;
+use Koha::CM;
 use C4::Members qw( GetMember );
 use C4::Branch qw( GetBranchName );
 
@@ -38,6 +39,7 @@ my ( $template, $loggedinuser, $cookie, $user_flags ) = get_template_and_user(
 
 my $user = GetMember( 'borrowernumber' => $loggedinuser );
 my $branchname = GetBranchName( $user->{branchcode} );
+my $tillid = SessionTillId();
 
 # here be tigers
 #
