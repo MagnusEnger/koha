@@ -29,6 +29,7 @@ use C4::Members::Attributes qw(GetBorrowerAttributes);
 use C4::Accounts;
 use C4::Koha;
 use C4::Branch;
+use Koha::Database;
 
 my $input = CGI->new();
 
@@ -61,6 +62,7 @@ my $select       = $input->param('selected_accts');
 my $payment_note = uri_unescape $input->param('payment_note');
 my $accountno;
 my $accountlines_id;
+my $tillid = $input->cookie("KohaStaffClient");
 if ( $individual || $writeoff ) {
     if ($individual) {
         $template->param( pay_individual => 1 );
@@ -143,6 +145,9 @@ if ( $total_paid and $total_paid ne '0.00' ) {
 
 borrower_add_additional_fields($borrower);
 
+my $schema = Koha::Database->new()->schema();
+my @paymenttypes = $schema->resultset('AuthorisedValue')->search( { category => 'PaymentType', });
+
 $template->param(
     borrowernumber => $borrowernumber,    # some templates require global
     borrower      => $borrower,
@@ -150,6 +155,7 @@ $template->param(
     activeBorrowerRelationship => (C4::Context->preference('borrowerRelationship') ne ''),
     RoutingSerials => C4::Context->preference('RoutingSerials'),
     ExtendedPatronAttributes => C4::Context->preference('ExtendedPatronAttributes'),
+    PaymentTypes => \@paymenttypes
 );
 
 output_html_with_http_headers $input, $cookie, $template->output;

@@ -140,11 +140,18 @@ function moneyFormat(textObj) {
 </table>
 
 <ol>
-
     <li>
         <label for="paid">Collect from patron: </label>
             <!-- default to paying all -->
         <input name="paid" id="paid" value="[% amountoutstanding | format('%.2f') %]" onchange="moneyFormat(document.payindivfine.paid)"/>
+    </li>
+    <li>
+        <label for="type">Payment type: </label>
+        <select name="type" id="type">
+            [% FOREACH PaymentType IN PaymentTypes %]
+            <option value="[% PaymentType.authorised_value %]">[% PaymentType.lib %]</option>
+            [% END %]
+        </select>
     </li>
 </ol>
 </fieldset>
@@ -210,6 +217,14 @@ function moneyFormat(textObj) {
         <label for="paid">Collect from patron: </label>
         <!-- default to paying all -->
         <input name="paid" id="paid" value="[% total | format('%.2f') %]" onchange="moneyFormat(document.payfine.paid)"/>
+    </li>
+    <li>
+        <label for="type">Payment type: </label>
+        <select name="type" id="type">
+            [% FOREACH PaymentType IN PaymentTypes %]
+            <option value="[% PaymentType.authorised_value %]">[% PaymentType.lib %]</option>
+            [% END %]
+        </select>
     </li>
     <li>
         <label for="selected_accts_notes">Note: </label>
