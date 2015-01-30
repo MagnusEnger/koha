@@ -18,7 +18,7 @@ create table cash_transcode (
 
 create table cash_transaction (
 	id serial not null,
-	created datetime not null default current_timestamp(),
+	created datetime null,
 	amt decimal(12,2) not null,
 	till integer(11) not null,
 	tcode varchar(10) not null,
@@ -27,6 +27,9 @@ create table cash_transaction (
         foreign key (till) references cash_till (tillid),
 	foreign key (tcode ) references cash_transcode( code )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TRIGGER cash_transaction_insert BEFORE INSERT ON `cash_transaction`
+FOR EACH ROW SET NEW.created = now();
 
 INSERT INTO systempreferences (variable,value,options,explanation,type) VALUES('CashManagement', '0', NULL , 'Use the cash management module to record money in and out', 'YesNo');
 
