@@ -62,7 +62,7 @@ my $select       = $input->param('selected_accts');
 my $payment_note = uri_unescape $input->param('payment_note');
 my $accountno;
 my $accountlines_id;
-my $tillid = $input->cookie("KohaStaffClient");
+my $tillid = $input->param('tillid') || $input->cookie("KohaStaffClient");
 my $type = $input->param('type');
 if ( $individual || $writeoff ) {
     if ($individual) {

@@ -153,6 +153,14 @@ function moneyFormat(textObj) {
             [% END %]
         </select>
     </li>
+    <li>
+        <label for="till">Till: </label>
+        <select name="till" id="till">
+            [% FOREACH till IN tills_loop %]
+            <option value="[% till.tillid %]">[% till.description %]</option>
+            [% END %]
+        </select>
+    </li>
 </ol>
 </fieldset>
 
@@ -223,6 +231,14 @@ function moneyFormat(textObj) {
         <select name="type" id="type">
             [% FOREACH PaymentType IN PaymentTypes %]
             <option value="[% PaymentType.authorised_value %]">[% PaymentType.lib %]</option>
+            [% END %]
+        </select>
+    </li>
+    <li>
+        <label for="till">Till: </label>
+        <select name="till" id="till">
+            [% FOREACH till IN tills_loop %]
+            <option value="[% till.tillid %]">[% till.description %]</option>
             [% END %]
         </select>
     </li>
