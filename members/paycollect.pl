@@ -63,6 +63,7 @@ my $payment_note = uri_unescape $input->param('payment_note');
 my $accountno;
 my $accountlines_id;
 my $tillid = $input->cookie("KohaStaffClient");
+my $type = $input->param('type');
 if ( $individual || $writeoff ) {
     if ($individual) {
         $template->param( pay_individual => 1 );
@@ -112,10 +113,10 @@ if ( $total_paid and $total_paid ne '0.00' ) {
         if ($individual) {
             if ( $total_paid == $total_due ) {
                 makepayment( $accountlines_id, $borrowernumber, $accountno, $total_paid, $user,
-                    $branch, $payment_note );
+                    $branch, $payment_note, $tillid, $type );
             } else {
                 makepartialpayment( $accountlines_id, $borrowernumber, $accountno, $total_paid,
-                    $user, $branch, $payment_note );
+                    $user, $branch, $payment_note, $tillid, $type );
             }
             print $input->redirect(
                 "/cgi-bin/koha/members/pay.pl?borrowernumber=$borrowernumber");
@@ -126,10 +127,10 @@ if ( $total_paid and $total_paid ne '0.00' ) {
                 }
                 my @acc = split /,/, $select;
                 my $note = $input->param('selected_accts_notes');
-                recordpayment_selectaccts( $borrowernumber, $total_paid, \@acc, $note );
+                recordpayment_selectaccts( $borrowernumber, $total_paid, \@acc, $note, $tillid, $type );
             } else {
                 my $note = $input->param('selected_accts_notes');
-                recordpayment( $borrowernumber, $total_paid, '', $note );
+                recordpayment( $borrowernumber, $total_paid, '', $note, $tillid, $type );
             }
 
 # recordpayment does not return success or failure so lets redisplay the boraccount

@@ -4,15 +4,15 @@ use warnings;
 use Koha::Database;
 
 sub new {
-    my ( $class, @params ) = @_;
-
-    # TBD :: based on passed parameters select a specific till
-    my $till_name = shift @params;
-    $till_name ||= 'DEFAULT';
+    my ( $class, $params ) = @_;
 
     my $schema = Koha::Database->new()->schema();
     my $tills_rs =
-      $schema->resultset('CashTill')->search( { name => $till_name } );
+      $schema->resultset('CashTill')->search( $params );
+
+    unless ( $tills_rs && ( $tills_rs->count gt '1' ) ) {
+        return undef;
+    }
 
     my $self = {
         schema  => $schema,
