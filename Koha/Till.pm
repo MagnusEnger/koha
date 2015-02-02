@@ -10,13 +10,13 @@ sub new {
     my $tills_rs =
       $schema->resultset('CashTill')->search( $params );
 
-    unless ( $tills_rs && ( $tills_rs->count gt '1' ) ) {
+    unless ( $tills_rs && $tills_rs->count == '1' ) {
         return undef;
     }
 
     my $self = {
         schema  => $schema,
-        till_id => $tills_rs->[0]->tillid,
+        till_id => $tills_rs->first->tillid,
     };
 
     bless $self, $class;
