@@ -73,7 +73,10 @@ sub get_till {
     my ($schema, $cgi_query) = @_;
     
 
-    if (my $id = $cgi_query->param('till_id') || $cgi_query->cookie('KohaStaffClient') ) {
+    my $id = $cgi_query->param('till_id');
+    $id ||= SessionTillId();
+
+    if ( $id ) {
         return $schema->resultset('CashTill')->find($id);
     }
     # use name
