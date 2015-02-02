@@ -71,7 +71,7 @@ patron.
 
 =head2 recordpayment
 
-  &recordpayment($borrowernumber, $payment, $sip_paytype, $note);
+  &recordpayment($borrowernumber, $payment, $sip_paytype, $note, $tillid, $type);
 
 Record payment by a patron. C<$borrowernumber> is the patron's
 borrower number. C<$payment> is a floating-point number, giving the
@@ -88,6 +88,7 @@ will be credited to the next one.
 
 #'
 sub recordpayment {
+    warn "recordpayment";
 
     #here we update the account lines
     my ( $borrowernumber, $data, $sip_paytype, $payment_note, $tillid, $type ) = @_;
@@ -115,12 +116,15 @@ sub recordpayment {
     # offset transactions
     my @ids;
     while ( ( $accdata = $sth->fetchrow_hashref ) and ( $amountleft > 0 ) ) {
+        my $thisamt;
         if ( $accdata->{'amountoutstanding'} < $amountleft ) {
+            $thisamt = $accdata->{'amountoutstanding'};
             $newamtos = 0;
             $amountleft -= $accdata->{'amountoutstanding'};
         }
         else {
             $newamtos   = $accdata->{'amountoutstanding'} - $amountleft;
+            $thisamt    = $newamtos;
             $amountleft = 0;
         }
         my $thisacct = $accdata->{accountlines_id};
@@ -129,6 +133,14 @@ sub recordpayment {
      WHERE (accountlines_id = ?)"
         );
         $usth->execute( $newamtos, $thisacct );
+
+        if ( C4::Context->preference('CashManagement')) {
+            my $tcode = 'DEFAULT'; #FIXME
+            my $payment_type = $type;
+            my $select = { tillid => $tillid };
+            my $till = Koha::Till->new( $select );
+            $till->payin($thisamt, $tcode, $payment_type);
+        }
 
         if ( C4::Context->preference("FinesLog") ) {
             $accdata->{'amountoutstanding_new'} = $newamtos;
@@ -167,14 +179,6 @@ sub recordpayment {
                 accountno => $nextaccntno }
     );
 
-    if ( C4::Context->preference('CashManagement')) {
-        my $tcode;
-        my $payment_type = $type;
-        my $select = { tillid => $tillid };
-        my $till = Koha::Till->new( $select );
-        $till->payin($data, $tcode, $payment_type);
-    }
-
     if ( C4::Context->preference("FinesLog") ) {
         $accdata->{'amountoutstanding_new'} = $newamtos;
         logaction("FINES", 'CREATE',$borrowernumber,Dumper({
@@ -210,6 +214,7 @@ was made.
 # FIXME - I'm not at all sure about the above, because I don't
 # understand what the acct* tables in the Koha database are for.
 sub makepayment {
+    warn "makepayment";
 
     #here we update both the accountoffsets and the account lines
     #updated to check, if they are paying off a lost item, we return the item
@@ -285,11 +290,11 @@ sub makepayment {
     }
 
     if ( C4::Context->preference('CashManagement')) {
-        my $tcode;
+        my $tcode = 'DEFAULT'; # FIXME
         my $payment_type = $type;
         my $select = { tillid => $tillid };
         my $till = Koha::Till->new( $select );
-        $till->payin($data, $tcode, $payment_type);
+        $till->payin($amount, $tcode, $payment_type);
     }
 
     UpdateStats({
@@ -597,7 +602,7 @@ sub ReversePayment {
 
 =head2 recordpayment_selectaccts
 
-  recordpayment_selectaccts($borrowernumber, $payment,$accts);
+  recordpayment_selectaccts($borrowernumber, $payment,$accts, $tillid, $type);
 
 Record payment by a patron. C<$borrowernumber> is the patron's
 borrower number. C<$payment> is a floating-point number, giving the
@@ -613,6 +618,7 @@ will be credited to the next one.
 
 sub recordpayment_selectaccts {
     my ( $borrowernumber, $amount, $accts, $note, $tillid, $type ) = @_;
+    warn "recordpayment_selectaccts";
 
     my $dbh        = C4::Context->dbh;
     my $newamtos   = 0;
@@ -640,19 +646,30 @@ sub recordpayment_selectaccts {
 
     my @ids;
     for my $accdata ( @{$rows} ) {
+        my $thisamt;
         if ($amountleft == 0) {
             last;
         }
         if ( $accdata->{amountoutstanding} < $amountleft ) {
+            $thisamt  = $accdata->{amountoutstanding};
             $newamtos = 0;
             $amountleft -= $accdata->{amountoutstanding};
         }
         else {
             $newamtos   = $accdata->{amountoutstanding} - $amountleft;
+            $thisamt    = $newamtos;
             $amountleft = 0;
         }
         my $thisacct = $accdata->{accountlines_id};
         $sth->execute( $newamtos, $thisacct );
+
+        if ( C4::Context->preference('CashManagement')) {
+            my $tcode = 'DEFAULT'; #FIXME
+            my $payment_type = $type;
+            my $select = { tillid => $tillid };
+            my $till = Koha::Till->new( $select );
+            $till->payin($thisamt, $tcode, $payment_type);
+        }
 
         if ( C4::Context->preference("FinesLog") ) {
             logaction("FINES", 'MODIFY', $borrowernumber, Dumper({
@@ -683,14 +700,6 @@ sub recordpayment_selectaccts {
                 accountno => $nextaccntno}
     );
 
-    if ( C4::Context->preference('CashManagement')) {
-        my $tcode;
-        my $payment_type = $type;
-        my $select = { tillid => $tillid };
-        my $till = Koha::Till->new( $select );
-        $till->payin($amount, $tcode, $payment_type);
-    }
-
     if ( C4::Context->preference("FinesLog") ) {
         logaction("FINES", 'CREATE',$borrowernumber,Dumper({
             action            => 'create_payment',
@@ -711,6 +720,7 @@ sub recordpayment_selectaccts {
 # fills in
 sub makepartialpayment {
     my ( $accountlines_id, $borrowernumber, $accountno, $amount, $user, $branch, $payment_note, $tillid, $type ) = @_;
+    warn "makepartialpayment";
     my $manager_id = 0;
     $manager_id = C4::Context->userenv->{'number'} if C4::Context->userenv;
     if (!$amount || $amount < 0) {
@@ -751,7 +761,7 @@ sub makepartialpayment {
         '', 'Pay', $data->{'itemnumber'}, $manager_id, $payment_note);
 
     if ( C4::Context->preference('CashManagement')) {
-        my $tcode;
+        my $tcode = 'DEFAULT'; #FIXME
         my $payment_type = $type;
         my $select = { tillid => $tillid };
         my $till = Koha::Till->new( $select );
