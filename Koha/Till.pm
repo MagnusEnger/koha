@@ -12,7 +12,7 @@ sub new {
 
     my $schema = Koha::Database->new()->schema();
     my $tills_rs =
-      $schema->resultset('CashTill')->search( { description => $till_name } );
+      $schema->resultset('CashTill')->search( { name => $till_name } );
 
     my $self = {
         schema  => $schema,

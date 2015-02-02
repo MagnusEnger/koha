@@ -1,9 +1,11 @@
 
 create table cash_till (
 	tillid integer(11) auto_increment not null,
+	name varchar(20) not null,
 	description varchar(100) not null,
 	branch varchar(10),
 	primary key (tillid),
+	unique key name (name),
 	foreign key (branch) references branches (branchcode)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

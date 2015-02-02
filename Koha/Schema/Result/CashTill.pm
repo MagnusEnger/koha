@@ -29,6 +29,12 @@ __PACKAGE__->table("cash_till");
   is_auto_increment: 1
   is_nullable: 0
 
+=head2 name
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 20
+
 =head2 description
 
   data_type: 'varchar'
@@ -47,6 +53,8 @@ __PACKAGE__->table("cash_till");
 __PACKAGE__->add_columns(
   "tillid",
   { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
+  "name",
+  { data_type => "varchar", is_nullable => 0, size => 20 },
   "description",
   { data_type => "varchar", is_nullable => 0, size => 100 },
   "branch",
@@ -64,6 +72,20 @@ __PACKAGE__->add_columns(
 =cut
 
 __PACKAGE__->set_primary_key("tillid");
+
+=head1 UNIQUE CONSTRAINTS
+
+=head2 C<name>
+
+=over 4
+
+=item * L</name>
+
+=back
+
+=cut
+
+__PACKAGE__->add_unique_constraint("name", ["name"]);
 
 =head1 RELATIONS
 
@@ -103,8 +125,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2014-12-18 15:37:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ShBSZp/M0wap+7CKO55XDw
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2015-02-02 09:58:10
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JK5x6jZPQGDhXMAZ7URCmw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
