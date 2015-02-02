@@ -28,7 +28,7 @@ $(document).ready(function() {
 <!-- TOOLBAR ??? -->
 
       <h1>Cash Management</h1>
-      <h2>Till:[% till.description %]</h2>
+      <h2>Till:[% till.name %]</h2>
 <!-- may need a select other till if perm -->
 
          <form action="/cgi-bin/koha/cm/till.pl" method="get">
