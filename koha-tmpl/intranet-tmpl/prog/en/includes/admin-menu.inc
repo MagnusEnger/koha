@@ -1,3 +1,4 @@
+[% USE Koha %]
 <script type="text/javascript">//<![CDATA[
     $(document).ready(function() {
         var path = location.pathname.substring(1);
@@ -20,7 +21,9 @@
 <h5>Basic parameters</h5>
 <ul>
 	<li><a href="/cgi-bin/koha/admin/branches.pl">Libraries and groups</a></li>
+    [% IF Koha.Preference( 'CashManagement' ) %]
     <li><a href="/cgi-bin/koha/admin/tills.pl">Tills</a></li>
+    [% END %]
 	<li><a href="/cgi-bin/koha/admin/itemtypes.pl">Item types</a></li>
 	<li><a href="/cgi-bin/koha/admin/authorised_values.pl">Authorized values</a></li>
 </ul>

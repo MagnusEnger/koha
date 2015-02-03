@@ -1,3 +1,4 @@
+[% USE Koha %]
 [% USE Branches %]
 <div id="header" class="navbar navbar-static-top">
     <div class="navbar-inner">
@@ -78,9 +79,11 @@
                         <a class="toplinks" href="/cgi-bin/koha/circ/selectbranchprinter.pl">Set library</a>
                     </li>
                     [% END %]
+                    [% IF Koha.Preference( 'CashManagement' ) %]
                     <li>
                         <a id="till-select" class="toplinks" href="#selectTill" data-toggle="modal">Set till (<span id="KohaStaffClient">[% till.description %]</span>)</a>
                     </li>
+                    [% END %]
                     [% IF EnableSearchHistory %]
                     <li>
                         <a class="toplinks" href="/cgi-bin/koha/catalogue/search-history.pl">Search history</a>
