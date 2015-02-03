@@ -1,33 +1,36 @@
 #!/usr/bin/perl
 #
+# Copyright 2015 PTFS Europe
+#
 # This file is part of Koha.
 #
-# Koha is free software; you can redistribute it and/or modify it under the
-# terms of the GNU General Public License as published by the Free Software
-# Foundation; either version 2 of the License, or (at your option) any later
-# version.
+# Koha is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
 #
-# Koha is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-# A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# Koha is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License along with
-# Koha; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
-# Suite 330, Boston, MA  02111-1307 USA
-#
+# You should have received a copy of the GNU General Public License
+# along with Koha; if not, see <http://www.gnu.org/licenses>.
 
 use Modern::Perl;
 use CGI;
+
 use C4::Auth;
-use C4::Output;
 use C4::Context;
+use C4::Output;
+
 use Koha::Database;
 
-my $q = CGI->new();
+my $cgi = CGI->new();
 my ( $template, $loggedinuser, $cookie, $user_flags ) = get_template_and_user(
     {
         template_name   => 'admin/transcode.tt',
-        query           => $q,
+        query           => $cgi,
         type            => 'intranet',
         authnotrequired => 0,
         flagsrequired   => { cashmanage => q{*} },
@@ -36,7 +39,7 @@ my ( $template, $loggedinuser, $cookie, $user_flags ) = get_template_and_user(
 
 my $schema = Koha::Database->new()->schema();
 
-my $function = $q->param('op');
+my $function = $cgi->param('op');
 $function ||= 'display';
 
 my @taxrates = $schema->resultset('AuthorisedValue')->search( { category => 'TaxRate', });
@@ -48,5 +51,4 @@ $template->param(
     taxrates   => \@taxrates,
     display    => 1,
 );
-output_html_with_http_headers( $q, $cookie, $template->output );
-
+output_html_with_http_headers( $cgi, $cookie, $template->output );
