@@ -1,3 +1,4 @@
+[% USE Koha %]
         </div>
 
 [% IF ( languages_loop ) %]
