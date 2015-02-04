@@ -94,24 +94,14 @@ $(document).ready(function() {
            </thead>
            <tbody>
              [% IF cashup == 1 %]
+             [% FOREACH st IN subtotals %]
              <tr>
-                  <td>Cash</td>
-                  <td>[% cash_in | format('%.2f') %]</td>
-                  <td>[% cash_out | format('%.2f')  %]</td>
-                  <td>[% cash_bal | format('%.2f') %]</td>
+                  <td>[% st.type %]</td>
+                  <td>[% st.total_in | format('%.2f') %]</td>
+                  <td>[% st.total_out | format('%.2f')  %]</td>
+                  <td>[% st.balance | format('%.2f') %]</td>
              </tr>
-             <tr>
-                  <td>Cheques</td>
-                  <td>[% chq_in | format('%.2f') %]</td>
-                  <td>[% chq_out | format('%.2f')  %]</td>
-                  <td>[% chq_bal | format('%.2f') %]</td>
-             </tr>
-             <tr>
-                  <td>Card</td>
-                  <td>[% card_in | format('%.2f') %]</td>
-                  <td>[% card_out | format('%.2f')  %]</td>
-                  <td>[% card_bal | format('%.2f') %]</td>
-             </tr>
+             [% END %]
              [% END %]
            <tr>
              [% IF cashup == 1 %]

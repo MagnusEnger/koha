@@ -74,36 +74,30 @@ my $total_paid_out = sum map { $_->{amt} if $_->{amt} < 0 } @{$transactions};
 if ( $cmd eq 'cashup' ) {
 
     # TBD Should loop through all payment types
-    my $cash_in =
-      sum map { $_->{amt} if $_->{paymenttype} eq 'Cash' && $_->{amt} > 0 }
-      @{$transactions};
-    my $cash_out =
-      sum map { $_->{amt} if $_->{paymenttype} eq 'Cash' && $_->{amt} < 0 }
-      @{$transactions};
-    my $card_in =
-      sum map { $_->{amt} if $_->{paymenttype} eq 'Card' && $_->{amt} > 0 }
-      @{$transactions};
-    my $card_out =
-      sum map { $_->{amt} if $_->{paymenttype} eq 'Card' && $_->{amt} < 0 }
-      @{$transactions};
+    my $subtotals     = [];
+    my @payment_types = $schema->resultset('AuthorisedValue')
+      ->search( { category => 'PaymentType', } )->all();
+    foreach my $pt (@payment_types) {
+        my $type = $pt->authorised_value;
+        my $sum_in =
+          sum map { $_->{amt} if $_->{paymenttype} eq $type && $_->{amt} > 0 }
+          @{$transactions};
+        my $sum_out =
+          sum map { $_->{amt} if $_->{paymenttype} eq $type && $_->{amt} < 0 }
+          @{$transactions};
 
-    my $chq_in =
-      sum map { $_->{amt} if $_->{paymenttype} eq 'Cheque' && $_->{amt} > 0 }
-      @{$transactions};
-    my $chq_out =
-      sum map { $_->{amt} if $_->{paymenttype} eq 'Cheque' && $_->{amt} < 0 }
-      @{$transactions};
+        push @{$subtotals},
+          {
+            type    => $type,
+            in      => $sum_in,
+            out     => $sum_out,
+            balance => $sum_in + $sum_out,
+          };
+    }
+
     $template->param(
-        cash_in  => $cash_in,
-        cash_out => $cash_out,
-        cash_bal => $cash_in + $cash_out,
-        card_in  => $card_in,
-        card_out => $card_out,
-        card_bal => $card_in + $card_out,
-        chq_in   => $chq_in,
-        chq_out  => $chq_out,
-        chq_bal => $chq_in + $chq_out,
-        cashup   => 1,
+        subtotals => $subtotals,
+        cashup    => 1,
     );
 }
 
