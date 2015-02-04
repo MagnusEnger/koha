@@ -31,7 +31,7 @@ use Koha::Till;
 my $q = CGI->new();
 my ( $template, $loggedinuser, $cookie, $user_flags ) = get_template_and_user(
     {
-        template_name   => 'cm/pay.tt',
+        template_name   => 'cm/pay2.tt',
         query           => $q,
         type            => 'intranet',
         authnotrequired => 0,

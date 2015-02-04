@@ -39,49 +39,118 @@ my ( $template, $loggedinuser, $cookie, $user_flags ) = get_template_and_user(
     }
 );
 
-my $user       = GetMember( 'borrowernumber' => $loggedinuser );
+my $user = GetMember( 'borrowernumber' => $loggedinuser );
 my $branchname = GetBranchName( $user->{branchcode} );
 
 # here be tigers
 #
 my $schema = Koha::Database->new()->schema;
 
-my $till = get_till($schema, $q);
+my $till = get_till( $schema, $q );
+my $date;
+my $cmd = $q->param('cmd');
+$cmd ||= 'display';
+if ( $cmd eq 'all' ) {
+    $cmd = 'display',;
+}
+elsif ( $cmd eq 'day' ) {
+    $date = $q->param->('date');
+}
+elsif ( $cmd eq 'cashup' ) {
+    my $ctrl_rec = $schema->resultset('CashTransaction')->create(
+        {
+            till  => $till->tillid(),
+            tcode => 'CASHUP',
+        }
+    );
+}
 
-my @transactions = $schema->resultset('CashTransaction')->search(
-    { till => $till->tillid() },
-    { order_by => 'created' }
-)->all();
+my $transactions = get_transactions( $till->tillid(), $cmd, $date );
 
+my $total_paid_in  = sum map { $_->{amt} if $_->{amt} > 0 } @{$transactions};
+my $total_paid_out = sum map { $_->{amt} if $_->{amt} < 0 } @{$transactions};
 
-my $total_paid_in = sum grep { $_->amt if $_->amt > 0} @transactions;
-my $total_paid_out = sum grep { $_->amt if $_->amt < 0} @transactions;
+if ( $cmd eq 'cashup' ) {
 
+    # TBD Should loop through all payment types
+    my $cash_in =
+      sum map { $_->{amt} if $_->{paymenttype} eq 'Cash' && $_->{amt} > 0 }
+      @{$transactions};
+    my $cash_out =
+      sum map { $_->{amt} if $_->{paymenttype} eq 'Cash' && $_->{amt} < 0 }
+      @{$transactions};
+    my $card_in =
+      sum map { $_->{amt} if $_->{paymenttype} eq 'Card' && $_->{amt} > 0 }
+      @{$transactions};
+    my $card_out =
+      sum map { $_->{amt} if $_->{paymenttype} eq 'Card' && $_->{amt} < 0 }
+      @{$transactions};
 
+    my $chq_in =
+      sum map { $_->{amt} if $_->{paymenttype} eq 'Cheque' && $_->{amt} > 0 }
+      @{$transactions};
+    my $chq_out =
+      sum map { $_->{amt} if $_->{paymenttype} eq 'Cheque' && $_->{amt} < 0 }
+      @{$transactions};
+    $template->param(
+        cash_in  => $cash_in,
+        cash_out => $cash_out,
+        cash_bal => $cash_in + $cash_out,
+        card_in  => $card_in,
+        card_out => $card_out,
+        card_bal => $card_in + $card_out,
+        chq_in   => $chq_in,
+        chq_out  => $chq_out,
+        chq_bal => $chq_in + $chq_out,
+        cashup   => 1,
+    );
+}
 
 $template->param(
-    branchname => $branchname,
-    till       => $till,
-    transactions => \@transactions,
-    total_in => $total_paid_in,
-    total_out => $total_paid_out,
+    branchname   => $branchname,
+    till         => $till,
+    transactions => $transactions,
+    total_in     => $total_paid_in,
+    total_out    => $total_paid_out,
+    balance      => $total_paid_in + $total_paid_out,    # paid_out is neg
 );
 
 output_html_with_http_headers( $q, $cookie, $template->output );
 
 sub get_till {
-    my ($schema, $cgi_query) = @_;
-    
+    my ( $schema, $cgi_query ) = @_;
 
     my $id = $cgi_query->param('till_id');
-    $id ||= SessionTillId();
+    $id ||= 1;
 
-    if ( $id ) {
+    if ($id) {
         return $schema->resultset('CashTill')->find($id);
     }
+
     # use name
     my $name = $cgi_query->param('till_name');
     $name ||= 'DEFAULT';
-    my $rs = $schema->resultset('CashTill')->search( { description => $name });
+    my $rs = $schema->resultset('CashTill')->search( { name => $name } );
     return $rs->single;
+}
+
+sub get_transactions {
+    my ( $till, $cmd, $date ) = @_;
+    my $sql;
+    my @query_parameters;
+
+    if ( $cmd eq 'display' ) {
+        $sql =
+'select * from cash_transaction where till = ? and datediff( created, NOW()) = 0 order by created';
+        @query_parameters = ($till);
+    }
+    elsif ( $cmd eq 'day' )
+    {    # show transactions for a specific date ( not today )
+        $sql =
+'select * from cash_transaction where till = ? and DATE( created) = ? order by created';
+        @query_parameters = ( $till, $date );
+    }
+    my $dbh = C4::Context->dbh;
+
+    return $dbh->selectall_arrayref( $sql, { Slice => {} }, @query_parameters );
 }

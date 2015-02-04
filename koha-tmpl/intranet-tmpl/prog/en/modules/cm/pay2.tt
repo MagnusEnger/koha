@@ -1,0 +1,48 @@
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Koha &rsaquo; Cash Management</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body id="cm-home" class="cm">
+[% INCLUDE 'header.inc' %]
+
+
+<div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; Cash Management</div>
+
+<div id="doc" class="yui-t7">
+
+  <div id="bd">
+    <div class="yui-g">
+
+<table>
+<tr><th>Item</th><th>Amount</th></tr>
+
+<tr><td>CHARGE</td><td>5.50</td>
+</tr>
+<tr>
+
+</tr>
+<td>
+<select>
+    <option> value="charge">CHARGE</option>
+    <option> value="fine">FINE</option>
+    <option> value="rental">RENTAL</option>
+    <option> value="misc">MISC<option>
+    </select>
+</td>
+<td>
+<input> type="text" name="amt" />
+</td>
+</tr>
+</table>
+
+<ul>
+<li>Total:
+
+      <div class="yui-u">
+
+      </div>
+    </div>
+  </div>
+</div>
+
+[% INCLUDE 'intranet-bottom.inc' %]
