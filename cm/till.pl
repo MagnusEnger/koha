@@ -65,6 +65,7 @@ elsif ( $cmd eq 'cashup' ) {
     );
 }
 
+warn "tillid: " . $till->tillid();
 my $transactions = get_transactions( $till->tillid(), $cmd, $date );
 
 my $total_paid_in  = sum map { $_->{amt} if $_->{amt} > 0 } @{$transactions};
@@ -121,7 +122,7 @@ sub get_till {
     my ( $schema, $cgi_query ) = @_;
 
     my $id = $cgi_query->param('till_id');
-    $id ||= 1;
+    $id ||= $cgi_query->cookie('KohaStaffClient');
 
     if ($id) {
         return $schema->resultset('CashTill')->find($id);
