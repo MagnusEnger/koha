@@ -31,7 +31,7 @@ use Koha::Till;
 my $q = CGI->new();
 my ( $template, $loggedinuser, $cookie, $user_flags ) = get_template_and_user(
     {
-        template_name   => 'cm/pay2.tt',
+        template_name   => 'cm/pay.tt',
         query           => $q,
         type            => 'intranet',
         authnotrequired => 0,
@@ -45,15 +45,25 @@ my $branchname = GetBranchName( $user->{branchcode} );
 my $tillid = $q->param('tillid') || $q->cookie('KohaStaffClient');
 my $schema = Koha::Database->new()->schema();
 
+my $chrg_cmd = $q->param('charge');
+if ( $chrg_cmd eq 'Charge' ) {
+    do_payment();
+}
 my @payment_types =
-  $schema->resultset('PaymentType')->search( { category => 'PaymentType', } );
+  $schema->resultset('AuthorisedValue')
+  ->search( { category => 'PaymentType', } );
 
-my @transcodes = $schema->resultset('CashTranscode')
-  ->search( undef, { order_by => { -asc => 'code', } } );
+@payment_types = map { $_->authorised_value } @payment_types;
 
-## Placeholder we need a screen for accepting payments not borrower related
-## e.g. sale of goods
-### and recording such as a transaction
+my @transcodes = $schema->resultset('CashTranscode')->search(
+
+    #      { code_type => 'charge' },
+    undef,
+    { order_by => { -asc => 'code', } }
+);
+
+# kludge we need to add a typr col so we can select only charges
+@transcodes = grep { $_ if ( $_->code ne 'CASHUP' ) } @transcodes;
 
 $template->param(
     branchname   => $branchname,
@@ -64,3 +74,19 @@ $template->param(
 
 output_html_with_http_headers( $q, $cookie, $template->output );
 
+sub do_payment {
+    my $amt         = $q->param('amt');
+    my $paymenttype = $q->param('paymenttype');
+    my $trans_code  = $q->param('trans_code');
+
+    # commit a transaction
+    my $new_trans = $schema->resultset('CashTransaction')->create(
+        {
+            amt         => $amt,
+            till        => $tillid,
+            tcode       => $trans_code,
+            paymenttype => $paymenttype,
+        }
+    );
+    return;
+}
