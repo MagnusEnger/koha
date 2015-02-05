@@ -58,3 +58,6 @@ insert into authorised_values (category, authorised_value, lib)
 
 insert into authorised_values (category, authorised_value, lib)
    values( 'TaxRate', 'Zero', 'Zero rated');
+
+insert into authorised_values (category, authorised_value, lib)
+   values( 'PaymentGroup', 'Default', 'Default');

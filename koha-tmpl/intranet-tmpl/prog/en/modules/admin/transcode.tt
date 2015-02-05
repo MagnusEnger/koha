@@ -45,24 +45,32 @@
                 "order": [1, 'asc'],
             })
         );
-
+    
+        var row;
         $('.edit-category').on('click', function()
         {
+            row = trans_table.api().row($(this).closest('tr'));
             $("#addCategoryHeader").text("Edit category");
             $("#addCategorySubmit").text("Edit category");
 
             var code = $(this).data('code');
             $("#addCategoryForm #code").val( code ).prop('disabled', true);
 
-            var row = trans_table.api().column(this).row().data();
-            $("#addCategoryForm #description").val( row[1] );
-            $("#addCategoryForm #group").val( row[2] );
-            $("#addCategoryForm #tax").val( row[3] );
+            var data = row.data();
+            $("#addCategoryForm #description").val( data.description );
+            $("#addCategoryForm #group").val( data.group );
+            $("#addCategoryForm #tax").val( data.taxrate );
         });
 
         $('#add_category').on('click', function()
         {
+            // Reset Form
             $("#addCategoryForm #code").removeAttr('value').prop('disabled', false);
+            $("#addCategoryForm #description").removeAttr('value');
+            $("#addCategoryForm #group").removeAttr('value');
+            $("#addCategoryForm #tax").removeAttr('value');
+
+            // Correct Form Headers
             $("#addCategoryHeader").text("Add category");
             $("#addCategorySubmit").text("Add category");
         });
@@ -76,6 +84,7 @@
             var group = $('#group').val();
             var groupname = $("#group option:selected").text();
             var tax = $('#tax').val();
+            var taxname = $("#tax option:selected").text();
 
             var transcode = {
                 "code": code,
@@ -95,23 +104,15 @@
                     dataType: 'json',
                     success: function(data)
                     {
-                        console.log(
-                            "data returned: " +
-                            JSON.stringify(
-                                data));
-                        trans_table.api().row.add(
-                                data)
-                            .draw();
-                        $('#addCategory').modal(
-                            'hide');
+                        data["action"] = '<a class="edit-category" href="#addCategory" data-toggle="modal" data-code="'+data["code"]+'">Edit</a> <a class="delete-category" href="#deleteCategory" data-code="'+data["code"]+'">Delete</a>';
+                        console.log( "data returned: " + JSON.stringify(data));
+                        trans_table.api().row( row ).data( data ).draw();
+                        $('#addCategory').modal('hide');
                     },
                     error: function(data)
                     {
-                        trans_table.api().row.add(
-                                category)
-                            .draw();
-                        $('#addCategory').modal(
-                            'hide');
+                        trans_table.api().row.add(transcode).draw();
+                        $('#addCategory').modal('hide');
                     }
                 });
             }
@@ -127,19 +128,13 @@
                     success: function(data)
                     {
                         data["action"] = '<a class="edit-category" href="#addCategory" data-toggle="modal" data-code="'+data["code"]+'">Edit</a> <a class="delete-category" href="#deleteCategory" data-code="'+data["code"]+'">Delete</a>';
-                        trans_table.api().row.add(
-                                data)
-                            .draw();
-                        $('#addCategory').modal(
-                            'hide');
+                        trans_table.api().row.add(data).draw();
+                        $('#addCategory').modal('hide');
                     },
                     error: function(data)
                     {
-                        trans_table.api().row.add(
-                                category)
-                            .draw();
-                        $('#addCategory').modal(
-                            'hide');
+                        trans_table.api().row.add(transcode).draw();
+                        $('#addCategory').modal('hide');
                     }
                 });
             }
@@ -228,14 +223,18 @@
                             <li>
                                 <label for="group">Group:</label>
                                 <select id="group" name="group">
-                                    [% FOREACH group IN groups_loop %]
-                                    <option value="[% group.groupcode %]">[% group.groupname %]</option>
+                                    [% FOREACH group IN groups %]
+                                    <option value="[% group.authorised_value %]">[% group.lib %]</option>
                                     [% END %]
                                 </select>
                             </li>
                             <li>
                                 <label for="tax">Tax Rate:</label>
-                                <input type="text" id="tax" name="tax">
+                                <select id="tax" name="tax">
+                                    [% FOREACH tax IN taxrates %]
+                                    <option value="[% tax.authorised_value %]">[% tax.lib %]</option>
+                                    [% END %]
+                                </select>
                             </li>
                         </ol>
                     </fieldset>
