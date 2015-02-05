@@ -10,6 +10,11 @@ $(document).ready(function() {
         'aaSorting': [],
         "sDom": 'C<"top pager"ilpf><"#filter_c">tr<"bottom pager"ip>'
     }));
+
+    var pop = [% popup %];
+    if ( pop ) {
+       $('#selectTill').modal(); 
+    }
 });
 </script>
 </head>

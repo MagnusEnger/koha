@@ -63,11 +63,16 @@ elsif ( $cmd eq 'cashup' ) {
     );
 }
 
-warn "tillid: " . $till->tillid();
+my $total_paid_in;
+my $total_paid_out;
+my $transactions;
+my $popup;
+
+if ($till) {
 my $transactions = get_transactions( $till->tillid(), $cmd, $date );
 
-my $total_paid_in  = sum map { $_->{amt} if $_->{amt} > 0 } @{$transactions};
-my $total_paid_out = sum map { $_->{amt} if $_->{amt} < 0 } @{$transactions};
+$total_paid_in  = sum map { $_->{amt} if $_->{amt} > 0 } @{$transactions};
+$total_paid_out = sum map { $_->{amt} if $_->{amt} < 0 } @{$transactions};
 
 if ( $cmd eq 'cashup' ) {
 
@@ -98,6 +103,9 @@ if ( $cmd eq 'cashup' ) {
         cashup    => 1,
     );
 }
+} else {
+    $popup = '1';
+}
 
 $template->param(
     branchname   => $branchname,
@@ -106,6 +114,7 @@ $template->param(
     total_in     => $total_paid_in,
     total_out    => $total_paid_out,
     balance      => $total_paid_in + $total_paid_out,    # paid_out is neg
+    popup        => $popup,
 );
 
 output_html_with_http_headers( $q, $cookie, $template->output );
