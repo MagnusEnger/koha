@@ -39,24 +39,31 @@ my ( $template, $loggedinuser, $cookie, $user_flags ) = get_template_and_user(
     }
 );
 
+my $user = GetMember( 'borrowernumber' => $loggedinuser );
+my $branchname = GetBranchName( $user->{branchcode} );
+
 my $tillid = SessionTillId();
 my $schema = Koha::Database->new()->schema();
 
-my @payment_types = $schema->resultset('PaymentType')->search( { category => 'PaymentType', });
+my @payment_types =
+  $schema->resultset('PaymentType')->search( { category => 'PaymentType', } );
 
-my @transcodes = $schema->resultset('CashTranscode')->search( undef, { order_by => { -asc => 'code', }});
-
-
-
+my @transcodes = $schema->resultset('CashTranscode')
+  ->search( undef, { order_by => { -asc => 'code', } } );
 
 ## Placeholder we need a screen for accepting payments not borrower related
 ## e.g. sale of goods
 ### and recording such as a transaction
 
 $template->param(
-    branchname => $branchname,
-    paymenttypes => \@paymenttypes,
+    branchname   => $branchname,
+    paymenttypes => \@payment_types,
     transcodes   => \@transcodes,
 );
 
 output_html_with_http_headers( $q, $cookie, $template->output );
+
+sub SessionTillId {
+    # for now default
+    return 1;
+}

@@ -18,6 +18,15 @@
       <div class="yui-u">
 
          <p>Work in Progress</p>
+         <ul>
+           <li>
+       <a href="/cgi-bin/koha/cm/till.pl">Till Screen</a>
+	</li>
+           <li>
+       <a href="/cgi-bin/koha/cm/pay.pl">Pay Screen</a>
+	</li>
+              
+         </ul>
       </div>
     </div>
   </div>
