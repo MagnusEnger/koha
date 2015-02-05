@@ -42,8 +42,6 @@ my ( $template, $loggedinuser, $cookie, $user_flags ) = get_template_and_user(
 my $user = GetMember( 'borrowernumber' => $loggedinuser );
 my $branchname = GetBranchName( $user->{branchcode} );
 
-# here be tigers
-#
 my $schema = Koha::Database->new()->schema;
 
 my $till = get_till( $schema, $q );
@@ -115,17 +113,14 @@ output_html_with_http_headers( $q, $cookie, $template->output );
 sub get_till {
     my ( $schema, $cgi_query ) = @_;
 
-    my $id = $cgi_query->param('till_id');
+    my $id = $cgi_query->param('tillid');
     $id ||= $cgi_query->cookie('KohaStaffClient');
 
     if ($id) {
         return $schema->resultset('CashTill')->find($id);
     }
 
-    # use name
-    my $name = $cgi_query->param('till_name');
-    $name ||= 'DEFAULT';
-    my $rs = $schema->resultset('CashTill')->search( { name => $name } );
+    my $rs = $schema->resultset('CashTill')->search( { tillid => $id } );
     return $rs->single;
 }
 

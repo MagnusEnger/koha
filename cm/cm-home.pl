@@ -37,14 +37,14 @@ my ( $template, $loggedinuser, $cookie, $user_flags ) = get_template_and_user(
     }
 );
 
-my $user = GetMember( 'borrowernumber' => $loggedinuser );
+my $user       = GetMember( 'borrowernumber' => $loggedinuser );
 my $branchname = GetBranchName( $user->{branchcode} );
-my $tillid = SessionTillId();
+my $tillid     = $query->param('tillid') || $query->cookie('KohaStaffClient');
 
 # here be tigers
 #
 
-$template->param( branchname => $branchname, );
+$template->param( branchname => $branchname, tillid => $tillid );
 
 output_html_with_http_headers( $query, $cookie, $template->output );
 

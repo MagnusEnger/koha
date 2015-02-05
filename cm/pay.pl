@@ -42,7 +42,7 @@ my ( $template, $loggedinuser, $cookie, $user_flags ) = get_template_and_user(
 my $user = GetMember( 'borrowernumber' => $loggedinuser );
 my $branchname = GetBranchName( $user->{branchcode} );
 
-my $tillid = SessionTillId();
+my $tillid = $q->param('tillid') || $q->cookie('KohaStaffClient');
 my $schema = Koha::Database->new()->schema();
 
 my @payment_types =
@@ -57,13 +57,10 @@ my @transcodes = $schema->resultset('CashTranscode')
 
 $template->param(
     branchname   => $branchname,
+    tillid       => $tillid,
     paymenttypes => \@payment_types,
     transcodes   => \@transcodes,
 );
 
 output_html_with_http_headers( $q, $cookie, $template->output );
 
-sub SessionTillId {
-    # for now default
-    return 1;
-}
