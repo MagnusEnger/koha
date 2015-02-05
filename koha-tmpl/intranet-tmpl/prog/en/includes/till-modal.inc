@@ -6,7 +6,7 @@
         {
 
             var tillid = $('#till').val();
-            var tilldescription = $("#till option:selected").text();
+            var tillname = $("#till option:selected").text();
             $.ajax(
             {
                 type: "GET",
@@ -14,7 +14,7 @@
                     tillid,
                 success: function(data)
                 {
-                    $('#KohaStaffClient').text(tilldescription);
+                    $('#KohaStaffClient').text(tillname);
                     $('#selectTill').modal('hide');
                 },
                 error: function(data)
@@ -47,7 +47,7 @@
                         <label for="till">Choose till:</label>
                         <select id="till" name="till">
                             [% FOREACH till IN tills_loop %]
-                            <option value="[% till.tillid %]">[% till.description %]</option>
+                            <option value="[% till.tillid %]">[% till.name %]</option>
                             [% END %]
                         </select>
                     </li>
