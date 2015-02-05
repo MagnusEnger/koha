@@ -5,7 +5,7 @@ create table cash_till (
 	description varchar(100) not null,
 	branch varchar(10),
 	primary key (tillid),
-	unique key name (name),
+        UNIQUE KEY name_branch (name,branch),
 	foreign key (branch) references branches (branchcode)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
