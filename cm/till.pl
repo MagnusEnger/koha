@@ -66,10 +66,10 @@ elsif ( $cmd eq 'cashup' ) {
 my $total_paid_in;
 my $total_paid_out;
 my $transactions;
-my $popup;
+my $popup = 0;
 
 if ($till) {
-my $transactions = get_transactions( $till->tillid(), $cmd, $date );
+$transactions = get_transactions( $till->tillid(), $cmd, $date );
 
 $total_paid_in  = sum map { $_->{amt} if $_->{amt} > 0 } @{$transactions};
 $total_paid_out = sum map { $_->{amt} if $_->{amt} < 0 } @{$transactions};
