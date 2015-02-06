@@ -157,7 +157,7 @@ function moneyFormat(textObj) {
         <label for="till">Till: </label>
         <select name="till" id="till">
             [% FOREACH till IN tills_loop %]
-            <option value="[% till.tillid %]">[% till.description %]</option>
+            <option value="[% till.tillid %]">[% till.name %]</option>
             [% END %]
         </select>
     </li>
@@ -238,7 +238,7 @@ function moneyFormat(textObj) {
         <label for="till">Till: </label>
         <select name="till" id="till">
             [% FOREACH till IN tills_loop %]
-            <option value="[% till.tillid %]">[% till.description %]</option>
+            <option value="[% till.tillid %]">[% till.name %]</option>
             [% END %]
         </select>
     </li>
