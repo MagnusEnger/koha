@@ -21,9 +21,6 @@
 <h5>Basic parameters</h5>
 <ul>
 	<li><a href="/cgi-bin/koha/admin/branches.pl">Libraries and groups</a></li>
-    [% IF Koha.Preference( 'CashManagement' ) %]
-    <li><a href="/cgi-bin/koha/admin/tills.pl">Tills</a></li>
-    [% END %]
 	<li><a href="/cgi-bin/koha/admin/itemtypes.pl">Item types</a></li>
 	<li><a href="/cgi-bin/koha/admin/authorised_values.pl">Authorized values</a></li>
 </ul>
@@ -60,6 +57,15 @@
 	<li><a href="/cgi-bin/koha/admin/aqbudgets.pl">Funds</a></li>
 
 </ul>
+
+    [% IF Koha.Preference( 'CashManagement' ) %]
+<h5>Cash Management parameters</h5>
+<ul>
+    <li><a href="/cgi-bin/koha/admin/transcode.pl">Category Codes</a></li>
+    <li><a href="/cgi-bin/koha/admin/tills.pl">Tills</a></li>
+</ul>
+    [% END %]
+
 
 <h5>Additional parameters</h5>
 
