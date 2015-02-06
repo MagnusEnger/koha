@@ -91,7 +91,7 @@ sub recordpayment {
     warn "recordpayment";
 
     #here we update the account lines
-    my ( $borrowernumber, $data, $sip_paytype, $payment_note, $tillid, $type ) = @_;
+    my ( $borrowernumber, $data, $sip_paytype, $payment_note, $tillid, $type, $tcode ) = @_;
     my $dbh        = C4::Context->dbh;
     my $newamtos   = 0;
     my $accdata    = "";
@@ -135,7 +135,7 @@ sub recordpayment {
         $usth->execute( $newamtos, $thisacct );
 
         if ( C4::Context->preference('CashManagement')) {
-            my $tcode = 'DEFAULT'; #FIXME
+            $tcode ||= 'DEFAULT'; #FIXME
             my $payment_type = $type;
             my $select = { tillid => $tillid };
             my $till = Koha::Till->new( $select );
@@ -219,7 +219,7 @@ sub makepayment {
     #here we update both the accountoffsets and the account lines
     #updated to check, if they are paying off a lost item, we return the item
     # from their card, and put a note on the item record
-    my ( $accountlines_id, $borrowernumber, $accountno, $amount, $user, $branch, $payment_note, $tillid, $type ) = @_;
+    my ( $accountlines_id, $borrowernumber, $accountno, $amount, $user, $branch, $payment_note, $tillid, $type, $tcode ) = @_;
     my $dbh = C4::Context->dbh;
     my $manager_id = 0;
     $manager_id = C4::Context->userenv->{'number'} if C4::Context->userenv; 
@@ -290,7 +290,7 @@ sub makepayment {
     }
 
     if ( C4::Context->preference('CashManagement')) {
-        my $tcode = 'DEFAULT'; # FIXME
+        $tcode ||= 'DEFAULT'; # FIXME
         my $payment_type = $type;
         my $select = { tillid => $tillid };
         my $till = Koha::Till->new( $select );
@@ -617,7 +617,7 @@ will be credited to the next one.
 =cut
 
 sub recordpayment_selectaccts {
-    my ( $borrowernumber, $amount, $accts, $note, $tillid, $type ) = @_;
+    my ( $borrowernumber, $amount, $accts, $note, $tillid, $type, $tcode ) = @_;
     warn "recordpayment_selectaccts";
 
     my $dbh        = C4::Context->dbh;
@@ -664,7 +664,7 @@ sub recordpayment_selectaccts {
         $sth->execute( $newamtos, $thisacct );
 
         if ( C4::Context->preference('CashManagement')) {
-            my $tcode = 'DEFAULT'; #FIXME
+            $tcode ||= 'DEFAULT'; #FIXME
             my $payment_type = $type;
             my $select = { tillid => $tillid };
             my $till = Koha::Till->new( $select );
@@ -719,7 +719,7 @@ sub recordpayment_selectaccts {
 # makepayment needs to be fixed to handle partials till then this separate subroutine
 # fills in
 sub makepartialpayment {
-    my ( $accountlines_id, $borrowernumber, $accountno, $amount, $user, $branch, $payment_note, $tillid, $type ) = @_;
+    my ( $accountlines_id, $borrowernumber, $accountno, $amount, $user, $branch, $payment_note, $tillid, $type, $tcode ) = @_;
     warn "makepartialpayment";
     my $manager_id = 0;
     $manager_id = C4::Context->userenv->{'number'} if C4::Context->userenv;
@@ -761,7 +761,7 @@ sub makepartialpayment {
         '', 'Pay', $data->{'itemnumber'}, $manager_id, $payment_note);
 
     if ( C4::Context->preference('CashManagement')) {
-        my $tcode = 'DEFAULT'; #FIXME
+        $tcode ||= 'DEFAULT'; #FIXME
         my $payment_type = $type;
         my $select = { tillid => $tillid };
         my $till = Koha::Till->new( $select );
