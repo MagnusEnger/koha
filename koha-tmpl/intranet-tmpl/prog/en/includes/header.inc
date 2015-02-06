@@ -29,7 +29,7 @@
                     [% END %]
 		    [% IF CAN_user_cashmanage %]
 		    <li>
-		      <a href="/cgi-bin/koha/cm/till.pl">Cash management</a>
+		      <a href="/cgi-bin/koha/cm/cm-home.pl">Cash management</a>
 		    </li>
 		    [% END %]
                     [% IF ( CAN_user_reports ) %]
