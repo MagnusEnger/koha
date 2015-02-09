@@ -161,7 +161,7 @@
 </script>
 </head>
 
-<body id="admin_edi_ean" class="admin">
+<body id="admin_transcode" class="admin">
     [% INCLUDE 'header.inc' %] [% INCLUDE 'cat-search.inc' %]
 
     <div id="breadcrumbs">
