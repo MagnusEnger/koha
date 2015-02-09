@@ -55,12 +55,8 @@ my @payment_types =
 
 @payment_types = map { $_->authorised_value } @payment_types;
 
-my @transcodes = $schema->resultset('CashTranscode')->search(
-
-    #      { code_type => 'charge' },
-    undef,
-    { order_by => { -asc => 'code', } }
-);
+my @transcodes = $schema->resultset('CashTranscode')
+  ->search( { charge_visible => 1 }, { order_by => { -asc => 'code', } } );
 
 # kludge we need to add a typr col so we can select only charges
 @transcodes = grep { $_ if ( $_->code ne 'CASHUP' ) } @transcodes;

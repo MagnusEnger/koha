@@ -14,9 +14,11 @@ create table cash_transcode (
         description varchar(100) not null default '',
 	income_group varchar(10),
 	taxrate varchar(10),
+	visible_charge boolean not null default 1,
 	primary key (code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- alter table cash_transcode add column visible_charge boolean not null default 1;
 
 create table cash_transaction (
 	id serial not null,

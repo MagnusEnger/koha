@@ -38,6 +38,12 @@
                 },
                 {
                     "targets": 4,
+                    "orderable": true,
+                    "searchable": true,
+                    "data": "visible_charge",
+                },
+                {
+                    "targets": 5,
                     "orderable": false,
                     "searchable": false,
                     "data": "action",
@@ -60,6 +66,7 @@
             $("#addCategoryForm #description").val( data.description );
             $("#addCategoryForm #group").val( data.group );
             $("#addCategoryForm #tax").val( data.taxrate );
+            $("#addCategoryForm #visible_charge").val( data.visible_charge );
         });
 
         $('#add_category').on('click', function()
@@ -69,6 +76,7 @@
             $("#addCategoryForm #description").removeAttr('value');
             $("#addCategoryForm #group").removeAttr('value');
             $("#addCategoryForm #tax").removeAttr('value');
+            $("#addCategoryForm #visible_charge").removeAttr('value');
 
             // Correct Form Headers
             $("#addCategoryHeader").text("Add category");
@@ -85,12 +93,14 @@
             var groupname = $("#group option:selected").text();
             var tax = $('#tax').val();
             var taxname = $("#tax option:selected").text();
+            var visible_charge = $('#visible_charge').val();
 
             var transcode = {
                 "code": code,
                 "description": description,
                 "income_group": group,
-                "taxrate": tax
+                "taxrate": tax,
+                "visible_charge": visible_charge
             };
 
             if ( edit )
@@ -177,6 +187,7 @@
                             <th>Description</th>
                             <th>Group Code</th>
                             <th>Tax rate</th>
+                            <th>Visible charge</th>
                             <th>Actions</th>
                         </thead>
                         [% FOREACH tcode IN transcodes %]
@@ -185,6 +196,13 @@
                             <td>[% tcode.description %]</td>
                             <td>[% tcode.income_group %]</td>
                             <td>[% tcode.taxrate %]</td>
+                            <td>
+                                [% IF tcode.visible_charge == 1%]
+                                   Yes
+                                [% ELSE %]
+                                   No
+                                [% END %]
+                            </td>
                             <td>
                                 <a class="edit-category" href="#addCategory" data-toggle="modal" data-code="[% tcode.code %]">Edit</a>
                                 <a class="delete-category" href="#deleteCategory" data-code="[% tcode.code %]">Delete</a>
@@ -236,6 +254,11 @@
                                     [% END %]
                                 </select>
                             </li>
+                            <li>
+                                <label for="visible_charge">Visible charge:</label>
+                                <input type="checkbox" id="visible_charge" name="visible_charge">
+                            </li>
+
                         </ol>
                     </fieldset>
                 </form>
