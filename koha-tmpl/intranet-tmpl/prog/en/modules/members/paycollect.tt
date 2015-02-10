@@ -4,7 +4,39 @@
 <script type= "text/javascript">
 //<![CDATA[
 $(document).ready(function() {
-    $('#payindivfine, #woindivfine, #payfine').preventDoubleFormSubmit();
+    jQuery.fn.preventDoubleFormSubmitCustom = function(prevent) {
+      $(this).on('submit',function(e){
+        var $form = $(this);
+
+        if ($form.data('submitted') === true || prevent === true) {
+          // Previously submitted - don't submit again
+          e.preventDefault();
+        } else {
+          // Mark it so that the next submit can be ignored
+          $form.data('submitted', true);
+        }
+      });
+
+      // Keep chainability
+      return this;
+    };
+
+    var prevent = false;
+    $('#collected').focus(function() {
+        prevent = true;
+    }).blur(function() {
+        prevent = false;
+    });
+
+    $('#payindivfine, #woindivfine, #payfine').preventDoubleFormSubmitCustom(prevent);
+
+/*
+    $('#payindivfine, #woindivfine, #payfine').submit(function(e) {
+        if (prevent) {
+           $(':focus').trigger('blur');
+        }
+    });
+*/
 });
 //]]>
 </script>
@@ -39,7 +71,8 @@ function moneyFormat(textObj) {
     if (dolAmount == "") {
         dolAmount = "0";
     }
-// Strip leading 0s
+
+    // Strip leading 0s
     if (dolAmount.length > 1) {
         while(dolAmount.length > 1 && dolAmount.substring(0,1) == "0") {
             dolAmount = dolAmount.substring(1,dolAmount.length);
@@ -48,7 +81,8 @@ function moneyFormat(textObj) {
     if (decAmount.length > 2) {
         decAmount = decAmount.substring(0,2);
     }
-// Pad right side
+
+    // Pad right side
     if (decAmount.length == 1) {
        decAmount = decAmount + "0";
     }
@@ -57,6 +91,20 @@ function moneyFormat(textObj) {
     }
 
     textObj.value = dolAmount + "." + decAmount;
+
+    // Calculate Change
+    var total = [% amountoutstanding | format('%.2f') %];
+    var giveChange = ( Number(dolAmount + "." + decAmount) * 100 - Number(total) * 100 ) / 100;
+    if ( giveChange > 0 ) {
+        document.getElementById('change').innerHTML = giveChange.toFixed(2);
+    }
+
+    // Set hidden form field
+    if ( giveChange > 0 ) {
+        document.getElementById('paid').value = total;
+    } else {
+        document.getElementById('paid').value = dolAmount + "." + decAmount;
+    }
 }
 //]]>
 </script>
@@ -141,9 +189,13 @@ function moneyFormat(textObj) {
 
 <ol>
     <li>
-        <label for="paid">Collect from patron: </label>
-            <!-- default to paying all -->
-        <input name="paid" id="paid" value="[% amountoutstanding | format('%.2f') %]" onchange="moneyFormat(document.payindivfine.paid)"/>
+        <label for="collected">Collected from patron: </label>
+        <input name="collected" id="collected" value="[% amountoutstanding | format('%.2f') %]" onchange="moneyFormat(document.payindivfine.collected)"/>
+        <input type="hidden" name="paid" id="paid" value="[% amountoutstanding | format('%.2f') %]" />
+    </li>
+    <li>
+        <label for="change">Change to give: </label>
+        <span  name="change" id="change" class="debit">0.00</span>
     </li>
     <li>
         <label for="type">Payment type: </label>
@@ -222,9 +274,13 @@ function moneyFormat(textObj) {
             <span class="debit">[% total | format('%.2f') %]</span>
         </li>
     <li>
-        <label for="paid">Collect from patron: </label>
-        <!-- default to paying all -->
-        <input name="paid" id="paid" value="[% total | format('%.2f') %]" onchange="moneyFormat(document.payfine.paid)"/>
+        <label for="collected">Collected from patron: </label>
+        <input name="collected" id="collected" value="[% total | format('%.2f') %]" onchange="moneyFormat(document.payfine.collected)"/>
+        <input type="hidden" name="paid" id="paid" value="[% total | format('%.2f') %]" />
+    </li>
+    <li>
+        <label for="change">Change to give: </label>
+        <span  name="change" id="change" class="debit">0.00</span>
     </li>
     <li>
         <label for="type">Payment type: </label>
