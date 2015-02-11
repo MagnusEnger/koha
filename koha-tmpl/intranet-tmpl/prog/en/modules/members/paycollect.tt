@@ -162,7 +162,7 @@ function moneyFormat(textObj) {
 <ol>
     <li>
         <label for="collected">Collected from patron: </label>
-        <input name="collected" id="collected" value="[% amountoutstanding | format('%.2f') %]" onchange="moneyFormat(document.payindivfine.collected)" onkeydown="if (event.keyCode == 13) { blur(this); return false; }"/>
+        <input name="collected" id="collected" value="[% amountoutstanding | format('%.2f') %]" onchange="moneyFormat(document.payindivfine.collected)" onkeydown="if (event.keyCode == 13) { blur(this); document.getElementById('submitbutton').focus(); return false; }"/>
         <input type="hidden" name="paid" id="paid" value="[% amountoutstanding | format('%.2f') %]" />
     </li>
     <li>
@@ -188,7 +188,7 @@ function moneyFormat(textObj) {
 </ol>
 </fieldset>
 
-    <div class="action"><input type="submit" name="submitbutton" value="Confirm" />
+    <div class="action"><input id="submitbutton" type="submit" name="submitbutton" value="Confirm" />
         <a class="cancel" href="/cgi-bin/koha/members/pay.pl?borrowernumber=[% borrower.borrowernumber %]">Cancel</a></div>
     </form>
 [% ELSIF ( writeoff_individual ) %]
@@ -247,7 +247,7 @@ function moneyFormat(textObj) {
         </li>
     <li>
         <label for="collected">Collected from patron: </label>
-        <input name="collected" id="collected" value="[% total | format('%.2f') %]" onchange="moneyFormat(document.payfine.collected)" onkeydown="if (event.keyCode == 13) { blur(this); return false; }"/>
+        <input name="collected" id="collected" value="[% total | format('%.2f') %]" onchange="moneyFormat(document.payfine.collected)" onkeydown="if (event.keyCode == 13) { blur(this); document.getElementById('submitbutton').focus(); return false; }"/>
         <input type="hidden" name="paid" id="paid" value="[% total | format('%.2f') %]" />
     </li>
     <li>
@@ -276,7 +276,7 @@ function moneyFormat(textObj) {
     </li>
     </ol>
     </fieldset>
-    <div class="action"><input type="submit" name="submitbutton" value="Confirm" />
+    <div class="action"><input id="submitbutton" type="submit" name="submitbutton" value="Confirm" />
         <a class="cancel" href="/cgi-bin/koha/members/boraccount.pl?borrowernumber=[% borrower.borrowernumber %]">Cancel</a></div>
     </form>
 [% END %]
