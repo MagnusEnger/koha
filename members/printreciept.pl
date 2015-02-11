@@ -53,6 +53,10 @@ my $accountlines_id =
 #get borrower details
 my $data = GetMember( 'borrowernumber' => $borrowernumber );
 
+if ( $action eq 'print' ) {
+    # Nothing to see here?
+}
+
 if ( $data->{'category_type'} eq 'C' ) {
     my ( $catcodes, $labels ) =
       GetborCatFromCatType( 'A', 'WHERE category_type = ?' );

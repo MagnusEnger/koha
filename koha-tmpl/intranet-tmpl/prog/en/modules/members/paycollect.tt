@@ -189,7 +189,7 @@ function moneyFormat(textObj) {
 </fieldset>
 
     <div class="action"><input id="submitbutton" type="submit" name="submitbutton" value="Confirm" />
-        <a class="btn" href="/cgi-bin/koha/members/printreciept.pl?borrowernumber=[% borrower.borrowernumber %]&accountlines_id=[% accountlines_id %]">Reciept</a>
+        <a class="btn" target="_blank" href="/cgi-bin/koha/members/printreciept.pl?borrowernumber=[% borrower.borrowernumber %]&accountlines_id=[% accountlines_id %]&action=print">Reciept</a>
         <a class="cancel" href="/cgi-bin/koha/members/pay.pl?borrowernumber=[% borrower.borrowernumber %]">Cancel</a></div>
     </form>
 [% ELSIF ( writeoff_individual ) %]
@@ -230,7 +230,7 @@ function moneyFormat(textObj) {
     </table>
     </fieldset>
     <div class="action"><input type="submit" name="confirm_writeoff" id="confirm_writeoff" value="Write off this charge" />
-        <a class="btn" href="/cgi-bin/koha/members/printreciept.pl?borrowernumber=[% borrower.borrowernumber %]&accountlines_id=[% accountlines_id %]">Reciept</a>
+        <a class="btn" target="_blank" href="/cgi-bin/koha/members/printreciept.pl?borrowernumber=[% borrower.borrowernumber %]&accountlines_id=[% accountlines_id %]&action=print">Reciept</a>
         <a class="cancel" href="/cgi-bin/koha/members/pay.pl?borrowernumber=[% borrower.borrowernumber %]">Cancel</a></div>
     </form>
 [% ELSE %]
@@ -281,9 +281,9 @@ function moneyFormat(textObj) {
     <div class="action">
         <input id="submitbutton" type="submit" name="submitbutton" value="Confirm" />
         [% IF ( selected_accts ) %]
-        <a class="btn" href="/cgi-bin/koha/members/printreciept.pl?borrowernumber=[% borrower.borrowernumber %]&accountlines_id=[% selected_accts %]">Reciept</a>
+        <a class="btn" target="_blank" href="/cgi-bin/koha/members/printreciept.pl?borrowernumber=[% borrower.borrowernumber %]&accountlines_id=[% selected_accts %]&action=print">Reciept</a>
         [% ELSE %]
-        <a class="btn" href="/cgi-bin/koha/members/printreciept.pl?borrowernumber=[% borrower.borrowernumber %]">Reciept</a>
+        <a class="btn" target="_blank" href="/cgi-bin/koha/members/printreciept.pl?borrowernumber=[% borrower.borrowernumber %]&action=print">Reciept</a>
         [% END %]
         <a class="cancel" href="/cgi-bin/koha/members/boraccount.pl?borrowernumber=[% borrower.borrowernumber %]">Cancel</a>
     </div>
