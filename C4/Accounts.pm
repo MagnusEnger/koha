@@ -136,6 +136,9 @@ sub recordpayment {
 
         if ( C4::Context->preference('CashManagement')) {
             my $tcode = $accdata->{'type'} ||= 'DEFAULT';
+            if ( $tcode eq 'F' ) {
+                $tcode = 'FINE';
+            }
             my $payment_type = $type;
             my $select = { tillid => $tillid };
             my $till = Koha::Till->new( $select );
@@ -291,6 +294,9 @@ sub makepayment {
 
     if ( C4::Context->preference('CashManagement')) {
         my $tcode = $data->{'accounttype'} ||= 'DEFAULT';
+        if ( $tcode eq 'F' ) {
+            $tcode = 'FINE';
+        }
         my $payment_type = $type;
         my $select = { tillid => $tillid };
         my $till = Koha::Till->new( $select );
@@ -665,6 +671,9 @@ sub recordpayment_selectaccts {
 
         if ( C4::Context->preference('CashManagement')) {
             my $tcode = $accdata->{accounttype} ||= 'DEFAULT';
+            if ( $tcode eq 'F' ) {
+                $tcode = 'FINE';
+            }
             my $payment_type = $type;
             my $select = { tillid => $tillid };
             my $till = Koha::Till->new( $select );
@@ -762,6 +771,9 @@ sub makepartialpayment {
 
     if ( C4::Context->preference('CashManagement')) {
         my $tcode = $data->{'accounttype'} ||= 'DEFAULT';
+        if ( $tcode eq 'F' ) {
+            $tcode = 'FINE';
+        }
         my $payment_type = $type;
         my $select = { tillid => $tillid };
         my $till = Koha::Till->new( $select );
