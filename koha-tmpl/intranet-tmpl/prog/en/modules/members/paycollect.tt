@@ -61,7 +61,11 @@ function moneyFormat(textObj) {
     textObj.value = dolAmount + "." + decAmount;
 
     // Calculate Change
+    [% IF total %]
+    var total = [% total | format('%.2f') %];
+    [% ELSE %]
     var total = [% amountoutstanding | format('%.2f') %];
+    [% END %]
     var giveChange = ( Number(dolAmount + "." + decAmount) * 100 - Number(total) * 100 ) / 100;
     if ( giveChange > 0 ) {
         document.getElementById('change').innerHTML = giveChange.toFixed(2);
