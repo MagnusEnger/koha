@@ -62,6 +62,16 @@ elsif ( $cmd eq 'cashup' ) {
         }
     );
 }
+elsif ( $cmd eq 'addfloat' ) {
+    my $float_amt = $q->param('floatamt');
+    my $ctrl_rec  = $schema->resultset('CashTransaction')->create(
+        {
+            till  => $till->tillid(),
+            tcode => 'FLOAT',
+            amt   => $float_amt,
+        }
+    );
+}
 
 my $total_paid_in;
 my $total_paid_out;
@@ -69,41 +79,48 @@ my $transactions;
 my $popup = 0;
 
 if ($till) {
-$transactions = get_transactions( $till->tillid(), $cmd, $date );
+    $transactions = get_transactions( $till->tillid(), $cmd, $date );
+    my $count = @{$transactions};
 
-$total_paid_in  = sum map { $_->{amt} if $_->{amt} > 0 } @{$transactions};
-$total_paid_out = sum map { $_->{amt} if $_->{amt} < 0 } @{$transactions};
+    $total_paid_in  = sum map { $_->{amt} if $_->{amt} > 0 } @{$transactions};
+    $total_paid_out = sum map { $_->{amt} if $_->{amt} < 0 } @{$transactions};
+    $total_paid_in  ||= 0;
+    $total_paid_out ||= 0;
 
-if ( $cmd eq 'cashup' ) {
+    if ( $cmd eq 'cashup' ) {
 
-    # TBD Should loop through all payment types
-    my $subtotals     = [];
-    my @payment_types = $schema->resultset('AuthorisedValue')
-      ->search( { category => 'PaymentType', } )->all();
-    foreach my $pt (@payment_types) {
-        my $type = $pt->authorised_value;
-        my $sum_in =
-          sum map { $_->{amt} if $_->{paymenttype} eq $type && $_->{amt} > 0 }
-          @{$transactions};
-        my $sum_out =
-          sum map { $_->{amt} if $_->{paymenttype} eq $type && $_->{amt} < 0 }
-          @{$transactions};
+        my $subtotals     = [];
+        my @payment_types = $schema->resultset('AuthorisedValue')
+          ->search( { category => 'PaymentType', } )->all();
+        foreach my $pt (@payment_types) {
+            my $type = $pt->authorised_value;
+            my $sum_in =
+              sum
+              map { $_->{amt} if $_->{paymenttype} eq $type && $_->{amt} > 0 }
+              @{$transactions};
+            my $sum_out =
+              sum
+              map { $_->{amt} if $_->{paymenttype} eq $type && $_->{amt} < 0 }
+              @{$transactions};
+            $sum_in  ||= 0;
+            $sum_out ||= 0;
 
-        push @{$subtotals},
-          {
-            type    => $type,
-            in      => $sum_in,
-            out     => $sum_out,
-            balance => $sum_in + $sum_out,
-          };
+            push @{$subtotals},
+              {
+                type    => $type,
+                in      => $sum_in,
+                out     => $sum_out,
+                balance => $sum_in + $sum_out,
+              };
+        }
+
+        $template->param(
+            subtotals => $subtotals,
+            cashup    => 1,
+        );
     }
-
-    $template->param(
-        subtotals => $subtotals,
-        cashup    => 1,
-    );
 }
-} else {
+else {
     $popup = '1';
 }
 
@@ -138,7 +155,7 @@ sub get_transactions {
     my $sql;
     my @query_parameters;
 
-    if ( $cmd eq 'display' ) {
+    if ( $cmd eq 'display' || $cmd eq 'cashup' ) {
         $sql =
 'select * from cash_transaction where till = ? and datediff( created, NOW()) = 0 order by created';
         @query_parameters = ($till);
