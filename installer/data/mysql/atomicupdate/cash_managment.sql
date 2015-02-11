@@ -63,3 +63,5 @@ insert into authorised_values (category, authorised_value, lib)
 
 insert into authorised_values (category, authorised_value, lib)
    values( 'PaymentGroup', 'Default', 'Default');
+
+ALTER TABLE accountlines MODIFY accounttype varchar(10);
