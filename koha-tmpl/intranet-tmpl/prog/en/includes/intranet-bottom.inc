@@ -66,7 +66,7 @@
         </div>
     [% END %]
 [% END %]
-[% IF Koha.Preference( 'CashManagement' ) %]
+[% IF Koha.Preference( 'CashManagement' ) && notill != 1 %]
 [% INCLUDE 'till-modal.inc' %]
 [% END %]
     </body>
