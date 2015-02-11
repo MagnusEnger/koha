@@ -33,7 +33,7 @@ $(document).ready(function(){
 <td>
 <select name="trans_code" id="trans_code">
     [% FOREACH  t IN transcodes %]
-    <option value="[% t.code %]">[% t.code %]</option>
+    <option value="[% t.code %]">[% t.description %]</option>
     [% END %]
 </select>
 </td>
