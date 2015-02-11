@@ -189,6 +189,7 @@ function moneyFormat(textObj) {
 </fieldset>
 
     <div class="action"><input id="submitbutton" type="submit" name="submitbutton" value="Confirm" />
+        <a class="btn" href="/cgi-bin/koha/members/printreciept.pl?borrowernumber=[% borrower.borrowernumber %]&accountlines_id=[% accountlines_id %]">Reciept</a>
         <a class="cancel" href="/cgi-bin/koha/members/pay.pl?borrowernumber=[% borrower.borrowernumber %]">Cancel</a></div>
     </form>
 [% ELSIF ( writeoff_individual ) %]
@@ -229,6 +230,7 @@ function moneyFormat(textObj) {
     </table>
     </fieldset>
     <div class="action"><input type="submit" name="confirm_writeoff" id="confirm_writeoff" value="Write off this charge" />
+        <a class="btn" href="/cgi-bin/koha/members/printreciept.pl?borrowernumber=[% borrower.borrowernumber %]&accountlines_id=[% accountlines_id %]">Reciept</a>
         <a class="cancel" href="/cgi-bin/koha/members/pay.pl?borrowernumber=[% borrower.borrowernumber %]">Cancel</a></div>
     </form>
 [% ELSE %]
@@ -276,8 +278,15 @@ function moneyFormat(textObj) {
     </li>
     </ol>
     </fieldset>
-    <div class="action"><input id="submitbutton" type="submit" name="submitbutton" value="Confirm" />
-        <a class="cancel" href="/cgi-bin/koha/members/boraccount.pl?borrowernumber=[% borrower.borrowernumber %]">Cancel</a></div>
+    <div class="action">
+        <input id="submitbutton" type="submit" name="submitbutton" value="Confirm" />
+        [% IF ( selected_accts ) %]
+        <a class="btn" href="/cgi-bin/koha/members/printreciept.pl?borrowernumber=[% borrower.borrowernumber %]&accountlines_id=[% selected_accts %]">Reciept</a>
+        [% ELSE %]
+        <a class="btn" href="/cgi-bin/koha/members/printreciept.pl?borrowernumber=[% borrower.borrowernumber %]">Reciept</a>
+        [% END %]
+        <a class="cancel" href="/cgi-bin/koha/members/boraccount.pl?borrowernumber=[% borrower.borrowernumber %]">Cancel</a>
+    </div>
     </form>
 [% END %]
 </div></div>
