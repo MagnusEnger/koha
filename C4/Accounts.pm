@@ -663,7 +663,7 @@ sub recordpayment_selectaccts {
         }
         else {
             $newamtos   = $accdata->{amountoutstanding} - $amountleft;
-            $thisamt    = $newamtos;
+            $thisamt    = $amountleft;
             $amountleft = 0;
         }
         my $thisacct = $accdata->{accountlines_id};
