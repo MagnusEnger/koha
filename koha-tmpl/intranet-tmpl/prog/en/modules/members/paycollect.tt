@@ -4,39 +4,7 @@
 <script type= "text/javascript">
 //<![CDATA[
 $(document).ready(function() {
-    jQuery.fn.preventDoubleFormSubmitCustom = function(prevent) {
-      $(this).on('submit',function(e){
-        var $form = $(this);
-
-        if ($form.data('submitted') === true || prevent === true) {
-          // Previously submitted - don't submit again
-          e.preventDefault();
-        } else {
-          // Mark it so that the next submit can be ignored
-          $form.data('submitted', true);
-        }
-      });
-
-      // Keep chainability
-      return this;
-    };
-
-    var prevent = false;
-    $('#collected').focus(function() {
-        prevent = true;
-    }).blur(function() {
-        prevent = false;
-    });
-
-    $('#payindivfine, #woindivfine, #payfine').preventDoubleFormSubmitCustom(prevent);
-
-/*
-    $('#payindivfine, #woindivfine, #payfine').submit(function(e) {
-        if (prevent) {
-           $(':focus').trigger('blur');
-        }
-    });
-*/
+    $('#payindivfine, #woindivfine, #payfine').preventDoubleFormSubmit();
 });
 //]]>
 </script>
@@ -190,7 +158,7 @@ function moneyFormat(textObj) {
 <ol>
     <li>
         <label for="collected">Collected from patron: </label>
-        <input name="collected" id="collected" value="[% amountoutstanding | format('%.2f') %]" onchange="moneyFormat(document.payindivfine.collected)"/>
+        <input name="collected" id="collected" value="[% amountoutstanding | format('%.2f') %]" onchange="moneyFormat(document.payindivfine.collected)" onkeydown="if (event.keyCode == 13) { blur(this); return false; }"/>
         <input type="hidden" name="paid" id="paid" value="[% amountoutstanding | format('%.2f') %]" />
     </li>
     <li>
@@ -275,7 +243,7 @@ function moneyFormat(textObj) {
         </li>
     <li>
         <label for="collected">Collected from patron: </label>
-        <input name="collected" id="collected" value="[% total | format('%.2f') %]" onchange="moneyFormat(document.payfine.collected)"/>
+        <input name="collected" id="collected" value="[% total | format('%.2f') %]" onchange="moneyFormat(document.payfine.collected)" onkeydown="if (event.keyCode == 13) { blur(this); return false; }"/>
         <input type="hidden" name="paid" id="paid" value="[% total | format('%.2f') %]" />
     </li>
     <li>
