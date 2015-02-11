@@ -65,12 +65,23 @@ type="image/x-icon" />
             [% END %]
             <tfoot>
                 <tr>
-                    <td colspan="2">Total outstanding dues as on date :</td>
-                    [% IF ( totalcredit ) %]
-                    <td class="credit">[% ELSE %]
-                        <td class="debit">[% END %][% total %]</td>
+                    <td colspan="2">Total:</td>
+                    <td>[% total %]</td>
                 </tr>
+                <tr>
+                    <td colspan="2">Tendered:</td>
+                    <td>[% tendered %]</td>
+                </tr>
+                <tr>
+                    <td colspan="2">Change:</td>
+                    <td>[% change %]</td>
             </tfoot>
         </table>
+        <h1>Account Summary</h1>
+        [% IF ( totalcredit ) %]
+        <p>Your account is in credit by [% total %]</p>
+        [% ELSE %]
+        <p>Your account is in debit by [% total %]</p>
+        [% END %]
     </div>
     [% INCLUDE 'intranet-bottom.inc' notill="1" %]

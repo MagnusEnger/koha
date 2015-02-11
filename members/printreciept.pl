@@ -47,6 +47,8 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
 
 my $borrowernumber = $input->param('borrowernumber');
 my $action = $input->param('action') || '';
+my $change = $input->param('change');
+my $tendered = $input->param('tendered');
 my $accountlines_id =
   { map { $_ => 1 } split( /,/, $input->param('accountlines_id') ) };
 
@@ -148,6 +150,8 @@ $template->param(
     total        => sprintf( "%.2f", $total ),
     totalcredit  => $totalcredit,
     is_child     => ( $data->{'category_type'} eq 'C' ),
+    change       => $change,
+    tendered     => $tendered,
     accounts     => \@accountrows
 );
 
