@@ -134,6 +134,11 @@ sub checkout {
     $circ->patron($patron = new ILS::Patron $patron_id);
     $circ->item($item = new ILS::Item $item_id);
 
+    if ($fee_ack) {
+        $circ->fee_ack($fee_ack);
+        $circ->tillid($self->{institution}->{tillid});
+    }
+
     if (!$patron) {
 		$circ->screen_msg("Invalid Patron");
     } elsif (!$patron->charge_ok) {
