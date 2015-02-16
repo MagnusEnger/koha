@@ -220,7 +220,7 @@ sub pay_fee {
     my $trans;
 
     $trans = ILS::Transaction::FeePayment->new();
-    syslod('LOG_DEBUG', "pay_fee passed tillid:$tillid");
+    syslog('LOG_DEBUG', "pay_fee passed tillid:$tillid");
     $tillid ||= 477; # test till
 
 
