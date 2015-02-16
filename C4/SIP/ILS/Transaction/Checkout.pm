@@ -20,6 +20,7 @@ use C4::Circulation;
 use C4::Members;
 use C4::Reserves qw(ModReserveFill);
 use C4::Debug;
+use Koha::Till;
 use parent qw(ILS::Transaction);
 
 our $debug;
@@ -107,6 +108,19 @@ sub do_checkout {
         $self->screen_msg("Item is on hold shelf for another patron.");
         $noerror = 0;
     }
+
+    my ($fee, undef) = GetIssuingCharges($itemnumber, $self->{patron}->{borrowernumber});
+    if ( $fee > 0 ) {
+        $self->{sip_fee_type} = '06';
+        $self->{fee_amount} = sprintf '%.2f', $fee;
+        if ($self->{fee_ack} eq 'N' ) {
+            $noerror = 0;
+        }
+        elsif ($self->{fee_ack} eq 'Y') {
+            log_rental_fee($self->{fee_amount}, $self->{tillid});
+        }
+    }
+
 	unless ($noerror) {
 		$debug and warn "cannot issue: " . Dumper($issuingimpossible) . "\n" . Dumper($needsconfirmation);
 		$self->ok(0);
@@ -135,6 +149,17 @@ sub do_checkout {
     #$self->{item}->due_date($due);
 	$self->ok(1);
 	return $self;
+}
+sub log_rental_fee {
+    my ($fee_amt, $tillid) =@_;
+	syslog('LOG_DEBUG', "log_rental_fee till=$tillid amt=$fee_amt");
+    $tillid ||= 477; # test till
+    my $transcode = 'RENTALFEE';
+    my $pay_type  = 'Cash';
+
+    my $till = Koha::Till->new( { tillid => $tillid });
+    $till->payin($fee_amt,, $transcode, $pay_type);
+    return;
 }
 
 1;
