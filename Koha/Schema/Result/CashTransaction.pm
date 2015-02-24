@@ -62,6 +62,16 @@ __PACKAGE__->table("cash_transaction");
   is_nullable: 1
   size: 10
 
+=head2 borrowernumber
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 itemnumber
+
+  data_type: 'integer'
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -87,6 +97,10 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_foreign_key => 1, is_nullable => 0, size => 10 },
   "paymenttype",
   { data_type => "varchar", is_nullable => 1, size => 10 },
+  "borrowernumber",
+  { data_type => "integer", is_nullable => 1 },
+  "itemnumber",
+  { data_type => "integer", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -134,8 +148,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2014-12-23 10:45:30
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:PjMVYbC4gvBOxI2SiPuLOQ
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2015-02-24 15:59:37
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:tQ462bQBTX9UBDejJx1Dvg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -25,7 +25,7 @@ sub new {
 }
 
 sub payin {
-    my ( $self, $amt, $code, $type ) = @_;
+    my ( $self, $amt, $code, $type, $borrowernumber, $itemnumber ) = @_;
 
     # IN code will be pos
     # OUT code should be neg
@@ -50,6 +50,18 @@ sub payin {
             paymenttype => $type,
         }
       );
+      my $dirty = 0;
+      if ($borrowernumber) {
+          $new_transaction->borrowernumber = $borrowernumber;
+          ++$dirty;
+      }
+      if ($itemnumber) {
+          $new_transaction->itemnumber = $itemnumber;
+          ++$dirty;
+      }
+      if ($dirty) {
+          $new_transaction->update();
+      }
     return;
 }
 
