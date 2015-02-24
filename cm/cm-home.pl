@@ -21,7 +21,6 @@ use CGI;
 use C4::Auth;
 use C4::Output;
 use C4::Context;
-use Koha::Till;
 use Koha::CM;
 use C4::Members qw( GetMember );
 use C4::Branch qw( GetBranchName );

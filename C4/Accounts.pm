@@ -141,7 +141,8 @@ sub recordpayment {
             my $payment_type = $type;
             my $select = { tillid => $tillid };
             my $till = Koha::Till->new( $select );
-            $till->payin($thisamt, $tcode, $payment_type);
+            $till->payin($thisamt, $tcode, $payment_type,
+                $accdata->{borrowernumber});
         }
 
         if ( C4::Context->preference("FinesLog") ) {
@@ -298,7 +299,7 @@ sub makepayment {
         my $payment_type = $type;
         my $select = { tillid => $tillid };
         my $till = Koha::Till->new( $select );
-        $till->payin($amount, $tcode, $payment_type);
+        $till->payin($amount, $tcode, $payment_type,$borrowernumber);
     }
 
     UpdateStats({
@@ -674,7 +675,7 @@ sub recordpayment_selectaccts {
             my $payment_type = $type;
             my $select = { tillid => $tillid };
             my $till = Koha::Till->new( $select );
-            $till->payin($thisamt, $tcode, $payment_type);
+            $till->payin($thisamt, $tcode, $payment_type, $borrowernumber);
         }
 
         if ( C4::Context->preference("FinesLog") ) {
@@ -773,7 +774,7 @@ sub makepartialpayment {
         my $payment_type = $type;
         my $select = { tillid => $tillid };
         my $till = Koha::Till->new( $select );
-        $till->payin($data, $tcode, $payment_type);
+        $till->payin($data, $tcode, $payment_type,$borrowernumber);
     }
 
     UpdateStats({

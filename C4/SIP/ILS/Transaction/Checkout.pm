@@ -117,7 +117,9 @@ sub do_checkout {
             $noerror = 0;
         }
         elsif ($self->{fee_ack} eq 'Y') {
-            log_rental_fee($self->{fee_amount}, $self->{tillid});
+            log_rental_fee($self->{fee_amount}, $self->{tillid},
+                 $self->{patron}->{borrowernumber}, $itemnumber
+            );
         }
     }
 
@@ -150,15 +152,17 @@ sub do_checkout {
 	$self->ok(1);
 	return $self;
 }
+
 sub log_rental_fee {
-    my ($fee_amt, $tillid) =@_;
-	syslog('LOG_DEBUG', "log_rental_fee till=$tillid amt=$fee_amt");
-    $tillid ||= 477; # test till
+    my ( $fee_amt, $tillid, $borrowernumber, $itemnumber ) = @_;
+    syslog( 'LOG_DEBUG', "log_rental_fee till=$tillid amt=$fee_amt" );
+    $tillid ||= 477;    # test till
     my $transcode = 'RENTALFEE';
     my $pay_type  = 'Cash';
 
-    my $till = Koha::Till->new( { tillid => $tillid });
-    $till->payin($fee_amt,, $transcode, $pay_type);
+    my $till = Koha::Till->new( { tillid => $tillid } );
+    $till->payin( $fee_amt,, $transcode, $pay_type,
+        $borrowernumber, $itemnumber );
     return;
 }
 
