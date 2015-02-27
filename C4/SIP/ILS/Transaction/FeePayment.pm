@@ -2,7 +2,6 @@ package ILS::Transaction::FeePayment;
 
 use warnings;
 use strict;
-use Koha::Till;
 
 
 # Copyright 2011 PTFS-Europe Ltd.

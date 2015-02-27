@@ -107,8 +107,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-02-26 05:47:14
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7eyl/xTvKOreIN1DdRmvRw
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2015-02-27 11:30:55
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7LrDcEEspkDr4z7Qg1CfOw
 __PACKAGE__->load_components(qw( FilterColumn ));
 __PACKAGE__->filter_column(
     visible_charge => {

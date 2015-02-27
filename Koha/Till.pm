@@ -1,6 +1,7 @@
 package Koha::Till;
 use strict;
 use warnings;
+use Carp;
 use Koha::Database;
 
 my $default_transaction_code = 'DEFAULT';
@@ -25,16 +26,25 @@ sub new {
 }
 
 sub payin {
-    my ( $self, $amt, $code, $type, $receiptid ) = @_;
+#    my ( $self, $amt, $code, $type, $receiptid, $borrowernumber, $itemnumber ) = @_;
+    my ( $self, %parm ) = @_;
 
     # IN code will be pos
     # OUT code should be neg
     # EVENT is 0
+    if ( !exists $parm{code} ) {
+        carp 'code not passed on payin';
+        $parm{code} = 'this will default';
+    }
+    my $code = $parm{code};
+    if ( !exists $parm{amount} ) {
+        $parm{amount} = 0;
+    }
 
     # dont refuse the payment if we cant identify a transaction for it
     my $tc_rs = $self->{schema}->resultset('CashTranscode')->search(
         {
-            code => $code,
+            code     => $code,
             archived => 0,
         }
     );
@@ -42,14 +52,23 @@ sub payin {
         $code = $default_transaction_code;
     }
 
+    # if any of these not passed explicitly set them to NULL
+    for my $fieldname (qw( borrowernumber itemnumber)) {
+        if ( !exists $parm{$fieldname} ) {
+            $parm{$fieldname} = undef;
+        }
+    }
+
     my $new_transaction =
       $self->{schema}->resultset('CashTransaction')->create(
         {
-            amt         => $amt,
-            till        => $self->{till_id},
-            tcode       => $code,
-            paymenttype => $type,
-            receiptid   => $receiptid,
+            amt            => $parm{amount},
+            till           => $self->{till_id},
+            tcode          => $code,
+            paymenttype    => $parm{type},
+            receiptid      => $parm{receiptid},
+            borrowernumber => $parm{borrowernumber},
+            itemnumber     => $parm{itemnumber},
         }
       );
     return;

@@ -140,8 +140,15 @@ sub recordpayment {
             }
             my $payment_type = $type;
             my $select = { tillid => $tillid };
-            my $till = Koha::Till->new( $select );
-            $till->payin($thisamt, $tcode, $payment_type, $receiptid);
+            my $till = Koha::Till->new($select);
+            $till->payin(
+                amount         => $thisamt,
+                code           => $tcode,
+                type           => $payment_type,
+                borrowernumber => $accdata->{borrowernumber},
+                itemnumber     => $accdata->{itemnumber},
+                receiptid      => $receiptid,
+            );
         }
 
         if ( C4::Context->preference("FinesLog") ) {
@@ -297,8 +304,15 @@ sub makepayment {
         }
         my $payment_type = $type;
         my $select = { tillid => $tillid };
-        my $till = Koha::Till->new( $select );
-        $till->payin($amount, $tcode, $payment_type, $receiptid);
+        my $till = Koha::Till->new($select);
+        $till->payin(
+            amount         => $amount,
+            code           => $tcode,
+            type           => $payment_type,
+            borrowernumber => $borrowernumber,
+            itemnumber     => $data->{itemnumber}
+            receiptid      => $receiptid,
+        );
     }
 
     UpdateStats({
@@ -673,8 +687,15 @@ sub recordpayment_selectaccts {
             }
             my $payment_type = $type;
             my $select = { tillid => $tillid };
-            my $till = Koha::Till->new( $select );
-            $till->payin($thisamt, $tcode, $payment_type, $receiptid);
+            my $till = Koha::Till->new($select);
+            $till->payin(
+                amount         => $thisamt,
+                code           => $tcode,
+                type           => $payment_type,
+                borrowernumber => $borrowernumber,
+                itemnumber     => $accdata->{itemnumber},
+                receiptid      => $receiptid,
+            );
         }
 
         if ( C4::Context->preference("FinesLog") ) {
@@ -772,8 +793,15 @@ sub makepartialpayment {
         }
         my $payment_type = $type;
         my $select = { tillid => $tillid };
-        my $till = Koha::Till->new( $select );
-        $till->payin($data, $tcode, $payment_type, $receiptid);
+        my $till = Koha::Till->new($select);
+        $till->payin(
+            amount         => $data->{amount},
+            code           => $tcode,
+            type           => $payment_type,
+            borrowernumber => $borrowernumber,
+            itemnumber     => $data->{itemnumber},
+            receiptid      => $receiptid,
+        );
     }
 
     UpdateStats({

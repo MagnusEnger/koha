@@ -69,3 +69,9 @@ ALTER TABLE accountlines MODIFY accounttype varchar(10);
 
 alter table cash_till add column starting_float decimal(4,2) default 0.0;
 
+alter table cash_transaction add column borrowernumber integer;
+alter table cash_transaction add column itemnumber integer;
+
+alter table cash_transcode add column archived tinyint(1) not null default 0;
+alter table cash_transaction add column receiptid varchar(16) after paymenttype;
+
