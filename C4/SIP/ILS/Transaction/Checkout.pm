@@ -157,7 +157,7 @@ sub log_rental_fee {
     my ( $fee_amt, $tillid, $borrowernumber, $itemnumber ) = @_;
     syslog( 'LOG_DEBUG', "log_rental_fee till=$tillid amt=$fee_amt" );
     $tillid ||= 477;    # test till
-    my $transcode = 'RENTALFEE';
+    my $transcode = 'Rent';
     my $pay_type  = 'Cash';
 
     my $till = Koha::Till->new( { tillid => $tillid } );
