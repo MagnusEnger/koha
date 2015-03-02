@@ -310,7 +310,7 @@ sub makepayment {
             code           => $tcode,
             type           => $payment_type,
             borrowernumber => $borrowernumber,
-            itemnumber     => $data->{itemnumber}
+            itemnumber     => $data->{itemnumber},
             receiptid      => $receiptid,
         );
     }
