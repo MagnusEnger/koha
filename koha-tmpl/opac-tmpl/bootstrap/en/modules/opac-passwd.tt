@@ -47,10 +47,8 @@
                                     <div class="alert alert-info">
                                         <p>Your password must be at least [% minpasslen %] characters long.</p>
                                         <p>
-                                            It is your responsability to set a strong password, and the below meter will give you an estimate
-                                            of your chosen passwords strength.</br>
-                                            Hint: Passphrases are inherantly stronger than passwords, and
-                                            come with the added bonus that they are often substantially easier to remember too.
+                                            It is your responsibility to set a strong password, and the meter below will give you an estimate of your chosen passwords strength.</p>
+                                            <p> Hint: Passphrases are inherently stronger than passwords, and come with the added bonus that they are often substantially easier to remember too.
                                         </p>
                                         <div class="progress">
                                             <div id="complexity-bar" class="bar bar-danger" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
