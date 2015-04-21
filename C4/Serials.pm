@@ -2380,6 +2380,10 @@ sub abouttoexpire {
         my $expirationdate = GetExpirationDate($subscriptionid);
         my ($res) = $dbh->selectrow_array('select max(planneddate) from serial where subscriptionid = ?', undef, $subscriptionid);
         my $nextdate = GetNextDate($subscription, $res);
+        # cannot make a meaningful comparison if either is undefined
+        if (!$nextdate || !$expirationdate) {
+            return 0;
+        }
         if(Date::Calc::Delta_Days(
             split( /-/, $nextdate ),
             split( /-/, $expirationdate )
