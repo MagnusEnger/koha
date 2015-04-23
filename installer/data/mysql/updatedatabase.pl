@@ -10270,6 +10270,13 @@ while ( my $file = readdir $dirh ) {
     my $rv = $installer->load_sql( $update_dir . $file ) ? 0 : 1;
 }
 
+$DBversion = "XXX";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do("INSERT INTO systempreferences (variable,value,options,explanation,type) VALUES('OPACPasswordStrength','0','','Display password strength indicator on OPAC.','YesNo')");
+    print "Upgrade to $DBversion done (Bug 13664: Add password strength plugin)\n";
+    SetVersion ($DBversion);
+}
+
 =head1 FUNCTIONS
 
 =head2 TableExists($table)
