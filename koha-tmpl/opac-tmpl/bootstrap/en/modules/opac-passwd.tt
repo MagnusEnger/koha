@@ -46,13 +46,15 @@
                                     [% UNLESS ( ShortPass ) %]
                                     <div class="alert alert-info">
                                         <p>Your password must be at least [% minpasslen %] characters long.</p>
+                                        [% IF (OPACPasswordStrength) %]
                                         <p>
-                                            It is your responsibility to set a strong password, and the meter below will give you an estimate of your chosen passwords strength.</p>
-                                            <p> Hint: Passphrases are inherently stronger than passwords, and come with the added bonus that they are often substantially easier to remember too.
+                                            It is your responsibility to set a strong password, and the meter below will give you an indication of the strength of your chosen password.</p>
+                                            <p> Hint: Passphrases are inherently stronger than passwords, and are often substantially easier to remember.
                                         </p>
                                         <div class="progress">
                                             <div id="complexity-bar" class="bar bar-danger" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
                                         </div>
+                                        [% END %]
                                     </div>
                                     [% END %]
                                     <label for="Oldkey">Current password:</label> <input type="password" id="Oldkey" size="25"  name="Oldkey" />
