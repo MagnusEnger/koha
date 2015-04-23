@@ -493,6 +493,7 @@ sub get_template_and_user {
             OpacNavRight                          => "" . C4::Context->preference("OpacNavRight"),
             OpacNavBottom                         => "" . C4::Context->preference("OpacNavBottom"),
             OpacPasswordChange                    => C4::Context->preference("OpacPasswordChange"),
+            OPACPasswordStrength                  => C4::Context->preference("OPACPasswordStrength"),
             OPACPatronDetails                     => C4::Context->preference("OPACPatronDetails"),
             OPACPrivacy                           => C4::Context->preference("OPACPrivacy"),
             OPACFinesTab                          => C4::Context->preference("OPACFinesTab"),
