@@ -10503,6 +10503,13 @@ foreach my $file ( sort readdir $dirh ) {
     }
 }
 
+$DBversion = "XXX";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do("INSERT INTO systempreferences (variable,value,options,explanation,type) VALUES('OPACPasswordStrength','0','','Display password strength indicator on OPAC.','YesNo')");
+    print "Upgrade to $DBversion done (Bug 13664: Add password strength plugin)\n";
+    SetVersion ($DBversion);
+}
+
 =head1 FUNCTIONS
 
 =head2 TableExists($table)
