@@ -339,6 +339,12 @@ OPAC:
                   no: "Don't allow"
             - patrons to change their own password on the OPAC. Note that this must be off to use LDAP authentication.
         -
+            - pref: OPACPasswordStrength
+              choices:
+                  yes: Display
+                  no: "Don't display"
+            - password strength indicator on OPAC.
+        -
             - pref: OPACPatronDetails
               choices:
                   yes: Allow
