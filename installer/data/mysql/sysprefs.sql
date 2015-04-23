@@ -284,6 +284,7 @@ INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `
 ('OPACNumbersPreferPhrase','0',NULL,'Control the use of phr operator in callnumber and standard number OPAC searches','YesNo'),
 ('OPACnumSearchResults','20',NULL,'Specify the maximum number of results to display on a page of results','Integer'),
 ('OpacPasswordChange','1',NULL,'If ON, enables patron-initiated password change in OPAC (disable it when using LDAP auth)','YesNo'),
+('OpacPasswordStrength','1',NULL,'If ON, display password strength meter','YesNo'),
 ('OPACPatronDetails','1','','If OFF the patron details tab in the OPAC is disabled.','YesNo'),
 ('OPACpatronimages','0',NULL,'Enable patron images in the OPAC','YesNo'),
 ('OpacPrivacy','0',NULL,'if ON, allows patrons to define their privacy rules (reading history)','YesNo'),
