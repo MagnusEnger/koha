@@ -4,6 +4,7 @@
 <title>Koha &rsaquo; Patrons &rsaquo; [% IF ( opadd ) %]Add[% ELSIF ( opduplicate ) %]Duplicate[% ELSE %] Modify[% END %] patron [% IF (firstname) %][% firstname %] [% END %][% IF (surname) %][% surname %] [% END %]([%IF ( categoryname ) %][% categoryname %][% ELSE %][% IF ( I ) %]Organization[% END %][% IF ( A ) %]Adult[% END %][% IF ( C ) %]Child[% END %][% IF ( P ) %]Professional[% END %][% IF ( S ) %]Staff[% END %][% END %])</title>
 [% INCLUDE 'doc-head-close.inc' %]
 [% INCLUDE 'calendar.inc' %]
+[% INCLUDE 'complexify.inc' %]
 <script type="text/javascript">
 //<![CDATA[
     $(document).ready(function() {
@@ -815,6 +816,12 @@
 [% END %]
 			[% ELSE %]
 			[% IF ( password ) %]
+<script src="https://raw.github.com/danpalmer/jquery.complexify.js/master/jquery.complexify.js"></script>
+      <script type="text/javascript"> $(function () {
+           $("#password").complexify({}, function (valid, complexity) {               document.getElementById("PassValue").value = complexity;
+           });
+       });
+</script>
 				[% IF ( NoUpdateLogin ) %]
 					<input type="password" id="password" name="password" size="20"  disabled="disabled" value="****" />
 				[% ELSE %]
@@ -822,6 +829,7 @@
 						<input type="password" id="password" name="password" size="20" />
 					[% ELSE %]
 						<input type="password" id="password" name="password" size="20" value="****" />
+<meter value="0" id="PassValue" max="100"></meter>
 					[% END %]
 				[% END %]
 			[% ELSE %]
