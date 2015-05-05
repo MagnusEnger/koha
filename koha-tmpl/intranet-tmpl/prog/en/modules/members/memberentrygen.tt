@@ -793,6 +793,12 @@
 		</li>
         [%END %]
         [% UNLESS nopassword %]
+<script src="https://raw.github.com/danpalmer/jquery.complexify.js/master/jquery.complexify.js"></script>
+      <script type="text/javascript"> $(function () {
+           $("#password").complexify({}, function (valid, complexity) {               document.getElementById("PassValue").value = complexity;
+           });
+       });
+</script>
 		<li>
 			[% IF ( mandatorypassword ) %]
 			<label for="password" class="required">
@@ -810,23 +816,24 @@
 [% ELSE %]
 				[% IF ( opduplicate ) %]
 					<input type="password" id="password" name="password" size="20" />
+
 				[% ELSE %]
 					<input type="password" id="password" name="password" size="20" value="[% password %]" />
+[% IF ( PasswordStrength ) %]
+<meter value="0" id="PassValue" max="100"></meter>
+[% END %]
 				[% END %]
 [% END %]
 			[% ELSE %]
 			[% IF ( password ) %]
-<script src="https://raw.github.com/danpalmer/jquery.complexify.js/master/jquery.complexify.js"></script>
-      <script type="text/javascript"> $(function () {
-           $("#password").complexify({}, function (valid, complexity) {               document.getElementById("PassValue").value = complexity;
-           });
-       });
-</script>
 				[% IF ( NoUpdateLogin ) %]
 					<input type="password" id="password" name="password" size="20"  disabled="disabled" value="****" />
 				[% ELSE %]
 					[% IF ( opduplicate ) %]
 						<input type="password" id="password" name="password" size="20" />
+[% IF ( PasswordStrength ) %]
+<meter value="0" id="PassValue" max="100"></meter>
+[% END %]
 					[% ELSE %]
 						<input type="password" id="password" name="password" size="20" value="****" />
 [% IF ( PasswordStrength ) %]
