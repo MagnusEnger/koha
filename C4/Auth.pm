@@ -413,6 +413,8 @@ sub get_template_and_user {
             IntranetUserJS                                                             => C4::Context->preference("IntranetUserJS"),
             intranetbookbag                                                            => C4::Context->preference("intranetbookbag"),
             suggestion                                                                 => C4::Context->preference("suggestion"),
+            PasswordStrength
+       => C4::Context->preference("PasswordStrength"),
             virtualshelves                                                             => C4::Context->preference("virtualshelves"),
             StaffSerialIssueDisplayCount                                               => C4::Context->preference("StaffSerialIssueDisplayCount"),
             EasyAnalyticalRecords                                                      => C4::Context->preference('EasyAnalyticalRecords'),

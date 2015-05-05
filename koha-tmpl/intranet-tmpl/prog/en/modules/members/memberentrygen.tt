@@ -829,7 +829,9 @@
 						<input type="password" id="password" name="password" size="20" />
 					[% ELSE %]
 						<input type="password" id="password" name="password" size="20" value="****" />
+[% IF ( PasswordStrength ) %]
 <meter value="0" id="PassValue" max="100"></meter>
+[% END %]
 					[% END %]
 				[% END %]
 			[% ELSE %]
