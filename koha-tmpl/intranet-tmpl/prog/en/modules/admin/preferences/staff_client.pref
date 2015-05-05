@@ -91,6 +91,12 @@ Staff Client:
             - pref: SlipCSS
               class: url
             - on Issue and Reserve Slips. (This should be a complete URL, starting with <code>http://</code>.)
+        -
+            - pref: PasswordStrength
+              choices:
+                 yes: Display
+                 no: "Don't display"
+            - password strength indicator in staff client.
     Options:
         -
             - pref: viewMARC

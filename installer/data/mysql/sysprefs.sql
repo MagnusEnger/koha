@@ -331,6 +331,7 @@ INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `
 ('OverdueNoticeBcc','','','Email address to bcc outgoing overdue notices sent by email','free'),
 ('OverdueNoticeCalendar',0,NULL,'Take the calendar into consideration when generating overdue notices','YesNo'),
 ('OverduesBlockCirc','noblock','noblock|confirmation|block','When checking out an item should overdues block checkout, generate a confirmation dialogue, or allow checkout','Choice'),
+('PasswordStrength','1',NULL,'If ON, display password strength meter','YesNo'),
 ('patronimages','0',NULL,'Enable patron images for the Staff Client','YesNo'),
 ('PatronSelfRegistration','0',NULL,'If enabled, patrons will be able to register themselves via the OPAC.','YesNo'),
 ('PatronSelfRegistrationAdditionalInstructions','','','A free text field to display additional instructions to newly self registered patrons.','free'),
