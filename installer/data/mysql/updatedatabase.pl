@@ -10509,6 +10509,12 @@ if ( CheckVersion($DBversion) ) {
     print "Upgrade to $DBversion done (Bug 13664: Add password strength plugin)\n";
     SetVersion ($DBversion);
 }
+$DBversion = "XXX";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do("INSERT INTO systempreferences (variable,value,options,explanation,type) VALUES('PasswordStrength','0','','Display password strength indicator in Staff Client.','YesNo')");
+    print "Upgrade to $DBversion done (Bug 13664: Add password strength plugin)\n";
+    SetVersion ($DBversion);
+}
 
 =head1 FUNCTIONS
 
