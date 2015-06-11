@@ -29,13 +29,23 @@
                     <h3>Fines and charges</h3>
 
                     [% IF ( ACCOUNT_LINES ) %]
-                        <table class="table table-bordered table-striped">
+                        <table id="finest" class="table table-bordered table-striped">
                             <thead>
                                 <tr>
                                     <th>Date</th>
                                     <th>Description</th>
                                     <th>Fine amount</th>
                                     <th>Amount outstanding</th>
+                                    [% IF Koha.Preference( 'OnlinePayments' ) == 1 %]
+                                    <th>
+                                        <div class="btn-group btn-group-mini">
+                                            <button id="checkAll" class="btn btn-mini" >All</button>
+                                            <button class="btn btn-mini">Type 1</button>
+                                            <button class="btn btn-mini">Type 2</button>
+                                            <button class="btn btn-mini">Type 3</button>
+                                        </div>
+                                    </th>
+                                    [% END %]
                                 </tr>
                             </thead>
 
@@ -43,6 +53,9 @@
                             <tr>
                                 <th class="sum" colspan="3">Total due</th>
                                 <td class="sum">[% total %]</td>
+                                [% IF Koha.Preference( 'OnlinePayments' ) == 1 %]
+                                <td><button type="submit" id="payselected" name="payselected" class="btn btn-primary">Pay Selected</button></td>
+                                [% END %]
                             </tr>
                             </tfoot>
 
@@ -77,11 +90,13 @@
                                         </td>
                                         [% IF ( ACCOUNT_LINE.amountcredit ) %]<td class="credit">[% ELSE %]<td class="debit">[% END %][% ACCOUNT_LINE.amount %]</td>
                                         [% IF ( ACCOUNT_LINE.amountoutstandingcredit ) %]<td class="credit">[% ELSE %]<td class="debit">[% END %][% ACCOUNT_LINE.amountoutstanding %]</td>
+                                        [% IF Koha.Preference( 'OnlinePayments' ) == 1 %]<td><input class="cb" type="checkbox" checked="checked" name="incl_par_2"></td>[% END %]
                                     </tr>
                                 [% END %]
                             </tbody>
 
                         </table>
+                        <p>You're on the right page!</p>
                     [% ELSE %]
                         <h4>You have no fines or charges</h4>
                     [% END %]
@@ -92,4 +107,30 @@
 </div> <!-- / .main -->
 
 [% INCLUDE 'opac-bottom.inc' %]
+<script type="text/javascript">
+    //<![CDATA[
+    $(document).ready(function()
+    {
+        // Check/Uncheck All
+        $("#checkAll").attr("data-type", "check");
+        $("#checkAll").click(function()
+        {
+            if ($("#checkAll").attr("data-type") === "check")
+            {
+                $(".cb").prop("checked", true);
+                $("#checkAll").attr("data-type", "uncheck");
+            }
+            else
+            {
+                $(".cb").prop("checked", false);
+                $("#checkAll").attr("data-type", "check");
+            }
+        })
+
+        // Check/Uncheck by type
+
+    });
+    //]]>
+</script>
+
 [% BLOCK jsinclude %][% END %]
