@@ -47,8 +47,10 @@ $template->param( BORROWER_INFO => \@bordat );
 
 #get account details
 my ( $total , $accts, $numaccts) = GetMemberAccountRecords( $borrowernumber );
+my $types;
 
 for ( my $i = 0 ; $i < $numaccts ; $i++ ) {
+    $types->{"$accts->[$i]{'accounttype'}"} = 1;
     $accts->[$i]{'amount'} = sprintf( "%.2f", $accts->[$i]{'amount'} || '0.00');
     if ( $accts->[$i]{'amount'} >= 0 ) {
         $accts->[$i]{'amountcredit'} = 1;
@@ -68,10 +70,12 @@ foreach my $row (@$accts) {
     $num++;
 }
 
+my @types = keys %{$types};
 $template->param (
     ACCOUNT_LINES => $accts,
     total => sprintf( "%.2f", $total ),
-	accountview => 1
+	accountview => 1,
+    types => \@types,
 );
 
 output_html_with_http_headers $query, $cookie, $template->output;

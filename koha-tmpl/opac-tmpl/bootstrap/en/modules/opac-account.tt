@@ -27,7 +27,6 @@
             <div class="span10">
                 <div id="useraccount" class="maincontent">
                     <h3>Fines and charges</h3>
-
                     [% IF ( ACCOUNT_LINES ) %]
                         <table id="finest" class="table table-bordered table-striped">
                             <thead>
@@ -40,9 +39,31 @@
                                     <th>
                                         <div class="btn-group btn-group-mini">
                                             <button id="checkAll" class="btn btn-mini" >All</button>
-                                            <button class="btn btn-mini">Type 1</button>
-                                            <button class="btn btn-mini">Type 2</button>
-                                            <button class="btn btn-mini">Type 3</button>
+                                            [% FOREACH type IN types %]
+                                            <button id="check[% type %]" class="btn btn-mini" data-attr="[% type %]">
+                                                [% SWITCH type %]
+                                                  [% CASE 'Pay' %]Payment, thanks
+                                                  [% CASE 'Pay00'%]Payment, thanks (cash via SIP2)
+                                                  [% CASE 'Pay01' %]Payment, thanks (VISA via SIP2)
+                                                  [% CASE 'Pay02' %]Payment, thanks (credit card via SIP2)
+                                                  [% CASE 'N' %]New card
+                                                  [% CASE 'F' %]Fine
+                                                  [% CASE 'A' %]Account management fee
+                                                  [% CASE 'M' %]Sundry
+                                                  [% CASE 'L' %]Lost item
+                                                  [% CASE 'W' %]Writeoff
+                                                  [% CASE 'FU' %]Accruing fine
+                                                  [% CASE 'Rent' %]Rental fee
+                                                  [% CASE 'FOR' %]Forgiven
+                                                  [% CASE 'LR' %]Lost item fee refund
+                                                  [% CASE 'PAY' %]Payment
+                                                  [% CASE 'WO' %]Writeoff
+                                                  [% CASE 'C' %]Credit
+                                                  [% CASE 'CR' %]Credit
+                                                  [% CASE %][% ACCOUNT_LINE.accounttype %]
+                                                [%- END -%]
+                                            </button>
+                                            [% END %]
                                         </div>
                                     </th>
                                     [% END %]
@@ -90,7 +111,7 @@
                                         </td>
                                         [% IF ( ACCOUNT_LINE.amountcredit ) %]<td class="credit">[% ELSE %]<td class="debit">[% END %][% ACCOUNT_LINE.amount %]</td>
                                         [% IF ( ACCOUNT_LINE.amountoutstandingcredit ) %]<td class="credit">[% ELSE %]<td class="debit">[% END %][% ACCOUNT_LINE.amountoutstanding %]</td>
-                                        [% IF Koha.Preference( 'OnlinePayments' ) == 1 %]<td><input class="cb" type="checkbox" checked="checked" name="incl_par_2"></td>[% END %]
+                                            [% IF Koha.Preference( 'OnlinePayments' ) == 1 %]<td><input class="cb [% ACCOUNT_LINE.accounttype %]" type="checkbox" checked="checked" name="incl_par_2"></td>[% END %]
                                     </tr>
                                 [% END %]
                             </tbody>
@@ -128,6 +149,23 @@
         })
 
         // Check/Uncheck by type
+        [% FOREACH type IN types %]
+        $("#check[% type %]").attr("data-type", "check");
+        $("#check[% type %]").click(function()
+        {
+            if ($("#check[% type%]").attr("data-type") === "check")
+            {
+                $(".cb.[% type %]").prop("checked", true);
+                $("#check[% type %]").attr("data-type", "uncheck");
+            }
+            else
+            {
+                $(".cb.[% type %]").prop("checked", false);
+                $("#check[% type %]").attr("data-type", "check");
+            }
+        })
+
+        [% END %]
 
     });
     //]]>
