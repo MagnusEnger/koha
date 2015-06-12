@@ -690,3 +690,27 @@ OPAC:
                 subtype: Subtypes
                 sorting: Sorting
                 location: Location and availability
+    Online Payments Options:
+        -
+            - pref: OnlinePayments
+              choices:
+                 yes: Allow
+                 no: "Don't allow"
+            - "online payments on the OPAC"
+        -
+            - pref: OnlinePaymentsProvider
+              choices:
+                 WPM: WPM
+            - "is our online payments gateway provider"
+        -
+            - pref: WPMClientID
+              class: long
+            - is my WPM clientid
+        -
+            - pref: WPMPathwayID
+              class: long
+            - is my WPM pathwayid
+        -
+            - pref: WPMDepartmentID
+              class: long
+            - is my WPM departmentid
