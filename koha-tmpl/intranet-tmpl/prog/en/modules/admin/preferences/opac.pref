@@ -707,6 +707,10 @@ OPAC:
               class: long
             - is my WPM clientid
         -
+            - pref: WPMPathway
+              class: long
+            - is the URL of the WPM pathway
+        -
             - pref: WPMPathwayID
               class: long
             - is my WPM pathwayid

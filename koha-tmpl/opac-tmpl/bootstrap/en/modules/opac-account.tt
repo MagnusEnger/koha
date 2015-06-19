@@ -170,12 +170,21 @@
         $("#payselected").click(function() {
             var output = $.map($('.cb:checkbox:checked'), function(n, i){
                 return $(n).attr("data-accountline");
-            }).join(','); console.log(output);
+            }).join(',');
             $.ajax({
                 type: "GET",
-                url: "/cgi-bin/koha/svc/online_payment&lines=".output,
-                success: function(reply) {
-                     console.log(reply);
+                url: "/cgi-bin/koha/svc/online_payment?lines=" + output,
+                dataType: "text",
+                success: function(data){
+                console.log(data);
+                    $.ajax({
+                        type: "POST",
+                        url: "[% Koha.Preference( 'WPMPathway' ) %]",
+                        data: data,
+                        success: function( reply ) {
+                          console.log(reply);
+                        }
+                    });
                 },
                 error: function(reply) {
                     console.log("failed");
