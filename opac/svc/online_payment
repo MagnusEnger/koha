@@ -59,7 +59,8 @@ my $accountlines_rs = $schema->resultset('Accountline')->search( { accountlines_
 my @accountlines = $accountlines_rs->all;
 
 # Create 'transaction'
-my $transaction_id = '1'; #FIXME
+my $transaction_result = $schema->resultset('AcTransaction')->create( { updated => DateTime->now } );
+my $transaction_id = $transaction_result->transaction_id;
 
 # Get borrower
 my $borrower_result = $schema->resultset('Borrower')->find( { borrowernumber => $borrowernumber } );
