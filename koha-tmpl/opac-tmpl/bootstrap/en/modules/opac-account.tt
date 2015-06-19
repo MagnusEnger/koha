@@ -111,7 +111,7 @@
                                         </td>
                                         [% IF ( ACCOUNT_LINE.amountcredit ) %]<td class="credit">[% ELSE %]<td class="debit">[% END %][% ACCOUNT_LINE.amount %]</td>
                                         [% IF ( ACCOUNT_LINE.amountoutstandingcredit ) %]<td class="credit">[% ELSE %]<td class="debit">[% END %][% ACCOUNT_LINE.amountoutstanding %]</td>
-                                            [% IF Koha.Preference( 'OnlinePayments' ) == 1 %]<td><input class="cb [% ACCOUNT_LINE.accounttype %]" type="checkbox" checked="checked" name="incl_par_2"></td>[% END %]
+                                        [% IF Koha.Preference( 'OnlinePayments' ) == 1 %]<td><input class="cb [% ACCOUNT_LINE.accounttype %]" type="checkbox" checked="checked" name="incl_par_2" data-accountline="[% ACCOUNT_LINE.accountlines_id %]"></td>[% END %]
                                     </tr>
                                 [% END %]
                             </tbody>
@@ -166,6 +166,22 @@
         })
 
         [% END %]
+
+        $("#payselected").click(function() {
+            var output = $.map($('.cb:checkbox:checked'), function(n, i){
+                return $(n).attr("data-accountline");
+            }).join(','); console.log(output);
+            $.ajax({
+                type: "GET",
+                url: "/cgi-bin/koha/svc/online_payment&lines=".output,
+                success: function(reply) {
+                     console.log(reply);
+                },
+                error: function(reply) {
+                    console.log("failed");
+                }
+            });
+        });
 
     });
     //]]>
