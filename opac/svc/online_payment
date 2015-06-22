@@ -73,90 +73,111 @@ my $wpm_clientid     = C4::Context->preference('WPMClientID');
 my $wpm_requesttype  = '1';
 my $wpm_pathwayid    = C4::Context->preference('WPMPathwayID');
 my $wpm_departmentid = C4::Context->preference('WPMDepartmentID');
-my $redirect_url     = 'thingy';
-my $callback_url     = 'thingy';
-my $cancel_url       = 'thingy';
+my $redirect_url =
+  'https://koha.koha-ptfs.co.uk/cgi-bin/koha/opac-account.pl?paid=1';
+my $callback_url =
+  'https://koha.koha-ptfs.co.uk/cgi-bin/koha/svc/online_payment_confirm';
+my $cancel_url =
+  'https://koha.koha-ptfs.co.uk/cgi-bin/koha/opac-account.pl?paid=0';
 
 my $post = XML::LibXML::Document->new( '1.0', 'utf-8' );
 my $root = $post->createElement("wpmpaymentrequest");
 
-my %tags = (
-    clientid     => { value => $wpm_clientid,     cdata => 0 },
-    requesttype  => { value => $wpm_requesttype,  cdata => 0 },
-    pathwayid    => { value => $wpm_pathwayid,    cdata => 0 },
-    departmentid => { value => $wpm_departmentid, cdata => 0 },
-    staffid      => { value => undef,             cdata => 0 },
-    customerid   => { value => 'DEFAULT',         cdata => 0 },   #studentnumber
-    title        => {
-        value => $borrower_result->title,
-        cdata => 1
+my @fields = (
+    { name => 'clientid', value => { value => $wpm_clientid, cdata => 0 } },
+    {
+        name  => 'requesttype',
+        value => { value => $wpm_requesttype, cdata => 0 }
     },
-    firstname => {
-        value => $borrower_result->firstname,
-        cdata => 1
+    { name => 'pathwayid', value => { value => $wpm_pathwayid, cdata => 0 } },
+    {
+        name  => 'departmentid',
+        value => { value => $wpm_departmentid, cdata => 0 }
     },
-    middlename => {
-        value => $borrower_result->othernames,
-        cdata => 1
+    { name => 'staffid',    value => { value => undef,     cdata => 0 } },
+    { name => 'customerid', value => { value => $borrowernumber, cdata => 0 } }
+    ,    #studentnumber
+    {
+        name  => 'title',
+        value => { value => $borrower_result->title, cdata => 1 }
     },
-    lastname => {
-        value => $borrower_result->surname,
-        cdata => 1
+    {
+        name  => 'firstname',
+        value => { value => $borrower_result->firstname, cdata => 1 }
     },
-    emailfrom =>
-      { value => C4::Context->preference('KohaAdminEmailAddress'), cdata => 1 },
-    toemail => {
-        value => $borrower_result->email,
-        cdata => 1
+    {
+        name  => 'middlename',
+        value => { value => $borrower_result->othernames, cdata => 1 }
     },
-    ccemail              => { value => undef,           cdata => 1 },
-    transactionreference => { value => $transaction_id, cdata => 1 },
-    redirecturl          => { value => $redirect_url,   cdata => 1 },
-    callbackurl          => { value => $callback_url,   cdata => 1 },
-    cancelurl            => { value => $cancel_url,     cdata => 1 },
-    billaddress1         => {
-        value => $borrower_result->streetnumber,
-        cdata => 1
+    {
+        name  => 'lastname',
+        value => { value => $borrower_result->surname, cdata => 1 }
     },
-    billaddress2 => {
-        value => $borrower_result->address,
-        cdata => 1
+    {
+        name  => 'emailfrom',
+        value => {
+            value => C4::Context->preference('KohaAdminEmailAddress'),
+            cdata => 1
+        }
     },
-    billaddress3 => {
-        value => $borrower_result->address2,
-        cdata => 1
+    {
+        name  => 'toemail',
+        value => { value => $borrower_result->email, cdata => 1 }
     },
-    billtown => {
-        value => $borrower_result->city,
-        cdata => 1
+    { name => 'ccemail', value => { value => undef, cdata => 1 } },
+    {
+        name  => 'transactionreference',
+        value => { value => $transaction_id, cdata => 1 }
     },
-    billcounty => {
-        value => $borrower_result->state,
-        cdata => 1
+    { name => 'redirecturl', value => { value => $redirect_url, cdata => 1 } },
+    { name => 'callbackurl', value => { value => $callback_url, cdata => 1 } },
+    { name => 'cancelurl',   value => { value => $cancel_url,   cdata => 1 } },
+    {
+        name  => 'billaddress1',
+        value => { value => $borrower_result->streetnumber, cdata => 1 }
     },
-    billpostcode => {
-        value => $borrower_result->zipcode,
-        cdata => 1
+    {
+        name  => 'billaddress2',
+        value => { value => $borrower_result->address, cdata => 1 }
     },
-    billcountry => {
-        value => $borrower_result->country,
-        cdata => 1
+    {
+        name  => 'billaddress3',
+        value => { value => $borrower_result->address2, cdata => 1 }
     },
-    customfield1  => undef,
-    customfield2  => undef,
-    customfield3  => undef,
-    customfield4  => undef,
-    customfield5  => undef,
-    customfield6  => undef,
-    customfield7  => undef,
-    customfield8  => undef,
-    customfield9  => undef,
-    customfield10 => undef
+    {
+        name  => 'billtown',
+        value => { value => $borrower_result->city, cdata => 1 }
+    },
+    {
+        name  => 'billcounty',
+        value => { value => $borrower_result->state, cdata => 1 }
+    },
+    {
+        name  => 'billpostcode',
+        value => { value => $borrower_result->zipcode, cdata => 1 }
+    },
+    {
+        name  => 'billcountry',
+        value => { value => $borrower_result->country, cdata => 1 }
+    },
+    { name => 'customfield1', value => undef },
+    { name => 'customfield2', value => undef },
+    { name => 'customfield3', value => undef },
+    { name => 'customfield4', value => undef },
+    { name => 'customfield5', value => undef },
+    { name => 'customfield6', value => undef },
+    { name => 'customfield7', value => undef },
+    { name => 'customfield8', value => undef },
+    { name => 'customfield9', value => undef },
+    {
+        name  => 'customfield10',
+        value => undef
+    }
 );
 
-for my $name ( keys %tags ) {
-    my $tag   = $post->createElement($name);
-    my $value = $tags{$name};
+for my $field (@fields) {
+    my $tag   = $post->createElement( $field->{name} );
+    my $value = $field->{value};
     if ( defined( $value->{'value'} ) && $value->{'value'} ne '' ) {
         if ( $value->{'cdata'} ) {
             my $data = XML::LibXML::CDATASection->new("$value->{'value'}");
@@ -173,7 +194,7 @@ my $wpm_type          = 'PN';
 my $pay_count         = 0;
 my $now               = DateTime->now;
 my $dateoftransaction = $now->ymd('-') . ' ' . $now->hms(':');
-my $sum = 0;
+my $sum               = 0;
 for my $accountline (@accountlines) {
 
     # Check user is only attempting to pay their own accountlines
@@ -192,7 +213,7 @@ for my $accountline (@accountlines) {
     if ( defined( $accountline->description )
         && $accountline->description ne '' )
     {
-        my $data = XML::LibXML::CDATASection->new($accountline->description);
+        my $data = XML::LibXML::CDATASection->new( $accountline->description );
         $description->appendChild($data);
     }
     $payments->appendChild($description);
@@ -254,9 +275,9 @@ warn "clientid: " . $wpm_clientid;
 warn "transactionid: " . $transaction_id;
 warn "sum: " . $sum;
 warn "secret: " . $secret;
-my $concat = $wpm_clientid.$transaction_id.$sum.$secret;
+my $concat = $wpm_clientid . $transaction_id . $sum . $secret;
 warn "concat: " . $concat;
-my $md5    = md5_hex( $wpm_clientid . $transaction_id . $sum . $secret );
+my $md5 = md5_hex( $wpm_clientid . $transaction_id . $sum . $secret );
 $root->setAttribute( 'msgid' => "$md5" );
 
 $post->setDocumentElement($root);
