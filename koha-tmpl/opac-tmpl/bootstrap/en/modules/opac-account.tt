@@ -35,7 +35,7 @@
                                     <th>Description</th>
                                     <th>Fine amount</th>
                                     <th>Amount outstanding</th>
-                                    [% IF Koha.Preference( 'OnlinePayments' ) == 1 %]
+                                    [% IF Koha.Preference( 'OnlinePayments' ) == 1 && Koha.Preference( 'OnlinePaymentsSelective' ) == 1 %]
                                     <th>
                                         <div class="btn-group btn-group-mini">
                                             <button id="checkAll" class="btn btn-mini" >All</button>
@@ -73,8 +73,8 @@
                             <tfoot>
                             <tr>
                                 <th class="sum" colspan="3">Total due</th>
-                                <td class="sum">[% total %]</td>
-                                [% IF Koha.Preference( 'OnlinePayments' ) == 1 %]
+                                <td class="sum">[% total %][% IF Koha.Preference( 'OnlinePayments' ) == 1 && Koha.Preference( 'OnlinePaymentsSelective' ) != 1 %]<button type="submit" id="paynow" name="paynow" class="btn btn-primary pull-right">Pay Now</button>[% END %]</td>
+                                [% IF Koha.Preference( 'OnlinePayments' ) == 1 && Koha.Preference( 'OnlinePaymentsSelective' ) == 1 %]
                                 <td><button type="submit" id="payselected" name="payselected" class="btn btn-primary">Pay Selected</button></td>
                                 [% END %]
                             </tr>
@@ -82,7 +82,7 @@
 
                             <tbody>
                                 [% FOREACH ACCOUNT_LINE IN ACCOUNT_LINES %]
-                                    [% IF ( ACCOUNT_LINE.odd ) %]<tr class="highlight">[% ELSE %]<tr>[% END %]
+                                    [% IF ( ACCOUNT_LINE.odd ) %]<tr class="highlight" data-accountline="[% ACCOUNT_LINE.accountlines_id %]">[% ELSE %]<tr data-accountline="[% ACCOUNT_LINE.accountlines_id %]">[% END %]
                                         <td>[% ACCOUNT_LINE.date | $KohaDates %]</td>
                                         <td>
                                             [% SWITCH ACCOUNT_LINE.accounttype %]
@@ -111,7 +111,7 @@
                                         </td>
                                         [% IF ( ACCOUNT_LINE.amountcredit ) %]<td class="credit">[% ELSE %]<td class="debit">[% END %][% ACCOUNT_LINE.amount %]</td>
                                         [% IF ( ACCOUNT_LINE.amountoutstandingcredit ) %]<td class="credit">[% ELSE %]<td class="debit">[% END %][% ACCOUNT_LINE.amountoutstanding %]</td>
-                                        [% IF Koha.Preference( 'OnlinePayments' ) == 1 %]<td><input class="cb [% ACCOUNT_LINE.accounttype %]" type="checkbox" checked="checked" name="incl_par_2" data-accountline="[% ACCOUNT_LINE.accountlines_id %]"></td>[% END %]
+                                        [% IF Koha.Preference( 'OnlinePayments' ) == 1 && Koha.Preference( 'OnlinePaymentsSelective' ) == 1 %]<td><input class="cb [% ACCOUNT_LINE.accounttype %]" type="checkbox" checked="checked" name="incl_par_2" data-accountline="[% ACCOUNT_LINE.accountlines_id %]"></td>[% END %]
                                     </tr>
                                 [% END %]
                             </tbody>
@@ -132,6 +132,7 @@
     //<![CDATA[
     $(document).ready(function()
     {
+        [% IF Koha.Preference( 'OnlinePayments' ) == 1 && Koha.Preference( 'OnlinePaymentsSelective' ) == 1 %]
         // Check/Uncheck All
         $("#checkAll").attr("data-type", "check");
         $("#checkAll").click(function()
@@ -191,6 +192,34 @@
                 }
             });
         });
+        [% END %]
+
+            [% IF Koha.Preference( 'OnlinePayments' ) == 1 && Koha.Preference( 'OnlinePaymentsSelective' ) != 1 %]
+        $("#paynow").click(function() {
+            var accounts = $.map($('tr'), function(n, i){
+                return $(n).attr("data-accountline");
+            }).join(',');
+            $.ajax({
+                type: "GET",
+                url: "/cgi-bin/koha/svc/online_payment?lines=" + accounts,
+                dataType: "text",
+                success: function(data){
+                    console.log(data);
+                    $.ajax({
+                        type: "POST",
+                        url: "[% Koha.Preference( 'WPMPathway' ) %]",
+                        data: data,
+                        success: function( reply ) {
+                          console.log(reply);
+                        }
+                    });
+                },
+                error: function(reply) {
+                    console.log("failed");
+                }
+            });
+        });
+        [% END %]
 
     });
     //]]>

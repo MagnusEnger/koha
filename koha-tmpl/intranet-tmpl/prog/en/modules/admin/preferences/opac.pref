@@ -698,6 +698,12 @@ OPAC:
                  no: "Don't allow"
             - "online payments on the OPAC"
         -
+            - pref: OnlinePaymentsSelective
+              choices:
+                 yes: Allow
+                 no: "Don't allow"
+            - "online payments to be selective"
+        -
             - pref: OnlinePaymentsProvider
               choices:
                  WPM: WPM
