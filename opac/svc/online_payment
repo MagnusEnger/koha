@@ -273,6 +273,7 @@ for my $accountline (@accountlines) {
 my $secret = C4::Context->config('wpm_secret');
 warn "clientid: " . $wpm_clientid;
 warn "transactionid: " . $transaction_id;
+$sum = sprintf "%.2f", $sum;
 warn "sum: " . $sum;
 warn "secret: " . $secret;
 my $concat = $wpm_clientid . $transaction_id . $sum . $secret;
@@ -284,33 +285,3 @@ $post->setDocumentElement($root);
 binmode STDOUT, ":encoding(UTF-8)";
 print $input->header( -type => 'application/xml', -charset => 'UTF-8' );
 print $post->toString();
-
-#print $input->header( -type => 'text/plain', -charset => 'UTF-8' );
-#
-#my $itemnumber     = $input->param('itemnumber');
-#my $borrowernumber = $input->param('borrowernumber');
-#my $override_limit = $input->param('override_limit');
-#my $branchcode     = $input->param('branchcode')
-#  || C4::Context->userenv->{'branch'};
-#my $date_due;
-#if ( $input->param('date_due') ) {
-#    $date_due = dt_from_string( $input->param('date_due') );
-#    $date_due->set_hour(23);
-#    $date_due->set_minute(59);
-#}
-#
-#my $data;
-#$data->{itemnumber}     = $itemnumber;
-#$data->{borrowernumber} = $borrowernumber;
-##$data->{branchcode}     = $branchcode;
-#
-#( $data->{renew_okay}, $data->{error} ) =
-#  CanBookBeRenewed( $borrowernumber, $itemnumber, $override_limit );
-#
-#if ( $data->{renew_okay} ) {
-#    $date_due =
-#      AddRenewal( $borrowernumber, $itemnumber, $branchcode, $date_due );
-#    $data->{date_due} = output_pref( { dt => $date_due, as_due_date => 1 } );
-#}
-#
-#print to_json($data);
