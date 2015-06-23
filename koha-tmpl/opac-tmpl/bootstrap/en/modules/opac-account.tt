@@ -40,29 +40,27 @@
                                         <div class="btn-group btn-group-mini">
                                             <button id="checkAll" class="btn btn-mini" >All</button>
                                             [% FOREACH type IN types %]
-                                            <button id="check[% type %]" class="btn btn-mini" data-attr="[% type %]">
                                                 [% SWITCH type %]
-                                                  [% CASE 'Pay' %]Payment, thanks
-                                                  [% CASE 'Pay00'%]Payment, thanks (cash via SIP2)
-                                                  [% CASE 'Pay01' %]Payment, thanks (VISA via SIP2)
-                                                  [% CASE 'Pay02' %]Payment, thanks (credit card via SIP2)
-                                                  [% CASE 'N' %]New card
-                                                  [% CASE 'F' %]Fine
-                                                  [% CASE 'A' %]Account management fee
-                                                  [% CASE 'M' %]Sundry
-                                                  [% CASE 'L' %]Lost item
-                                                  [% CASE 'W' %]Writeoff
-                                                  [% CASE 'FU' %]Accruing fine
-                                                  [% CASE 'Rent' %]Rental fee
-                                                  [% CASE 'FOR' %]Forgiven
-                                                  [% CASE 'LR' %]Lost item fee refund
-                                                  [% CASE 'PAY' %]Payment
-                                                  [% CASE 'WO' %]Writeoff
-                                                  [% CASE 'C' %]Credit
-                                                  [% CASE 'CR' %]Credit
-                                                  [% CASE %][% ACCOUNT_LINE.accounttype %]
+                                                  [% CASE 'Pay' %]
+                                                  [% CASE 'Pay00'%]
+                                                  [% CASE 'Pay01' %]
+                                                  [% CASE 'Pay02' %]
+                                                  [% CASE 'W' %]
+                                                  [% CASE 'FOR' %]
+                                                  [% CASE 'LR' %]
+                                                  [% CASE 'PAY' %]
+                                                  [% CASE 'WO' %]
+                                                  [% CASE 'C' %]
+                                                  [% CASE 'CR' %]
+                                                  [% CASE 'N' %]<button id="check[% type %]" class="btn btn-mini" data-attr="[% type %]">New card</button>
+                                                  [% CASE 'F' %]<button id="check[% type %]" class="btn btn-mini" data-attr="[% type %]">Fine</button>
+                                                  [% CASE 'A' %]<button id="check[% type %]" class="btn btn-mini" data-attr="[% type %]">Account management fee</button>
+                                                  [% CASE 'M' %]<button id="check[% type %]" class="btn btn-mini" data-attr="[% type %]">Sundry</button>
+                                                  [% CASE 'L' %]<button id="check[% type %]" class="btn btn-mini" data-attr="[% type %]">Lost item</button>
+                                                  [% CASE 'FU' %]<button id="check[% type %]" class="btn btn-mini" data-attr="[% type %]">Accruing fine</button>
+                                                  [% CASE 'Rent' %]<button id="check[% type %]" class="btn btn-mini" data-attr="[% type %]">Rental fee</button>
+                                                  [% CASE %]<button id="check[% type %]" class="btn btn-mini" data-attr="[% type %]">[% type %]</button>
                                                 [%- END -%]
-                                            </button>
                                             [% END %]
                                         </div>
                                     </th>
@@ -82,7 +80,7 @@
 
                             <tbody>
                                 [% FOREACH ACCOUNT_LINE IN ACCOUNT_LINES %]
-                                    [% IF ( ACCOUNT_LINE.odd ) %]<tr class="highlight" data-accountline="[% ACCOUNT_LINE.accountlines_id %]">[% ELSE %]<tr data-accountline="[% ACCOUNT_LINE.accountlines_id %]">[% END %]
+                                [% IF ( ACCOUNT_LINE.odd ) %]<tr class="highlight[% IF ( ACCOUNT_LINE.amountoutstanding > 0.00 ) %] outstanding[% END %]" data-accountline="[% ACCOUNT_LINE.accountlines_id %]">[% ELSE %]<tr [% IF ( ACCOUNT_LINE.amountoutstanding > 0.00 ) %]class="outstanding"[% END %] data-accountline="[% ACCOUNT_LINE.accountlines_id %]">[% END %]
                                         <td>[% ACCOUNT_LINE.date | $KohaDates %]</td>
                                         <td>
                                             [% SWITCH ACCOUNT_LINE.accounttype %]
@@ -111,7 +109,7 @@
                                         </td>
                                         [% IF ( ACCOUNT_LINE.amountcredit ) %]<td class="credit">[% ELSE %]<td class="debit">[% END %][% ACCOUNT_LINE.amount %]</td>
                                         [% IF ( ACCOUNT_LINE.amountoutstandingcredit ) %]<td class="credit">[% ELSE %]<td class="debit">[% END %][% ACCOUNT_LINE.amountoutstanding %]</td>
-                                        [% IF Koha.Preference( 'OnlinePayments' ) == 1 && Koha.Preference( 'OnlinePaymentsSelective' ) == 1 %]<td><input class="cb [% ACCOUNT_LINE.accounttype %]" type="checkbox" checked="checked" name="incl_par_2" data-accountline="[% ACCOUNT_LINE.accountlines_id %]"></td>[% END %]
+                                            [% IF Koha.Preference( 'OnlinePayments' ) == 1 && Koha.Preference( 'OnlinePaymentsSelective' ) == 1 %]<td>[% IF ( ACCOUNT_LINE.amountoutstanding > 0.00 ) %]<input class="cb [% ACCOUNT_LINE.accounttype %]" type="checkbox" checked="checked" name="incl_par_2" data-accountline="[% ACCOUNT_LINE.accountlines_id %]">[% END %]</td>[% END %]
                                     </tr>
                                 [% END %]
                             </tbody>
@@ -194,9 +192,9 @@
         });
         [% END %]
 
-            [% IF Koha.Preference( 'OnlinePayments' ) == 1 && Koha.Preference( 'OnlinePaymentsSelective' ) != 1 %]
+        [% IF Koha.Preference( 'OnlinePayments' ) == 1 && Koha.Preference( 'OnlinePaymentsSelective' ) != 1 %]
         $("#paynow").click(function() {
-            var accounts = $.map($('tr'), function(n, i){
+            var accounts = $.map($('tr.outstanding'), function(n, i){
                 return $(n).attr("data-accountline");
             }).join(',');
             $.ajax({
