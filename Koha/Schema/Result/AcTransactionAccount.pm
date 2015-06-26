@@ -35,6 +35,11 @@ __PACKAGE__->table("ac_transaction_accounts");
   is_foreign_key: 1
   is_nullable: 0
 
+=head2 status
+
+  data_type: 'tinyint'
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -42,6 +47,8 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "transaction_id",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
+  "status",
+  { data_type => "tinyint", is_nullable => 1 },
 );
 
 =head1 RELATIONS
@@ -77,8 +84,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-19 10:41:48
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:8qNlR2YszzDfDHzuwAkiaQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-25 22:19:49
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:LaUhuRjFbx54yZQeeWqsKw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
