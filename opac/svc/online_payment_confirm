@@ -19,14 +19,84 @@
 
 use Modern::Perl;
 
-use CGI;
+use CGI qw( -utf8 );
 use XML::LibXML;
 use DateTime;
 use Digest::MD5 qw(md5_base64);
 
-use C4::Circulation;
+use C4::Accounts qw(makepayment);
+use C4::Circulation qw(CheckIfIssuedToPatron AddRenewal);
 use C4::Context;
 
-my $input = new CGI;
+# Parse XML
+binmode STDIN, ':encoding(UTF-8)';
+my $xml_string;
+while (<STDIN>) {
+    $xml_string .= $_;
+}
+my $xml;
+eval { $xml = XML::LibXML->load_xml( string => $xml_string ); };
+warn "error: " . $@ if $@;
 
-my $xml = $input->param( 'POSTDATA' );
+my $transaction = $xml->findnodes('/wpmpaymentrequest/transactionreference');
+my $success     = $xml->findnodes('/wpmpaymentrequest/transaction/success');
+
+if ( $success eq '1' ) {
+    my $schema = Koha::Database->new()->schema();
+
+    # Make payments (associating them to a transaction)
+    my @accountlines = $schema->resultset('AcTransactionAccount')
+      ->search( { transaction_id => $transaction } )->all;
+    for my $account (@accountlines) {
+
+        # Make Payment
+        makepayment(
+            $account->accountline_id,
+            $account->accountline->borrowernumber,
+            $account->accountline->accountno,
+            $account->accountline->amount
+        );
+
+        # Update Transaction (2 = success)
+        $account->update( { status => '2' } );
+
+        # Renew if required
+        if (
+            CheckIfIssuedToPatron(
+                $account->accountline->borrowernumber,
+                $account->accountline->itemnumber->biblionumber
+            )
+          )
+        {
+            AddRenewal(
+                $account->accountline->borrowernumber,
+                $account->accountline->itemnumber
+            );
+        }
+    }
+
+    # Respond with OK
+    my $response = new CGI;
+    print header('text/html','204 No response');
+    return;
+}
+else {
+    # Update transaction status
+    #
+    # Respond OK
+    print header('text/html','204 No response');
+    return;
+
+}
+
+1;
+
+#foreach my $payment ( $doc->findnodes('/wpmpaymentrequest/payments') ) {
+#    my ($title) = $payment->findnodes('./title');
+#    print $title->to_literal, "\n";
+#}
+
+#my @params = $input->param();
+#my $inxml = $input->param('POSTDATA');
+#warn "XML: " . $inxml . "\n";
+

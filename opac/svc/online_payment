@@ -94,7 +94,7 @@ my @fields = (
         name  => 'departmentid',
         value => { value => $wpm_departmentid, cdata => 0 }
     },
-    { name => 'staffid',    value => { value => undef,     cdata => 0 } },
+    { name => 'staffid',    value => { value => undef,           cdata => 0 } },
     { name => 'customerid', value => { value => $borrowernumber, cdata => 0 } }
     ,    #studentnumber
     {
@@ -267,6 +267,18 @@ for my $accountline (@accountlines) {
 
     # Add 'payments' to 'root' block
     $root->appendChild($payments);
+
+   #
+   # Link Accountline to Transaction [Set status '1' to reperesent request sent]
+    my $transactionAccount_result =
+      $schema->resultset('AcTransactionAccount')->create(
+        {
+            accountline_id => $accountline->accountlines_id,
+            transaction_id => $transaction_id,
+            status         => 1
+        }
+      );
+
 }
 
 # Sign the message
