@@ -119,6 +119,9 @@
                     [% ELSE %]
                         <h4>You have no fines or charges</h4>
                     [% END %]
+                    <form id="wpmform" name="wpmform" method="post" action="[% Koha.Preference( 'WPMPathway' ) %]">
+                       <input type="hidden" name="xml" id="wpm_xml">
+                    </form>
                 </div> <!-- / #useraccount -->
             </div> <!-- / .span10 -->
         </div> <!-- / .row-fluid -->
@@ -175,15 +178,8 @@
                 url: "/cgi-bin/koha/svc/online_payment?lines=" + output,
                 dataType: "text",
                 success: function(data){
-                console.log(data);
-                    $.ajax({
-                        type: "POST",
-                        url: "[% Koha.Preference( 'WPMPathway' ) %]",
-                        data: data,
-                        success: function( reply ) {
-                          console.log(reply);
-                        }
-                    });
+                    $('#wpm_xml').val(data);
+                    $('#wpmform').submit();
                 },
                 error: function(reply) {
                     console.log("failed");
@@ -202,15 +198,8 @@
                 url: "/cgi-bin/koha/svc/online_payment?lines=" + accounts,
                 dataType: "text",
                 success: function(data){
-                    console.log(data);
-                    $.ajax({
-                        type: "POST",
-                        url: "[% Koha.Preference( 'WPMPathway' ) %]",
-                        data: data,
-                        success: function( reply ) {
-                          console.log(reply);
-                        }
-                    });
+                    $('#wpm_xml').val(data);
+                    $('#wpmform').submit();
                 },
                 error: function(reply) {
                     console.log("failed");
