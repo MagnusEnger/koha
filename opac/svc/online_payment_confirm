@@ -38,6 +38,7 @@ my $xml;
 eval { $xml = XML::LibXML->load_xml( string => $xml_string ); };
 warn "error: " . $@ if $@;
 
+my $rootNode    = $xml->findnodes('/wpmpaymentrequest');
 my $transaction = $xml->findnodes('/wpmpaymentrequest/transactionreference');
 my $success     = $xml->findnodes('/wpmpaymentrequest/transaction/success');
 
@@ -77,16 +78,48 @@ if ( $success eq '1' ) {
 
     # Respond with OK
     my $response = new CGI;
-    print header('text/html','204 No response');
-    return;
+    my $msgid = $xml->findnodes
+    my $reply = XML::LibXML::Document->new( '1.0', 'utf-8' );
+    my $root = $post->createElement("wpmmessagevalidation");
+    my $md5 = $rootNode->getAttribute('msgid');
+    $root->setAttribute( 'msgid' => "$md5" );
+
+    my $validation = $reply->createElement( 'validation' );
+    $validation->appendTextNode("1");
+    $root->appendChild($validation);
+
+    my $validationmessage = $reply->createElement( 'validationmessage' );
+    my $success = XML::LibXML::CDATASection->new("Success");
+    $validationmessage->appendChild($success);
+    $root->appendChild($validationmessage);
+
+    $reply->setDocumentElement($root);
+   
+    return print $reply->toString();;
 }
 else {
     # Update transaction status
     #
     # Respond OK
-    print header('text/html','204 No response');
-    return;
 
+    my $msgid = $xml->findnodes
+    my $reply = XML::LibXML::Document->new( '1.0', 'utf-8' );
+    my $root = $post->createElement("wpmmessagevalidation");
+    my $md5 = $rootNode->getAttribute('msgid');
+    $root->setAttribute( 'msgid' => "$md5" );
+
+    my $validation = $reply->createElement( 'validation' );
+    $validation->appendTextNode("1");
+    $root->appendChild($validation);
+
+    my $validationmessage = $reply->createElement( 'validationmessage' );
+    my $success = XML::LibXML::CDATASection->new("Success");
+    $validationmessage->appendChild($success);
+    $root->appendChild($validationmessage);
+
+    $reply->setDocumentElement($root);
+
+    return print $reply->toString();;
 }
 
 1;
